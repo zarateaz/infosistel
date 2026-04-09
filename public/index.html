@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infosistel - Soluciones Tecnológicas Profesionales</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/default-product.png">
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Navegación -->
+    <header>
+        <a href="/" class="logo">Info<span>sistel</span></a>
+        <nav>
+            <ul>
+                <li><a href="#home">Inicio</a></li>
+                <li><a href="#services">Servicios</a></li>
+                <li><a href="#catalog">Productos</a></li>
+                <li><a href="#track">Seguimiento</a></li>
+                <li><a href="#contact">Contacto</a></li>
+            </ul>
+        </nav>
+        <div class="mobile-menu-btn" style="display:none;"><i class="fas fa-bars"></i></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Soluciones Críticas para su Infraestructura Tecnológica</h1>
+            <p>Especialistas en reparación, mantenimiento y suministro de equipos de cómputo de alta gama con más de 10 años de experiencia garantizada.</p>
+            <div style="display:flex; gap:20px; flex-wrap: wrap;">
+                <a href="#services" class="btn btn-primary">Nuestros Servicios</a>
+                <a href="#catalog" class="btn btn-outline">Ver Catálogo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios -->
+    <section id="services" class="container">
+        <h2 class="section-title">Servicios Especializados</h2>
+        <div class="grid">
+            <div class="service-card-premium">
+                <div class="service-img-container">
+                    <img src="/assets/laptop.png" alt="Reparación de Laptops y PCs" class="service-img">
+                </div>
+                <h3>Reparación de Laptops y PCs</h3>
+                <p>Diagnóstico avanzado a nivel de componentes para todas las marcas. Especialistas en reparación de placas base y hardware crítico.</p>
+            </div>
+            <div class="service-card-premium">
+                <div class="service-img-container">
+                    <img src="/assets/mantenimiento.png" alt="Mantenimiento Preventivo" class="service-img">
+                </div>
+                <h3>Mantenimiento Preventivo</h3>
+                <p>Optimización integral de sistemas para empresas y profesionales. Limpieza, cambio de pasta térmica y auditoría de rendimiento.</p>
+            </div>
+            <div class="service-card-premium">
+                <div class="service-img-container">
+                    <img src="/assets/impresora.png" alt="Soporte para Impresoras" class="service-img">
+                </div>
+                <h3>Soporte para Impresoras</h3>
+                <p>Mantenimiento especializado en sistemas de impresión láser y de inyección de tinta. Configuración de redes de impresión corporativas.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seguimiento de Reparaciones -->
+    <section id="track" class="tracking-sec">
+        <div class="track-container">
+            <h2 class="section-title">Estado de su Servicio</h2>
+            <p>Consulte el avance actual de su equipo ingresando su número de ticket o DNI.</p>
+            
+            <form id="trackForm" class="track-form">
+                <input type="text" id="trackInput" placeholder="Ej: INF-1001 o su DNI" required>
+                <button type="submit" class="btn btn-primary">Consultar Estado</button>
+            </form>
+            
+            <div id="trackResult" style="display: none;">
+                <!-- Result logic will be handled by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Catálogo de Productos -->
+    <section id="catalog" class="container">
+        <h2 class="section-title">Catálogo de Productos</h2>
+        
+        <div style="max-width: 400px; margin: 0 auto 50px; text-align:center;">
+            <p style="margin-bottom: 10px; font-weight: 500; font-size: 0.9rem; color: var(--text-muted);">Filtrar por categoría:</p>
+            <select id="categoryFilter">
+                <option value="all">Todas las categorías</option>
+            </select>
+        </div>
+        
+        <div class="grid" id="productGrid">
+            <!-- Loaded by main.js -->
+            <p style="text-align:center; width:100%; color: var(--text-muted);">Sincronizando inventario...</p>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section id="contact" class="container" style="background: white;">
+        <h2 class="section-title">Contacto y Ubicación</h2>
+        <div class="contact-grid">
+            <div class="contact-info-card">
+                <div class="info-item">
+                    <i class="fas fa-location-dot"></i>
+                    <div>
+                        <h4>Visítenos</h4>
+                        <p>Av. Giráldez 274, Huancayo 12001 (Zona Central)</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <h4>Llámenos</h4>
+                        <p>+51 987 654 321</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <div>
+                        <h4>WhatsApp Directo</h4>
+                        <p>Consultas técnicas inmediatas</p>
+                        <a href="https://wa.me/123456789" class="btn btn-primary" style="margin-top: 15px; padding: 10px 20px;">Iniciar Chat</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-md); min-height: 400px;">
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://maps.google.com/maps?q=Av.%20Giraldez%20274,%20Huancayo&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                ></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div>
+                <a href="/" class="logo" style="color: white; margin-bottom: 20px; display: block;">Info<span>sistel</span></a>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Elevamos los estándares de soporte técnico en la región central, ofreciendo soluciones integrales y confiables.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Empresa</h4>
+                <ul>
+                    <li><a href="#home">Inicio</a></li>
+                    <li><a href="#services">Servicios</a></li>
+                    <li><a href="#catalog">Productos</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Términos y Condiciones</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Garantías</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Redes Sociales</h4>
+                <div style="display:flex; gap:15px; font-size: 1.2rem;">
+                    <a href="#" style="color: white;"><i class="fab fa-facebook"></i></a>
+                    <a href="#" style="color: white;"><i class="fab fa-instagram"></i></a>
+                    <a href="#" style="color: white;"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 INFOSISTEL. Todos los derechos reservados.</p>
+            <p style="margin-top:10px;"><a href="/admin" style="color:rgba(255,255,255,0.2); text-decoration:none; font-size: 0.75rem;">Acceso Administrativo</a></p>
+        </div>
+    </footer>
+
+    <!-- Botón Flotante del Carrito -->
+    <div class="cart-fab" id="cartFab">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+    </div>
+
+    <!-- Modal del Carrito -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-center" style="margin-bottom: 30px;"><i class="fas fa-shopping-basket"></i> Su Carrito</h3>
+            
+            <div id="cartItemsList" class="cart-items-list">
+                <!-- Se llena con JS -->
+                <p class="text-center" style="padding: 20px; color: var(--text-muted);">El carrito está vacío</p>
+            </div>
+
+            <div id="checkoutSection" style="display: none;">
+                <div style="background: var(--bg-section); padding: 25px; border-radius: var(--radius-md); margin-top: 20px;">
+                    <div class="price-total">Total a pagar: S/ <span id="cartTotal">0.00</span></div>
+                    
+                    <h4 style="margin: 0 0 20px; font-size: 1.1rem; color: var(--primary);">Datos de Contacto Directo</h4>
+                    <form id="checkoutForm" class="checkout-form">
+                        <div class="form-group full-width">
+                            <label>Su Nombre Completo</label>
+                            <input type="text" id="custName" required placeholder="Ej: Juan Pérez">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Número de WhatsApp</label>
+                            <input type="text" id="custPhone" required placeholder="Ej: 987654321">
+                        </div>
+                        
+                        <div style="display:flex; gap: 10px; margin-top: 10px;" class="full-width">
+                            <button type="submit" class="btn btn-primary" style="flex-grow: 1;">Finalizar y Coordinar por WhatsApp</button>
+                            <button type="button" id="closeCart" class="btn btn-outline" style="color: var(--text-main); border-color: var(--border-light);">Seguir Comprando</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="orderSuccess" style="display: none; text-align: center; padding: 40px 0;">
+                <i class="fas fa-circle-check success-check"></i>
+                <h3>¡Pedido Enviado!</h3>
+                <p style="margin: 15px 0 25px; color: var(--text-muted);">Hemos recibido su orden. Un asesor técnico se pondrá en contacto con usted brevemente para coordinar la entrega y el pago.</p>
+                <button type="button" id="successDone" class="btn btn-primary">Volver a la tienda</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/main.js"></script>
+</body>
+</html>
