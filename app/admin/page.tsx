@@ -472,9 +472,15 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100 h-fit">
                 <h3 className="text-2xl font-black mb-4">Gestión de Acceso</h3>
-                <p className="text-xs text-gray-400 font-bold mb-8 flex items-center gap-2">
-                  <Lock size={12} className="text-green-500" />
-                  Las contraseñas se almacenan cifradas con SHA-256
+                <p className="text-xs text-gray-400 font-bold mb-8 flex flex-col gap-1">
+                  <span className="flex items-center gap-2">
+                    <Lock size={12} className="text-green-500" />
+                    Protección: Hasheado Scrypt (Mem-Hard)
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <CreditCard size={12} className="text-blue-500" />
+                    Datos: Cifrado AES-256-GCM
+                  </span>
                 </p>
                 <div className="space-y-4">
                   <input 
@@ -516,8 +522,8 @@ export default function AdminPage() {
                           <p className="font-bold">{u.username}</p>
                           <div className="flex items-center gap-2">
                             <p className="text-xs uppercase font-black text-gray-400 tracking-tighter">{u.role}</p>
-                            {u.passwordHash ? (
-                              <span className="text-[9px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-black">SHA-256</span>
+                             {u.passwordHash ? (
+                              <span className="text-[9px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-black uppercase">Scrypt</span>
                             ) : (
                               <span className="text-[9px] bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full font-black">LEGACY</span>
                             )}
