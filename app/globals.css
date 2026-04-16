@@ -2,25 +2,157 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+  --infositel-blue: #1433C9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-blue-infositel: var(--infositel-blue);
+  
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+}
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+}
+
+.glass {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)];
+}
+
+.glass-dark {
+  @apply bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl;
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-black via-blue-infositel to-blue-600;
+  background-size: 200% 200%;
+  animation: gradient-x 15s ease infinite;
+}
+
+.bg-blue-gradient {
+  background: radial-gradient(circle at top left, #1433C9, #0a1e80);
+}
+
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 15s ease infinite;
+}
+
+.shadow-premium {
+  box-shadow: 0 20px 40px -15px rgba(20, 51, 201, 0.2);
+}
+
+.card-hover {
+  transition: all 0.5s ease;
+}
+
+.card-hover:hover {
+  box-shadow: 0 20px 40px -15px rgba(20, 51, 201, 0.2);
+  transform: translateY(-0.5rem);
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+@keyframes orbit {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(15px, -20px) rotate(2deg) scale(1.02); }
+  66% { transform: translate(-10px, 10px) rotate(-2deg) scale(0.98); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+.animate-orbit {
+  animation: orbit 8s ease-in-out infinite;
+}
+
+.animate-orbit-delayed {
+  animation: orbit 10s ease-in-out infinite reverse;
+}
+
+.shadow-neon-blue {
+  box-shadow: 0 0 30px rgba(20, 51, 201, 0.15), 0 0 60px rgba(20, 51, 201, 0.1);
+}
+
+.glass-white {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ── Swiper overrides (migrated from Hero.tsx <style jsx global>) ── */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #1433c9 !important;
+  background: rgba(255, 255, 255, 0.92);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(20, 51, 201, 0.2);
+  box-shadow: 0 4px 20px rgba(20, 51, 201, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: #1433c9;
+  color: #fff !important;
+  box-shadow: 0 8px 28px rgba(20, 51, 201, 0.35);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 14px !important;
+  font-weight: 900;
+}
+
+.swiper-pagination-bullet {
+  background: #1433c9;
+  opacity: 0.2;
+  transition: all 0.3s;
+}
+
+.swiper-pagination-bullet-active {
+  background: #1433c9 !important;
+  opacity: 1;
+  width: 28px !important;
+  border-radius: 4px !important;
+}
+
+/* ── Shimmer animation (migrated from rastreo/page.tsx <style jsx>) ── */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
 }

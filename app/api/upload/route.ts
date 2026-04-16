@@ -1,0 +1,82 @@
+import { NextRequest, NextResponse } from "next/server";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { verifyAuth } from "@/lib/auth";
+
+export async function POST(request: NextRequest) {
+  try {
+    console.log("[UPLOAD_API] Inicio de petición POST");
+    
+    // 1. Security check: Must be authenticated to upload
+    const token = request.cookies.get("infositel_token")?.value;
+    console.log("[UPLOAD_API] Token encontrado:", !!token);
+    
+    if (!token) {
+      console.error("[UPLOAD_API] Error: Token ausente");
+      return NextResponse.json({ error: "No autorizado (token ausente)" }, { status: 401 });
+    }
+
+    const payload = await verifyAuth(token);
+    if (!payload) {
+      console.error("[UPLOAD_API] Error: Token inválido");
+      return NextResponse.json({ error: "No autorizado (token inválido)" }, { status: 401 });
+    }
+    
+    console.log("[UPLOAD_API] Usuario autenticado:", payload.username);
+
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      console.error("[UPLOAD_API] Error: No se recibió ningún archivo");
+      return NextResponse.json({ error: "No se encontró ningún archivo" }, { status: 400 });
+    }
+
+    console.log("[UPLOAD_API] Archivo recibido:", file.name, "Tipo:", file.type, "Tamaño:", file.size);
+
+    // 2. Security check: Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      console.error("[UPLOAD_API] Error: Tipo de archivo no permitido:", file.type);
+      return NextResponse.json({ error: "Tipo de archivo no permitido" }, { status: 400 });
+    }
+
+    // 3. Security check: Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      console.error("[UPLOAD_API] Error: Archivo demasiado grande:", file.size);
+      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 20MB" }, { status: 400 });
+    }
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // 4. Create unique filename and sanitize it
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+    const uniqueName = `${Date.now()}-${sanitizedName}`;
+    const uploadDir = join(process.cwd(), "public", "uploads");
+    
+    console.log("[UPLOAD_API] Intentando guardar en:", uploadDir);
+
+    try {
+      await mkdir(uploadDir, { recursive: true });
+    } catch (e) {
+      console.log("[UPLOAD_API] El directorio ya existe o hubo un aviso menor al crear mkdir");
+    }
+
+    const path = join(uploadDir, uniqueName);
+    await writeFile(path, buffer);
+    
+    console.log("[UPLOAD_API] Archivo guardado con éxito:", path);
+
+    return NextResponse.json({ 
+      success: true, 
+      url: `/uploads/${uniqueName}` 
+    });
+  } catch (error: any) {
+    console.error("[UPLOAD_API] EXCEPCIÓN:", error.message || error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error.message || "Error al subir la imagen" 
+    }, { status: 500 });
+  }
+}
