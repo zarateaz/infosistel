@@ -136,7 +136,7 @@ export default function Footer() {
                   <div className="w-8 h-8 rounded-lg bg-blue-infositel/5 flex items-center justify-center shrink-0 mt-0.5">
                     <MapPin className="text-blue-infositel" size={14} />
                   </div>
-                  <span className="text-sm text-gray-400 leading-relaxed">Av. Giráldez 274, Huancayo 12001</span>
+                  <span className="text-sm text-gray-400 leading-relaxed">Av. Giráldez 274, Sótano Stand S25, Huancayo 12001</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-blue-infositel/5 flex items-center justify-center shrink-0">

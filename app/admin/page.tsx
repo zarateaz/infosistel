@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { 
   User, Lock, LogOut, Plus, Trash2, Package, Tag, 
   Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
-  ShoppingCart as CartIcon, CreditCard 
+  ShoppingCart as CartIcon, CreditCard, Mail
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -136,13 +136,24 @@ export default function AdminPage() {
             <h1 className="text-4xl font-black">Dashboard</h1>
             <p className="text-gray-500 font-medium">Gestiona tu tienda, usuarios y reparaciones desde aquí.</p>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center space-x-2 bg-red-50 text-red-600 px-6 py-3 rounded-2xl font-bold hover:bg-red-100 transition-all"
-          >
-            <LogOut size={18} />
-            <span>Cerrar Sesión</span>
-          </button>
+          <div className="flex items-center gap-4">
+            <a 
+              href="https://webmail.hostingperu.com.pe/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 bg-blue-50 text-blue-infositel px-6 py-3 rounded-2xl font-bold hover:bg-blue-100 transition-all"
+            >
+              <Mail size={18} />
+              <span>Webmail</span>
+            </a>
+            <button 
+              onClick={handleLogout}
+              className="flex items-center space-x-2 bg-red-50 text-red-600 px-6 py-3 rounded-2xl font-bold hover:bg-red-100 transition-all"
+            >
+              <LogOut size={18} />
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}

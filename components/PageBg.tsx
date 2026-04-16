@@ -40,7 +40,6 @@ export function PlasmaRing({ size, duration, dir, dash, opacity, idPrefix = "prg
 export function EnergyBeam({ angle, delay }: { angle: number; delay: number }) {
   return (
     <motion.div
-      className="absolute pointer-events-none"
       style={{
         left: "50%", top: "50%", width: 1400, height: 1.5,
         background: "linear-gradient(90deg,transparent 0%,rgba(20,51,201,.45) 35%,rgba(100,160,255,.9) 50%,rgba(20,51,201,.45) 65%,transparent 100%)",
@@ -60,7 +59,6 @@ export function OrbitDot({ angle, radius, dur, delay, sz }: {
 }) {
   return (
     <motion.div
-      className="absolute pointer-events-none"
       style={{ left: "50%", top: "50%", x: "-50%", y: "-50%" }}
       whileInView={{ rotate: [angle, angle + 360] }}
       viewport={{ once: false }}

@@ -338,7 +338,6 @@ export default function Home() {
                       { bottom: '15%', right: '5%' }  // Bottom Right
                     ];
                     const pos = positions[i];
-                    const isCenter = pos.center;
 
                     return (
                       <motion.div
@@ -454,7 +453,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="font-black text-xl mb-1">Dirección</h4>
-                    <p className="text-gray-500 text-lg">Av. Giráldez 274, Huancayo 12001</p>
+                    <p className="text-gray-500 text-lg">Av. Giráldez 274, Sótano Stand S25, Huancayo 12001</p>
                   </div>
                 </div>
 

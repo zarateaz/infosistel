@@ -34,24 +34,33 @@ export async function POST(request: NextRequest) {
 
     console.log("[UPLOAD_API] Archivo recibido:", file.name, "Tipo:", file.type, "Tamaño:", file.size);
 
-    // 2. Security check: Validate file type
+    // 2. Security check: Validate file type and extension
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    
     if (!allowedTypes.includes(file.type)) {
       console.error("[UPLOAD_API] Error: Tipo de archivo no permitido:", file.type);
       return NextResponse.json({ error: "Tipo de archivo no permitido" }, { status: 400 });
     }
 
-    // 3. Security check: Validate file size (max 20MB)
-    if (file.size > 20 * 1024 * 1024) {
+    const ext = file.name.slice(((file.name.lastIndexOf(".") - 1) >>> 0) + 2).toLowerCase();
+    if (!allowedExtensions.includes("." + ext)) {
+       console.error("[UPLOAD_API] Error: Extensión no permitida:", ext);
+       return NextResponse.json({ error: "Extensión de archivo no permitida" }, { status: 400 });
+    }
+
+    // 3. Security check: Validate file size (max 5MB - reduced from 20MB for safety)
+    if (file.size > 5 * 1024 * 1024) {
       console.error("[UPLOAD_API] Error: Archivo demasiado grande:", file.size);
-      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 20MB" }, { status: 400 });
+      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 5MB" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 4. Create unique filename and sanitize it
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+    // 4. Create unique filename and sanitize it strictly
+    // Remove anything that isn't alphanumeric or a dot
+    const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
     const uniqueName = `${Date.now()}-${sanitizedName}`;
     const uploadDir = join(process.cwd(), "public", "uploads");
     
