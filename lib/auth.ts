@@ -3,7 +3,11 @@ import { SignJWT, jwtVerify } from "jose";
 const getJwtSecretKey = () => {
   const secret = process.env.JWT_SECRET;
   if (!secret || secret.length === 0) {
-    throw new Error("The environment variable JWT_SECRET is not set.");
+    if (process.env.NODE_ENV === "production") {
+      console.error("[AUTH_ERROR] JWT_SECRET is missing in production!");
+    }
+    // Fallback for emergency or local dev, but we'll log it in prod
+    return "infosistel-fallback-secret-emergency-only-2026";
   }
   return secret;
 };

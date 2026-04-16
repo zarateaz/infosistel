@@ -46,7 +46,14 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("Login error:", error);
-    return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
+    console.error("[LOGIN_AUTH_FLOW_ERROR]:", error);
+    if (error instanceof Error) {
+      console.error("Message:", error.message);
+      console.error("Stack:", error.stack);
+    }
+    return NextResponse.json({ 
+      error: "Error en el servidor", 
+      details: process.env.NODE_ENV === "development" ? String(error) : "Consulte los logs del servidor" 
+    }, { status: 500 });
   }
 }
