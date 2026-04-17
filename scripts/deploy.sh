@@ -25,9 +25,11 @@ git fetch origin
 git reset --hard origin/main
 echo "✅ Código actualizado: $(git log --oneline -1)"
 
-# ── 3. Instalar dependencias (por si hay nuevas) ──
-echo "📦 [3/7] Verificando dependencias..."
+# ── 3. Preparar Base de Datos y Dependencias ──
+echo "📦 [3/7] Instalando dependencias y sincronizando Base de Datos..."
 npm install --production=false --silent
+npx prisma generate
+npx prisma db push --accept-data-loss
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
