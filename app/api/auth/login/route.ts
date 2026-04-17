@@ -34,13 +34,16 @@ export async function POST(request: Request) {
     const response = NextResponse.json({ success: true, message: "Autenticado" }, { status: 200 });
 
     // SET SECURE COOKIE
+    // NOTA: secure:true solo funciona con HTTPS.
+    // Usar COOKIE_SECURE=true en producción cuando haya SSL configurado.
+    const isSecure = process.env.COOKIE_SECURE === "true";
     response.cookies.set({
       name: "infositel_token",
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict", // Strict for admin panel protection
-      maxAge: 60 * 60 * 12, // Reduced to 12 hours for better security
+      secure: isSecure,
+      sameSite: "lax", // lax permite redireccionamientos normales
+      maxAge: 60 * 60 * 12, // 12 horas
       path: "/",
     });
 
