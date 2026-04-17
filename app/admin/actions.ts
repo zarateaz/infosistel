@@ -32,8 +32,28 @@ export async function addProduct(data: any) {
       category: data.category,
       description: data.description,
       price: parseFloat(data.price),
+      costPrice: data.costPrice ? parseFloat(data.costPrice) : 0,
       stock: parseInt(data.stock),
       image: data.image || "/img/producto3mouse.webp",
+      onSale: data.onSale || false,
+      salePrice: data.salePrice ? parseFloat(data.salePrice) : null,
+      isFeatured: data.isFeatured || false,
+    },
+  });
+}
+
+export async function editProduct(id: string, data: any) {
+  await ensureAuth();
+  return prisma.product.update({
+    where: { id },
+    data: {
+      name: data.name,
+      category: data.category,
+      description: data.description,
+      price: parseFloat(data.price),
+      costPrice: data.costPrice ? parseFloat(data.costPrice) : 0,
+      stock: parseInt(data.stock),
+      image: data.image,
       onSale: data.onSale || false,
       salePrice: data.salePrice ? parseFloat(data.salePrice) : null,
       isFeatured: data.isFeatured || false,

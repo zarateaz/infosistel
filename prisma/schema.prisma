@@ -25,6 +25,7 @@ model Product {
   price       Float
   stock       Int
   image       String
+  costPrice   Float?   @default(0)
   isFeatured  Boolean  @default(false)
   onSale      Boolean  @default(false)
   salePrice   Float?

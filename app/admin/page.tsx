@@ -5,7 +5,7 @@ import {
   User, Lock, LogOut, Plus, Trash2, Package, Tag, 
   Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
   ShoppingCart as CartIcon, CreditCard, Mail, Tag as OfferTag,
-  CheckCircle, AlertCircle, ToggleLeft, ToggleRight
+  CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -17,12 +17,12 @@ import {
   getRepairs, addRepair as addRepairAction, updateRepairProgress as updateRepairProgressAction, deleteRepair,
   getOrders, deleteOrder as deleteOrderAction,
   getUsers, addUser as addUserAction, deleteUser,
-  toggleProductOffer,
+  toggleProductOffer, editProduct as editProductAction
 } from "./actions";
 
 export default function AdminPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"productos" | "categorias" | "reparaciones" | "usuarios" | "ventas">("productos");
+  const [activeTab, setActiveTab] = useState<"productos" | "categorias" | "reparaciones" | "usuarios" | "ventas" | "inventario">("productos");
 
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -32,9 +32,10 @@ export default function AdminPage() {
 
   const [newCategory, setNewCategory] = useState("");
   const [newProduct, setNewProduct] = useState({
-    name: "", category: "", description: "", price: "", stock: "",
+    name: "", category: "", description: "", price: "", costPrice: "", stock: "",
     image: "/img/cooler.png", onSale: false, salePrice: ""
   });
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [newRepair, setNewRepair] = useState({
     dni: "", equipment: "", problem: "", progress: 0, statusText: ""
   });
@@ -90,7 +91,14 @@ export default function AdminPage() {
   const addProduct = async () => {
     if (!newProduct.name || !newProduct.category) return;
     await addProductAction(newProduct);
-    setNewProduct({ name: "", category: "", description: "", price: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
+    setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
+    setImagePreview(null);
+    loadData();
+  };
+  const saveEditedProduct = async () => {
+    if (!editingProduct) return;
+    await editProductAction(editingProduct.id, editingProduct);
+    setEditingProduct(null);
     setImagePreview(null);
     loadData();
   };
@@ -163,6 +171,7 @@ export default function AdminPage() {
   };
 
   const TABS = [
+    { id: "inventario", label: "Inventario", icon: ClipboardList },
     { id: "productos", label: "Productos", icon: Package },
     { id: "categorias", label: "Categorías", icon: Tag },
     { id: "reparaciones", label: "Reparaciones", icon: Wrench },
@@ -265,6 +274,91 @@ export default function AdminPage() {
         )}
       </AnimatePresence>
 
+      {/* ── Edit Product Modal ── */}
+      <AnimatePresence>
+        {editingProduct && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => { setEditingProduct(null); setImagePreview(null); }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-[2rem] p-6 max-w-lg w-full shadow-2xl my-8 relative"
+              onClick={e => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => { setEditingProduct(null); setImagePreview(null); }}
+                className="absolute top-6 right-6 p-2 bg-gray-50 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
+               >
+                <X size={20} />
+              </button>
+              <h3 className="text-xl font-black mb-6 flex items-center gap-2">
+                <Edit3 className="text-blue-infositel" size={20} /> Editar Producto
+              </h3>
+              
+              <div className="space-y-3">
+                  <input type="text" placeholder="Nombre del producto"
+                    className="w-full p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
+                    value={editingProduct.name} onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })} />
+                  <select className="w-full p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
+                    value={editingProduct.category} onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })}>
+                    <option value="">Seleccionar Categoría</option>
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                  <textarea placeholder="Descripción"
+                    className="w-full p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm resize-none"
+                    rows={2}
+                    value={editingProduct.description} onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })} />
+                  
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-gray-400 px-1">Costo (S/.)</label>
+                      <input type="number" placeholder="Costo"
+                        className="w-full p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
+                        value={editingProduct.costPrice || ""} onChange={e => setEditingProduct({ ...editingProduct, costPrice: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black tracking-wider text-gray-400 px-1">Venta (S/.)</label>
+                      <input type="number" placeholder="Venta"
+                        className="w-full p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
+                        value={editingProduct.price} onChange={e => setEditingProduct({ ...editingProduct, price: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black tracking-wider text-gray-400 px-1">Stock</label>
+                      <input type="number" placeholder="Stock"
+                        className="w-full p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
+                        value={editingProduct.stock} onChange={e => setEditingProduct({ ...editingProduct, stock: e.target.value })} />
+                    </div>
+                  </div>
+
+                  {/* Image upload */}
+                  <div className="relative h-32 w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center overflow-hidden transition-all bg-gray-50 hover:bg-gray-100 border-gray-200 mt-2">
+                    {imagePreview ? (
+                      <Image src={imagePreview} alt="Preview" fill className="object-contain p-2" />
+                    ) : (
+                       <Upload className="mx-auto text-gray-400" size={24} />
+                    )}
+                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]; if (!file) return;
+                        const formData = new FormData(); formData.append("file", file);
+                        const res = await fetch("/api/upload", { method: "POST", body: formData });
+                        const data = await res.json();
+                        if (data.success) { setEditingProduct({ ...editingProduct, image: data.url }); setImagePreview(data.url); }
+                      }} />
+                  </div>
+
+                  <button onClick={saveEditedProduct}
+                    className="w-full bg-blue-infositel text-white py-4 mt-2 rounded-2xl font-black hover:bg-blue-600 transition-all text-sm">
+                    Guardar Cambios
+                  </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
@@ -307,6 +401,74 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* ══════════════════ INVENTARIO TAB ══════════════════ */}
+        {activeTab === "inventario" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Inversión (Suma Compras)</p>
+                <h3 className="text-2xl md:text-3xl font-black text-blue-infositel">
+                  S/. {products.reduce((acc, p) => acc + (p.costPrice || 0) * p.stock, 0).toFixed(2)}
+                </h3>
+              </div>
+              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Capital (Suma Ventas)</p>
+                <h3 className="text-2xl md:text-3xl font-black text-green-500">
+                  S/. {products.reduce((acc, p) => acc + p.price * p.stock, 0).toFixed(2)}
+                </h3>
+              </div>
+              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
+                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Ganancia Estimada Total</p>
+                <h3 className="text-2xl md:text-3xl font-black text-purple-500">
+                  S/. {products.reduce((acc, p) => acc + (p.price - (p.costPrice || 0)) * p.stock, 0).toFixed(2)}
+                </h3>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-100 overflow-x-auto">
+              <h3 className="text-xl font-black mb-6">Detalle de Inventario</h3>
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-gray-100 text-xs font-black text-gray-400 uppercase tracking-widest">
+                    <th className="py-4 px-4 font-bold">Producto</th>
+                    <th className="py-4 px-4 font-bold text-center">Stock</th>
+                    <th className="py-4 px-4 font-bold text-right">P. Costo</th>
+                    <th className="py-4 px-4 font-bold text-right">P. Venta</th>
+                    <th className="py-4 px-4 font-bold text-right">Ganancia</th>
+                    <th className="py-4 px-4 font-bold text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {products.map(p => {
+                    const cost = p.costPrice || 0;
+                    const profit = p.price - cost;
+                    return (
+                      <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                        <td className="py-3 px-4 font-bold flex items-center gap-3">
+                          <div className="w-8 h-8 relative rounded-lg border border-gray-100 overflow-hidden bg-white shrink-0"><Image src={p.image} fill className="object-cover p-1" alt="img"/></div>
+                          <span className="truncate max-w-[200px] block">{p.name}</span>
+                        </td>
+                        <td className="py-3 px-4 text-center font-black">
+                          <span className={`px-2 py-1 rounded-lg ${p.stock < 5 ? "bg-red-50 text-red-500" : "bg-green-50 text-green-500"}`}>{p.stock}</span>
+                        </td>
+                        <td className="py-3 px-4 text-right text-gray-500 font-medium">S/. {cost.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-right font-black">S/. {p.price.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-right font-black text-purple-500">S/. {profit.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center">
+                          <button onClick={() => { setEditingProduct(p); setImagePreview(p.image); setActiveTab("productos"); }} className="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
+                            <Edit3 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {products.length === 0 && <div className="text-center py-10 text-gray-400 font-bold">Inventario vacío.</div>}
+            </div>
+          </div>
+        )}
+
         {/* ══════════════════ PRODUCTOS TAB ══════════════════ */}
         {activeTab === "productos" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -329,8 +491,11 @@ export default function AdminPage() {
                     className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm resize-none"
                     rows={3}
                     value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input type="number" placeholder="Precio S/."
+                  <div className="grid grid-cols-3 gap-2">
+                    <input type="number" placeholder="C. Compra"
+                      className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
+                      value={newProduct.costPrice} onChange={e => setNewProduct({ ...newProduct, costPrice: e.target.value })} />
+                    <input type="number" placeholder="P. Venta"
                       className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
                       value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} />
                     <input type="number" placeholder="Stock"
@@ -413,12 +578,15 @@ export default function AdminPage() {
                             🔥 S/. {p.salePrice}
                           </span>
                         )}
+                        <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full tracking-wider border border-gray-200">
+                          STOCK: {p.stock}
+                        </span>
                       </div>
                     </div>
                     {/* Toggle offer button */}
                     <button
                       onClick={() => handleToggleOffer(p)}
-                      className={`p-2.5 rounded-xl transition-all text-xs font-black shrink-0 ${
+                      className={`p-2.5 rounded-xl transition-all text-xs font-black shrink-0 hidden md:block ${
                         p.onSale
                           ? "bg-blue-50 text-blue-infositel hover:bg-blue-100"
                           : "bg-gray-50 text-gray-400 hover:bg-gray-100"
@@ -426,6 +594,13 @@ export default function AdminPage() {
                       title={p.onSale ? "Quitar oferta" : "Activar oferta"}
                     >
                       {p.onSale ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                    </button>
+                    {/* Edit button */}
+                    <button
+                      onClick={() => { setEditingProduct(p); setImagePreview(p.image); }}
+                      className="p-2.5 bg-blue-50 text-blue-400 rounded-xl hover:bg-blue-500 hover:text-white transition-all shrink-0"
+                    >
+                      <Edit3 size={16} />
                     </button>
                     {/* Delete button */}
                     <button
