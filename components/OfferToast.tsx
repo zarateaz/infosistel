@@ -31,14 +31,14 @@ export default function OfferToast({
       // Producto fallback — se muestra si no hay ofertas en la DB
       const FALLBACK: Product = {
         id: "fallback-1",
-        name: "Laptop lissi",
-        category: "Laptops",
-        description: "Potencia y elegancia para creadores de contenido.",
-        price: 88,
-        salePrice: 74,
-        stock: 3,
+        name: "Cooler Gamer Pro",
+        category: "Cooling",
+        description: "Sistema térmico de alto rendimiento para tu equipo.",
+        price: 320,
+        salePrice: 250,
+        stock: 5,
         onSale: true,
-        image: "/img/tienda1laptops.png",
+        image: "/img/cooler.png",
       };
 
       try {

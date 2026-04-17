@@ -22,24 +22,24 @@ const slides = [
     title: "PCs de Alto",
     highlight: "Rendimiento",
     description: "Configuraciones extremas para Gaming y Trabajo Profesional con componentes de última generación.",
-    image: "/img/fondo1pc.webp",
-    accentColor: "#1433C9", // Unified Brutal Blue
+    image: "/img/pc.png",
+    accentColor: "#1433C9",
   },
   {
     label: "IMPRESIÓN · PRO X",
     title: "Impresoras",
     highlight: "Corporativas",
     description: "Mantenimiento especializado y venta de soluciones de impresión de alta gama.",
-    image: "/img/fondo2impresorora.webp",
-    accentColor: "#1433C9", // Unified Brutal Blue
+    image: "/img/impresora.png",
+    accentColor: "#1433C9",
   },
   {
     label: "MOVILIDAD · ELITE",
     title: "Laptops",
     highlight: "Gaming",
     description: "La cima del rendimiento móvil: Reparación y repotenciación con piezas originales.",
-    image: "/img/fondo3laptop.webp",
-    accentColor: "#1433C9", // Unified Brutal Blue
+    image: "/img/laptop.png",
+    accentColor: "#1433C9",
   },
 ];
 
