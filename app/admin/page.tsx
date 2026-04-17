@@ -5,7 +5,7 @@ import {
   User, Lock, LogOut, Plus, Trash2, Package, Tag, 
   Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
   ShoppingCart as CartIcon, CreditCard, Mail, Tag as OfferTag,
-  CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3
+  CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3, Calculator, CalculatorIcon, Percent
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -37,6 +37,14 @@ export default function AdminPage() {
   });
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [inventorySearch, setInventorySearch] = useState("");
+  const [inventoryCategory, setInventoryCategory] = useState("");
+  
+  // Calculator State
+  const [calcCost, setCalcCost] = useState<string>("");
+  const [calcMargin, setCalcMargin] = useState<string>("30");
+  const [calcIgv, setCalcIgv] = useState<boolean>(true);
+  const [calcTargetId, setCalcTargetId] = useState<string | null>(null);
+
   const [newRepair, setNewRepair] = useState({
     dni: "", equipment: "", problem: "", progress: 0, statusText: ""
   });
@@ -106,6 +114,20 @@ export default function AdminPage() {
   const removeProduct = async (id: string) => {
     await deleteProduct(id);
     setConfirmDelete(null);
+    loadData();
+  };
+
+  const applyCalculatedPrice = async () => {
+    if (!calcTargetId || !calcCost) return;
+    const baseCost = parseFloat(calcCost) || 0;
+    const margin = parseFloat(calcMargin) || 0;
+    let finalPrice = baseCost + (baseCost * margin / 100);
+    if (calcIgv) {
+      finalPrice = finalPrice * 1.18;
+    }
+    await inlineUpdateProductAction(calcTargetId, { costPrice: baseCost, price: finalPrice });
+    setCalcTargetId(null);
+    setCalcCost("");
     loadData();
   };
 
@@ -180,7 +202,11 @@ export default function AdminPage() {
     { id: "ventas", label: "Ventas", icon: CartIcon },
   ] as const;
 
-  const filteredInventory = products.filter(p => p.name.toLowerCase().includes(inventorySearch.toLowerCase()));
+  const filteredInventory = products.filter(p => {
+    const matchName = p.name.toLowerCase().includes(inventorySearch.toLowerCase());
+    const matchCat = inventoryCategory === "" || p.category === inventoryCategory;
+    return matchName && matchCat;
+  });
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden pt-24 pb-24">
@@ -428,16 +454,77 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* CALCULATOR PANEL */}
+            <div className="bg-gradient-to-br from-blue-infositel to-blue-900 rounded-[2.5rem] p-6 md:p-8 shadow-xl text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-[url('/img/pattern.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+              <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-center justify-between">
+                <div className="flex-1 w-full space-y-6">
+                  <h3 className="text-2xl font-black flex items-center gap-2">
+                    <CalculatorIcon size={28} className="text-blue-300" /> Calculadora de Precios
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-blue-200">Costo Base (S/.)</label>
+                      <input type="number" placeholder="Ej. 100"
+                        className="w-full p-4 bg-white/10 border border-white/20 rounded-2xl outline-none text-white font-black text-lg focus:bg-white/20 transition-all placeholder:text-white/30"
+                        value={calcCost} onChange={e => setCalcCost(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-blue-200">Margen Deseado (%)</label>
+                      <div className="relative">
+                        <input type="number" placeholder="Ej. 30"
+                          className="w-full p-4 bg-white/10 border border-white/20 rounded-2xl outline-none text-white font-black text-lg focus:bg-white/20 transition-all placeholder:text-white/30 pl-12"
+                          value={calcMargin} onChange={e => setCalcMargin(e.target.value)} />
+                        <Percent className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-300" size={18} />
+                      </div>
+                    </div>
+                    <div className="space-y-2 flex flex-col justify-center">
+                       <label className="text-xs font-black uppercase tracking-wider text-blue-200 mb-2">Igv (18%)</label>
+                       <button onClick={() => setCalcIgv(!calcIgv)}
+                         className={`py-4 rounded-2xl font-black text-sm transition-all border-2 ${calcIgv ? 'bg-white text-blue-infositel border-white' : 'bg-transparent text-blue-200 border-blue-400 hover:bg-white/10'}`}>
+                         {calcIgv ? "Incluido ✅" : "Sin IGV ❌"}
+                       </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 w-full lg:w-72 shrink-0">
+                  <p className="text-xs font-black uppercase tracking-wider text-blue-200 mb-1">Precio Sugerido</p>
+                  <h2 className="text-4xl font-black text-white mb-2">
+                    S/. {((parseFloat(calcCost) || 0) * ( 1 + (parseFloat(calcMargin) || 0) / 100) * (calcIgv ? 1.18 : 1)).toFixed(2)}
+                  </h2>
+                  <p className="text-sm font-bold text-blue-200 mb-6">
+                    Ganancia Neta: <span className="text-green-400">S/. {(((parseFloat(calcCost) || 0) * (parseFloat(calcMargin) || 0) / 100)).toFixed(2)}</span>
+                  </p>
+                  <button 
+                    onClick={applyCalculatedPrice}
+                    disabled={!calcTargetId || !calcCost}
+                    className="w-full py-4 bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl font-black shadow-lg hover:shadow-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    {calcTargetId ? "Aplicar Precio Mágicamente 🚀" : "Selecciona un producto 👇"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-100 overflow-x-auto">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
                 <h3 className="text-xl font-black">Detalle de Inventario</h3>
-                <input
-                  type="text"
-                  placeholder="🔍 Buscar producto..."
-                  className="w-full md:w-64 p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-medium"
-                  value={inventorySearch}
-                  onChange={e => setInventorySearch(e.target.value)}
-                />
+                <div className="flex gap-2 w-full md:w-auto">
+                  <select 
+                    className="p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-medium border border-gray-100"
+                    value={inventoryCategory} onChange={e => setInventoryCategory(e.target.value)}
+                  >
+                    <option value="">Todas las categorías</option>
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="🔍 Buscar producto..."
+                    className="w-full md:w-64 p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-medium border border-gray-100"
+                    value={inventorySearch}
+                    onChange={e => setInventorySearch(e.target.value)}
+                  />
+                </div>
               </div>
               <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
@@ -480,7 +567,18 @@ export default function AdminPage() {
                         <td className="py-3 px-4 text-right font-black">S/. {p.price.toFixed(2)}</td>
                         <td className="py-3 px-4 text-right font-black text-purple-500">S/. {profit.toFixed(2)}</td>
                         <td className="py-3 px-4 text-center">
-                          <button onClick={() => { setEditingProduct(p); setImagePreview(p.image); setActiveTab("productos"); }} className="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
+                          <button 
+                            onClick={() => {
+                              setCalcTargetId(p.id);
+                              setCalcCost((p.costPrice || 0).toString());
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }} 
+                            className={`p-2.5 rounded-xl transition-all font-black text-xs mr-2 ${calcTargetId === p.id ? 'bg-blue-infositel text-white' : 'bg-blue-50 text-blue-500 hover:bg-blue-100'}`}
+                            title="Calcular Precio"
+                          >
+                            <CalculatorIcon size={16} />
+                          </button>
+                          <button onClick={() => { setEditingProduct(p); setImagePreview(p.image); setActiveTab("productos"); }} className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-xl transition-all">
                             <Edit3 size={16} />
                           </button>
                         </td>
