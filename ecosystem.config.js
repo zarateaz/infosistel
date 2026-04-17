@@ -13,7 +13,7 @@ module.exports = {
         NODE_ENV: "production",
         // Ruta absoluta a la base de datos SQLite en producción
         DATABASE_URL: "file:/home/zarate/infosistel/prisma/dev.db",
-        PORT: 3000,
+        PORT: 3001,
         HOSTNAME: "0.0.0.0",
         // IMPORTANTE: JWT_SECRET y ENCRYPTION_KEY DEBEN estar en este bloque 'env'
         // (no en env_production) para que PM2 las cargue siempre sin --env production
