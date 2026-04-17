@@ -29,7 +29,7 @@ echo "✅ Código actualizado: $(git log --oneline -1)"
 echo "📦 [3/7] Instalando dependencias y sincronizando Base de Datos..."
 npm install --production=false --silent
 npx prisma generate
-npx prisma db push --accept-data-loss
+DATABASE_URL="file:/home/angel/infosistel/prisma/dev.db" npx prisma db push --accept-data-loss
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
