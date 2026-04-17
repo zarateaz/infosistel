@@ -42,11 +42,11 @@ echo "✅ Assets copiados"
 
 # ── 6. Actualizar Nginx ──
 echo "🌐 [6/7] Actualizando configuración de Nginx..."
-cp "$APP_DIR/nginx.conf" "$NGINX_CONF"
+sudo cp "$APP_DIR/nginx.conf" "$NGINX_CONF"
 
 # Verificar que la config sea válida antes de recargar
-if nginx -t 2>/dev/null; then
-    systemctl reload nginx
+if sudo nginx -t 2>/dev/null; then
+    sudo systemctl reload nginx
     echo "✅ Nginx recargado con nueva configuración de seguridad"
 else
     echo "⚠️  Error en nginx.conf — revisa manualmente con: nginx -t"
@@ -54,7 +54,7 @@ else
 fi
 
 # ── 7. Reiniciar PM2 ──
-echo "🚀 [7/7] Reiniciando la app en PM2 (puerto 3001)..."
+echo "🚀 [7/7] Reiniciando la app en PM2 (puerto 3002)..."
 pm2 restart "$PM2_NAME" || pm2 start ecosystem.config.js
 pm2 save
 echo ""
@@ -65,7 +65,7 @@ echo ""
 pm2 list
 echo ""
 echo "📊 Estado de servicios:"
-echo "  • App:   http://localhost:3001 (PM2)"
+echo "  • App:   http://localhost:3002 (PM2)"
 echo "  • Web:   http://$(curl -s ifconfig.me 2>/dev/null || echo 'tu-ip') (Nginx)"
-echo "  • Nginx: $(systemctl is-active nginx)"
+echo "  • Nginx: $(systemctl is-active nginx 2>/dev/null || echo 'desconocido')"
 echo ""
