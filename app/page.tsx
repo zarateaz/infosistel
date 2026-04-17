@@ -8,7 +8,7 @@ import OfferToast from "@/components/OfferToast";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, MapPin, Clock, Phone, Zap, ShoppingCart, Star } from "lucide-react";
+import { ArrowRight, MapPin, Clock, Phone, Zap, Star } from "lucide-react";
 import { useState } from "react";
 
 interface Product {
@@ -24,13 +24,13 @@ interface Product {
   isFeatured?: boolean;
 }
 
-// ── 4 productos principales del showcase ──
+// ── 4 productos del showcase orbital ──
 const SHOWCASE_PRODUCTS: Product[] = [
   {
     id: "s1",
     name: "Cooler Gamer Pro",
     category: "Cooling",
-    description: "Sistema de enfriamiento de alto rendimiento. Mantén tu equipo al máximo.",
+    description: "Sistema de enfriamiento de alto rendimiento.",
     price: 250,
     stock: 10,
     image: "/img/cooler.png",
@@ -39,7 +39,7 @@ const SHOWCASE_PRODUCTS: Product[] = [
     id: "s2",
     name: "Gaming Mouse X7",
     category: "Periféricos",
-    description: "Precisión extrema de 16000 DPI para gaming profesional y diseño.",
+    description: "Precisión extrema para gaming profesional.",
     price: 180,
     stock: 15,
     image: "/img/mouse.png",
@@ -48,7 +48,7 @@ const SHOWCASE_PRODUCTS: Product[] = [
     id: "s3",
     name: "GPU RTX Serie Pro",
     category: "Tarjeta Gráfica",
-    description: "Gráficos de última generación con ray tracing y DLSS para máximo rendimiento.",
+    description: "Gráficos de última generación con ray tracing.",
     price: 3400,
     stock: 3,
     image: "/img/tarjeta%20grafica.png",
@@ -57,7 +57,7 @@ const SHOWCASE_PRODUCTS: Product[] = [
     id: "s4",
     name: "Teclado Mecánico RGB",
     category: "Accesorios",
-    description: "Respuesta táctica perfecta con iluminación RGB completa personalizable.",
+    description: "Respuesta táctica con iluminación RGB.",
     price: 320,
     stock: 8,
     image: "/img/teclado.png",
@@ -81,6 +81,158 @@ function RevealText({ text, className }: { text: string; className?: string }) {
         </motion.span>
       ))}
     </h2>
+  );
+}
+
+// ── Orbital ring — each card orbits around the INFOSISTEL center ──
+function OrbitalShowcase({
+  onSelect,
+}: {
+  onSelect: (p: Product) => void;
+}) {
+  const ORBIT_DURATION = 22; // seconds for full revolution
+
+  return (
+    <div className="relative w-[560px] h-[560px] flex items-center justify-center flex-shrink-0">
+      {/* ── Decorative static rings ── */}
+      {[520, 400, 270].map((size, i) => (
+        <motion.div
+          key={size}
+          className="absolute rounded-full border border-blue-infositel pointer-events-none"
+          style={{ width: size, height: size, opacity: 0.04 + i * 0.02 }}
+          animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
+          transition={{ duration: 60 + i * 20, repeat: Infinity, ease: "linear" }}
+        />
+      ))}
+
+      {/* ── Dashed spinning ring ── */}
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 460,
+          height: 460,
+          border: "1.5px dashed rgba(20,51,201,0.12)",
+        }}
+        animate={{ rotate: -360 }}
+        transition={{ duration: ORBIT_DURATION, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* ── Glowing orbit dots ── */}
+      {[0, 90, 180, 270].map((angle, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const r = 230;
+        const x = r * Math.cos(rad);
+        const y = r * Math.sin(rad);
+        return (
+          <motion.div
+            key={`dot-${i}`}
+            className="absolute w-2 h-2 rounded-full bg-blue-infositel pointer-events-none"
+            style={{ left: `calc(50% + ${x}px - 4px)`, top: `calc(50% + ${y}px - 4px)` }}
+            animate={{ scale: [1, 1.8, 1], opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
+          />
+        );
+      })}
+
+      {/* ── CENTER: INFOSISTEL logo badge ── */}
+      <motion.div
+        className="absolute z-20 flex flex-col items-center gap-3"
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      >
+        {/* Outer glow ring */}
+        <div className="relative">
+          <motion.div
+            className="absolute -inset-3 rounded-[2rem] bg-blue-infositel/20 blur-xl"
+            animate={{ opacity: [0.4, 0.9, 0.4], scale: [1, 1.1, 1] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          />
+          <motion.div
+            className="relative w-20 h-20 bg-blue-infositel rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-blue-500/60"
+            animate={{ rotate: [0, 10, 0, -10, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            style={{ rotate: 6 }}
+          >
+            <Zap size={36} className="text-white fill-white" style={{ rotate: "-6deg" }} />
+          </motion.div>
+        </div>
+        <div className="text-center">
+          <span className="block text-[9px] font-black text-blue-infositel tracking-[0.5em] uppercase">
+            INFO
+          </span>
+          <span className="block text-[9px] font-black text-black tracking-[0.4em] uppercase">
+            SISTEL
+          </span>
+        </div>
+      </motion.div>
+
+      {/* ── ORBITING PRODUCT CARDS ── */}
+      {SHOWCASE_PRODUCTS.map((product, i) => {
+        const baseAngle = i * 90; // 0, 90, 180, 270 degrees
+        return (
+          // Arm that rotates around center
+          <motion.div
+            key={product.id}
+            className="absolute inset-0 flex items-center justify-end"
+            animate={{ rotate: [baseAngle, baseAngle + 360] }}
+            transition={{
+              duration: ORBIT_DURATION,
+              ease: "linear",
+              repeat: Infinity,
+            }}
+          >
+            {/* Card counter-rotates to stay upright */}
+            <motion.div
+              animate={{ rotate: [-baseAngle, -(baseAngle + 360)] }}
+              transition={{
+                duration: ORBIT_DURATION,
+                ease: "linear",
+                repeat: Infinity,
+              }}
+              whileHover={{ scale: 1.12 }}
+              onClick={() => onSelect(product)}
+              className="
+                group relative w-36 h-36 mr-6
+                bg-white rounded-[2rem]
+                border border-gray-100 hover:border-blue-infositel/40
+                shadow-[0_10px_40px_rgba(0,0,0,0.06)]
+                hover:shadow-[0_20px_60px_rgba(20,51,201,0.20)]
+                transition-shadow duration-300
+                cursor-pointer overflow-hidden
+                flex flex-col items-center justify-center p-3
+              "
+            >
+              {/* Blue glow behind image */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                animate={{ opacity: [0.1, 0.35, 0.1] }}
+                transition={{ duration: 3, repeat: Infinity, delay: i * 0.7 }}
+              >
+                <div className="w-20 h-20 rounded-full bg-blue-infositel/15 blur-2xl" />
+              </motion.div>
+
+              {/* Product image */}
+              <div className="relative w-20 h-20 z-10">
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-contain drop-shadow-[0_8px_20px_rgba(20,51,201,0.2)] group-hover:drop-shadow-[0_12px_30px_rgba(20,51,201,0.35)] transition-all duration-300"
+                />
+              </div>
+
+              {/* Category label */}
+              <span className="relative z-10 mt-2 text-[8px] font-black text-blue-infositel tracking-[0.25em] uppercase leading-none text-center">
+                {product.category}
+              </span>
+
+              {/* Hover shimmer */}
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+            </motion.div>
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -109,10 +261,10 @@ export default function Home() {
       <Services />
 
       {/* ══════════════════════════════════════════════════════
-           PRODUCT SHOWCASE — 4 accesorios con diseño premium
+           ORBITAL PRODUCT SHOWCASE
       ══════════════════════════════════════════════════════ */}
-      <section className="relative py-32 bg-white overflow-hidden">
-        {/* Subtle grid background */}
+      <section className="relative py-24 bg-white overflow-hidden">
+        {/* Subtle background grid */}
         <div
           className="absolute inset-0 opacity-[0.025] pointer-events-none"
           style={{
@@ -122,9 +274,9 @@ export default function Home() {
           }}
         />
 
-        {/* Radial blue glow top-center */}
+        {/* Radial glow center-right */}
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none"
           style={{
             background:
               "radial-gradient(ellipse at center, rgba(20,51,201,0.06) 0%, transparent 70%)",
@@ -132,183 +284,147 @@ export default function Home() {
         />
 
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* ── Section Header ── */}
-          <div className="text-center mb-20 space-y-5">
+          {/* ── Desktop: 2-col layout ── */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+
+            {/* ── LEFT: Text + CTA ── */}
+            <div className="flex-1 space-y-10 text-center lg:text-left max-w-lg">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-3 py-2.5 px-8 rounded-full border-2 border-blue-infositel/20 text-blue-infositel font-black text-xs tracking-[0.3em] uppercase"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-infositel" />
+                </span>
+                Innovation Store
+              </motion.div>
+
+              <div className="space-y-3">
+                <RevealText
+                  text="Explora Nuestra"
+                  className="text-[clamp(2.5rem,6vw,4.5rem)] font-black leading-[0.9] tracking-tighter text-black"
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="text-[clamp(3rem,8vw,6.5rem)] font-black leading-[0.85] tracking-tighter text-blue-infositel drop-shadow-[0_10px_30px_rgba(20,51,201,0.15)]"
+                >
+                  Tecnología
+                </motion.div>
+              </div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                viewport={{ once: true }}
+                className="text-gray-400 text-lg font-medium leading-relaxed"
+              >
+                Hardware premium seleccionado para la excelencia. Cada producto, una experiencia única.
+              </motion.p>
+
+              {/* Stats */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                viewport={{ once: true }}
+                className="flex items-center justify-center lg:justify-start gap-12 py-8 border-y border-gray-100"
+              >
+                {[
+                  { value: "500+", label: "Clientes", icon: Star },
+                  { value: "100%", label: "Garantía", icon: Zap },
+                  { value: "5 años", label: "Experiencia", icon: Clock },
+                ].map((stat, i) => (
+                  <div key={stat.label} className="text-center">
+                    <stat.icon className="text-blue-infositel mx-auto mb-1 opacity-50" size={16} />
+                    <div className="text-2xl font-black text-black">{stat.value}</div>
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <Link
+                  href="/tienda"
+                  className="group relative inline-flex items-center justify-center bg-blue-infositel text-white h-18 px-12 py-5 rounded-[1.5rem] font-black text-sm uppercase tracking-[0.25em] overflow-hidden shadow-2xl shadow-blue-500/40 hover:scale-[1.04] active:scale-95 transition-all"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="relative z-10 flex items-center gap-3">
+                    Entrar al Universo
+                    <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+                  </span>
+                </Link>
+              </motion.div>
+            </div>
+
+            {/* ── RIGHT: Orbital display (desktop only) ── */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-3 py-2.5 px-8 rounded-full border-2 border-blue-infositel/20 text-blue-infositel font-black text-xs tracking-[0.3em] uppercase"
+              transition={{ duration: 1, ease: [0.2, 0.65, 0.3, 0.9] }}
+              className="hidden lg:flex items-center justify-center"
             >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-infositel" />
-              </span>
-              Innovation Store
+              <OrbitalShowcase onSelect={handleSelectProduct} />
             </motion.div>
-
-            <RevealText
-              text="Explora Nuestra"
-              className="text-[clamp(2.5rem,7vw,5.5rem)] font-black leading-[0.9] tracking-tighter text-black"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              viewport={{ once: true }}
-              className="text-[clamp(3rem,9vw,8rem)] font-black leading-[0.85] tracking-tighter text-blue-infositel drop-shadow-[0_10px_30px_rgba(20,51,201,0.15)]"
-            >
-              Tecnología
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              viewport={{ once: true }}
-              className="text-gray-400 text-lg font-medium max-w-md mx-auto leading-relaxed pt-2"
-            >
-              Hardware premium seleccionado para la excelencia. Disponible en Huancayo.
-            </motion.p>
           </div>
 
-          {/* ── Products Grid ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* ── Mobile: 2x2 product grid (no price, no cart) ── */}
+          <div className="lg:hidden grid grid-cols-2 gap-4 mt-16">
             {SHOWCASE_PRODUCTS.map((product, i) => (
               <motion.div
                 key={product.id}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.12, duration: 0.7, ease: [0.2, 0.65, 0.3, 0.9] }}
-                className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-gray-100/80 hover:border-blue-infositel/25 shadow-[0_8px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_30px_80px_rgba(20,51,201,0.12)] transition-all duration-500 cursor-pointer flex flex-col"
+                transition={{ delay: i * 0.1 }}
                 onClick={() => handleSelectProduct(product)}
+                className="group relative bg-white rounded-[2rem] border border-gray-100 hover:border-blue-infositel/30 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer overflow-hidden p-5 flex flex-col items-center text-center"
               >
-                {/* ── Image Zone ── */}
-                <div className="relative h-60 bg-gradient-to-b from-blue-50/40 to-white overflow-hidden">
-                  {/* Animated glow behind product */}
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.1, 1] }}
-                    transition={{ duration: 4, repeat: Infinity, delay: i * 0.5 }}
-                  >
-                    <div className="w-36 h-36 rounded-full bg-blue-infositel/10 blur-3xl" />
-                  </motion.div>
+                {/* Category */}
+                <span className="text-[9px] font-black text-blue-infositel tracking-[0.3em] uppercase mb-3 block">
+                  {product.category}
+                </span>
 
-                  {/* Product image */}
+                {/* Image */}
+                <div className="relative w-28 h-28">
                   <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
                     className="relative w-full h-full"
-                    whileHover={{ scale: 1.1, y: -10 }}
-                    transition={{ type: "spring", stiffness: 280, damping: 22 }}
                   >
                     <Image
                       src={product.image}
                       alt={product.name}
                       fill
-                      className="object-contain p-8 drop-shadow-[0_15px_35px_rgba(20,51,201,0.12)] group-hover:drop-shadow-[0_25px_50px_rgba(20,51,201,0.28)] transition-all duration-500"
+                      className="object-contain drop-shadow-[0_10px_25px_rgba(20,51,201,0.15)] group-hover:drop-shadow-[0_15px_35px_rgba(20,51,201,0.3)] transition-all duration-300"
                     />
                   </motion.div>
-
-                  {/* Category pill */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="bg-white/90 backdrop-blur-sm text-blue-infositel text-[9px] font-black px-3 py-1.5 rounded-full border border-blue-infositel/10 tracking-[0.25em] uppercase shadow-sm">
-                      {product.category}
-                    </span>
-                  </div>
-
-                  {/* Stock badge */}
-                  {product.stock <= 5 && (
-                    <div className="absolute top-4 right-4 z-10">
-                      <span className="bg-orange-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full tracking-[0.2em] uppercase">
-                        ¡Últimas!
-                      </span>
-                    </div>
-                  )}
                 </div>
 
-                {/* ── Info Zone ── */}
-                <div className="p-6 flex flex-col flex-1 space-y-3">
-                  <div>
-                    <h3 className="text-base font-black text-black group-hover:text-blue-infositel transition-colors duration-300 leading-tight">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-400 text-xs font-medium leading-relaxed mt-1.5 line-clamp-2">
-                      {product.description}
-                    </p>
-                  </div>
+                {/* Name */}
+                <h3 className="text-sm font-black text-black group-hover:text-blue-infositel transition-colors mt-3 leading-tight">
+                  {product.name}
+                </h3>
 
-                  <div className="flex items-center justify-between pt-2 mt-auto">
-                    <div>
-                      <span className="text-2xl font-black text-blue-infositel">
-                        S/. {product.price.toLocaleString()}
-                      </span>
-                    </div>
-                    <motion.button
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="w-11 h-11 rounded-2xl bg-blue-infositel flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-shadow"
-                    >
-                      <ShoppingCart size={14} className="text-white" />
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* Bottom slide-in bar on hover */}
-                <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-blue-infositel via-blue-400 to-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                {/* Bottom bar */}
+                <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-blue-infositel to-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
               </motion.div>
             ))}
           </div>
-
-          {/* ── Stats row ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-3 gap-8 mt-20 py-12 border-y border-gray-100"
-          >
-            {[
-              { value: "500+", label: "Clientes Satisfechos", icon: Star },
-              { value: "100%", label: "Hardware Garantizado", icon: Zap },
-              { value: "5 años", label: "En el Mercado", icon: Clock },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 + i * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <stat.icon className="text-blue-infositel mx-auto mb-3 opacity-60" size={22} />
-                <div className="text-3xl font-black text-black">{stat.value}</div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-[0.3em] mt-1">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* ── CTA Button ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            viewport={{ once: true }}
-            className="text-center mt-16"
-          >
-            <Link
-              href="/tienda"
-              className="group relative inline-flex items-center justify-center bg-blue-infositel text-white h-20 px-16 rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] overflow-hidden transition-all shadow-2xl shadow-blue-500/40 hover:scale-[1.04] active:scale-95"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="relative z-10 flex items-center gap-4">
-                Entrar al Universo
-                <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
-              </span>
-            </Link>
-          </motion.div>
         </div>
       </section>
 

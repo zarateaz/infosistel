@@ -12,6 +12,13 @@ export const metadata: Metadata = {
   title: "INFOSISTEL | Reparación de Laptops, PC e Impresoras en Huancayo",
   description: "Servicio técnico especializado en Huancayo. Reparación de laptops, mantenimiento de computadoras, impresoras y venta de repuestos. ¡Calidad y rapidez garantizada!",
   keywords: "reparación de laptops huancayo, servicio técnico pc, mantenimiento impresoras, infosistel, repotenciación computadoras",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico" },
+    ],
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
