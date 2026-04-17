@@ -46,6 +46,21 @@ export async function deleteProduct(id: string) {
   return prisma.product.delete({ where: { id } });
 }
 
+export async function toggleProductOffer(
+  id: string,
+  onSale: boolean,
+  salePrice?: number
+) {
+  await ensureAuth();
+  return prisma.product.update({
+    where: { id },
+    data: {
+      onSale,
+      salePrice: onSale && salePrice ? salePrice : null,
+    },
+  });
+}
+
 // --- Categories ---
 export async function getCategories() {
   return prisma.category.findMany({ orderBy: { name: "asc" } });
@@ -131,6 +146,13 @@ export async function addOrder(data: any) {
       },
     },
   });
+}
+
+export async function deleteOrder(id: string) {
+  await ensureAuth();
+  // Delete items first (cascade), then the order
+  await prisma.orderItem.deleteMany({ where: { orderId: id } });
+  return prisma.order.delete({ where: { id } });
 }
 
 // --- Users ---
