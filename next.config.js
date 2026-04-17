@@ -5,13 +5,11 @@ const nextConfig = {
 
   // ── Image optimization ──
   images: {
-    // Allow serving images from the same origin
-    remotePatterns: [],
-    // Formats to offer (WebP first, then AVIF for modern browsers)
+    // unoptimized: nginx sirve las imágenes directamente (/_next/image no funciona
+    // en standalone cuando las imágenes están en /uploads/ via alias de nginx)
+    unoptimized: true,
+    // Formatos preferidos (informativo, se respeta si el browser los soporta)
     formats: ["image/webp", "image/avif"],
-    // Minimum time (seconds) before an image can be re-optimized
-    minimumCacheTTL: 86400, // 24 hours
-    // Reasonable device size breakpoints for responsive images
     deviceSizes: [375, 640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 64, 96, 128, 256, 384],
   },
