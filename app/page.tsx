@@ -482,9 +482,11 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="font-black text-xl mb-1">Dirección</h4>
-                    <p className="text-gray-500 text-lg">
-                      Av. Giráldez 274, Sótano Stand S25, Huancayo 12001
-                    </p>
+                    <div className="text-gray-500 text-lg space-y-1">
+                      <p>• Av. Giráldez 274, Sótano Stand S25, Huancayo 12001</p>
+                      <p>• Av. Giráldez 274, Segundo Piso Stand B-10, Huancayo</p>
+                      <p>• Av. Giráldez 274, 1er Nivel Stand B-10, Huancayo</p>
+                    </div>
                   </div>
                 </div>
 
