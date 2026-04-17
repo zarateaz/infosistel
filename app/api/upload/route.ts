@@ -61,10 +61,11 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
     const uniqueName = `${Date.now()}-${sanitizedName}`;
 
-    // 5. Directorio de uploads — usa UPLOADS_DIR desde env (configurado en PM2)
-    // Necesario porque process.cwd() en standalone = .next/standalone/
-    const uploadDir = process.env.UPLOADS_DIR 
-      ?? join(process.cwd(), "public", "uploads");
+    // 5. Directorio de uploads — ruta absoluta segura para el VPS
+    // En standalone cwd() apunta a .next/standalone/, así que forzamos la ruta real.
+    const uploadDir = process.env.NODE_ENV === "production" 
+      ? "/home/angel/infosistel/public/uploads"
+      : join(process.cwd(), "public", "uploads");
     
     console.log("[UPLOAD_API] Directorio de destino:", uploadDir);
     
