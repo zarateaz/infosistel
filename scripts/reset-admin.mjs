@@ -21,8 +21,8 @@ const projectRoot = path.resolve(__dirname, "..");
 // ============================================================
 // CONFIGURACIÓN — Cambia el password aquí antes de ejecutar
 // ============================================================
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "Admin2026!!"; // <-- cambia esto en el VPS
+const ADMIN_USERNAME = "zarate";
+const ADMIN_PASSWORD = "228"; // <-- cambia esto en el VPS
 const ADMIN_ROLE = "superadmin";
 // ============================================================
 
