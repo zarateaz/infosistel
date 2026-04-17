@@ -11,16 +11,15 @@ module.exports = {
       max_memory_restart: "1G",
       env: {
         NODE_ENV: "production",
-        // Usamos rutas absolutas para evitar errores de directorio
+        // Ruta absoluta a la base de datos SQLite en producción
         DATABASE_URL: "file:/home/zarate/infosistel/prisma/dev.db",
         PORT: 3000,
-        HOSTNAME: "0.0.0.0"
-      },
-      // Estas variables se pueden pasar dinámicamente o dejar fijas aquí
-      env_production: {
-        NODE_ENV: "production",
-        JWT_SECRET: "infosistel-key-super-segura-2026",
-        ENCRYPTION_KEY: "infosistel-encryption-key-32-chars"
+        HOSTNAME: "0.0.0.0",
+        // IMPORTANTE: JWT_SECRET y ENCRYPTION_KEY DEBEN estar en este bloque 'env'
+        // (no en env_production) para que PM2 las cargue siempre sin --env production
+        JWT_SECRET: "infosistel-jwt-super-secret-key-2026!!",
+        // 64 caracteres hex exactos = 32 bytes para AES-256-GCM
+        ENCRYPTION_KEY: "696e666f73697374656c2d656e63727970742d6b65792d333262797465733200"
       }
     }
   ]
