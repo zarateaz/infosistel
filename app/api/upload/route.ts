@@ -57,18 +57,21 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 4. Create unique filename and sanitize it strictly
-    // Remove anything that isn't alphanumeric or a dot
+    // 4. Nombre único y sanitizado
     const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
     const uniqueName = `${Date.now()}-${sanitizedName}`;
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    
-    console.log("[UPLOAD_API] Intentando guardar en:", uploadDir);
 
+    // 5. Directorio de uploads — usa UPLOADS_DIR desde env (configurado en PM2)
+    // Necesario porque process.cwd() en standalone = .next/standalone/
+    const uploadDir = process.env.UPLOADS_DIR 
+      ?? join(process.cwd(), "public", "uploads");
+    
+    console.log("[UPLOAD_API] Directorio de destino:", uploadDir);
+    
     try {
       await mkdir(uploadDir, { recursive: true });
     } catch (e) {
-      console.log("[UPLOAD_API] El directorio ya existe o hubo un aviso menor al crear mkdir");
+      // Directorio ya existe — normal
     }
 
     const path = join(uploadDir, uniqueName);
