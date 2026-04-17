@@ -49,10 +49,9 @@ export async function POST(request: NextRequest) {
        return NextResponse.json({ error: "Extensión de archivo no permitida" }, { status: 400 });
     }
 
-    // 3. Security check: Validate file size (max 5MB - reduced from 20MB for safety)
-    if (file.size > 5 * 1024 * 1024) {
-      console.error("[UPLOAD_API] Error: Archivo demasiado grande:", file.size);
-      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 5MB" }, { status: 400 });
+    // 3. Security check: Validate file size (max 10MB for product images)
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 10MB" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
