@@ -28,25 +28,54 @@ export default function OfferToast({
 
   useEffect(() => {
     const fetchRandomOffer = async () => {
+      // Producto fallback — se muestra si no hay ofertas en la DB
+      const FALLBACK: Product = {
+        id: "fallback-1",
+        name: "Laptop lissi",
+        category: "Laptops",
+        description: "Potencia y elegancia para creadores de contenido.",
+        price: 88,
+        salePrice: 74,
+        stock: 3,
+        onSale: true,
+        image: "/img/tienda1laptops.png",
+      };
+
       try {
         const res = await fetch("/api/products", { cache: "no-store" });
         if (res.ok) {
           const all: Product[] = await res.json();
-          const onSale = all.filter((p) => p.onSale);
-          if (onSale.length === 0) return;
-          
-          const pick = onSale[Math.floor(Math.random() * onSale.length)];
+          const onSale = all.filter((p) => p.onSale && p.salePrice);
+
+          // Si hay productos en oferta en la DB, usar uno al azar
+          // Si no, usar el fallback para que el toast siempre aparezca
+          const pick =
+            onSale.length > 0
+              ? onSale[Math.floor(Math.random() * onSale.length)]
+              : FALLBACK;
+
           setOffer(pick);
-          
+
           const t = setTimeout(() => setVisible(true), 1800);
           const t2 = setTimeout(() => setDismissed(true), 13800);
           return () => {
             clearTimeout(t);
             clearTimeout(t2);
           };
+        } else {
+          // Si falla la API, mostrar fallback de todas formas
+          setOffer(FALLBACK);
+          const t = setTimeout(() => setVisible(true), 1800);
+          const t2 = setTimeout(() => setDismissed(true), 13800);
+          return () => { clearTimeout(t); clearTimeout(t2); };
         }
       } catch (error) {
         console.error("Error fetching toast offer:", error);
+        // Fallback si hay error de red
+        setOffer(FALLBACK);
+        const t = setTimeout(() => setVisible(true), 1800);
+        const t2 = setTimeout(() => setDismissed(true), 13800);
+        return () => { clearTimeout(t); clearTimeout(t2); };
       }
     };
     fetchRandomOffer();
