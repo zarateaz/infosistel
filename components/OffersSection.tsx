@@ -19,6 +19,43 @@ interface Product {
   salePrice?: number;
 }
 
+// Ofertas fallback — se muestran si no hay productos en oferta en la DB
+const FALLBACK_OFFERS: Product[] = [
+  {
+    id: "f1",
+    name: "Laptop lissi",
+    category: "Laptops",
+    description: "Potencia y elegancia para creadores de contenido.",
+    price: 88,
+    salePrice: 74,
+    stock: 3,
+    onSale: true,
+    image: "/img/tienda1laptops.png",
+  },
+  {
+    id: "f2",
+    name: "Cooler Pro G7",
+    category: "Accesorios",
+    description: "Sistema térmico de alto rendimiento.",
+    price: 320,
+    salePrice: 250,
+    stock: 5,
+    onSale: true,
+    image: "/img/tienda2cooler.png",
+  },
+  {
+    id: "f3",
+    name: "RTX 5060 Ti",
+    category: "GPU",
+    description: "Gráficos de siguiente nivel con DLSS 4.",
+    price: 4200,
+    salePrice: 3400,
+    stock: 2,
+    onSale: true,
+    image: "/img/tienda3rtx5060.png",
+  },
+];
+
 export default function OffersSection({
   onSelect,
 }: {
@@ -32,10 +69,15 @@ export default function OffersSection({
         const res = await fetch("/api/products", { cache: "no-store" });
         if (res.ok) {
           const allProducts: Product[] = await res.json();
-          setOffers(allProducts.filter((p) => p.onSale));
+          const onSale = allProducts.filter((p) => p.onSale && p.salePrice);
+          // Si hay ofertas reales en DB, usarlas. Si no, mostrar fallback.
+          setOffers(onSale.length > 0 ? onSale : FALLBACK_OFFERS);
+        } else {
+          setOffers(FALLBACK_OFFERS);
         }
       } catch (error) {
         console.error("Error fetching offers:", error);
+        setOffers(FALLBACK_OFFERS);
       }
     };
     fetchOffers();
