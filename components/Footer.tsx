@@ -4,6 +4,12 @@ import Link from "next/link";
 import { Mail, Phone, MapPin, Facebook, Instagram, MessageCircle, ArrowRight, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
+const TikTokIcon = ({ size = 16, className = "" }: { size?: number, className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+  </svg>
+);
+
 const footerLinks = [
   { name: "Inicio", href: "/" },
   { name: "Tienda Online", href: "/tienda" },
@@ -75,8 +81,9 @@ export default function Footer() {
               </p>
               <div className="flex items-center gap-2">
                 {[
-                  { Icon: Facebook, href: "https://facebook.com" },
+                  { Icon: Facebook, href: "https://www.facebook.com/share/1CAYDHW7va/" },
                   { Icon: Instagram, href: "https://instagram.com" },
+                  { Icon: TikTokIcon, href: "https://www.tiktok.com/@infosistel6?_r=1&_t=ZS-95cScAQ9Obd" },
                   { Icon: MessageCircle, href: "https://wa.me/51964648202" },
                 ].map(({ Icon, href }, i) => (
                   <a
@@ -137,6 +144,12 @@ export default function Footer() {
                     <MapPin className="text-blue-infositel" size={14} />
                   </div>
                   <span className="text-sm text-gray-400 leading-relaxed">Av. Giráldez 274, Sótano Stand S25, Huancayo 12001</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-infositel/5 flex items-center justify-center shrink-0 mt-0.5">
+                    <MapPin className="text-blue-infositel" size={14} />
+                  </div>
+                  <span className="text-sm text-gray-400 leading-relaxed">Av. Giráldez 274, Segundo Piso Stand B-10, Huancayo</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-blue-infositel/5 flex items-center justify-center shrink-0">
