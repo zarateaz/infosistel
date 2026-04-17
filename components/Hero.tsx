@@ -86,7 +86,7 @@ function SlideBg({ accentColor }: { accentColor: string }) {
 /* ── Floating Image — Ultra sharp ── */
 function FloatingImage({ src, alt, accentColor, index }: { src: string; alt: string; accentColor: string; index: number }) {
   return (
-    <div className="flex relative h-[250px] sm:h-[300px] md:h-[450px] lg:h-[600px] w-full items-center justify-center mt-12 lg:mt-0">
+    <div className="flex relative h-[180px] sm:h-[300px] md:h-[450px] lg:h-[600px] w-full items-center justify-center mt-6 lg:mt-0">
       {/* Kinetic Halo */}
       <motion.div
         className="absolute w-[450px] h-[450px] rounded-full border border-blue-infositel/10"
@@ -180,8 +180,8 @@ export default function Hero() {
               <SlideBg accentColor={slide.accentColor} />
             </div>
 
-            <div className="relative z-10 max-w-7xl mx-auto h-full px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-16 pt-24 pb-32 lg:py-12">
-              <div className="space-y-6 lg:space-y-10 text-center lg:text-left">
+            <div className="relative z-10 max-w-7xl mx-auto h-full px-4 sm:px-8 flex flex-col lg:grid lg:grid-cols-2 items-center justify-center gap-6 lg:gap-16 pt-20 pb-16 lg:py-12">
+              <div className="space-y-4 lg:space-y-10 text-center lg:text-left">
                 <motion.div
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -196,7 +196,7 @@ export default function Hero() {
                     initial={{ y: 80, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] }}
-                    className="text-[clamp(3rem,10vw,6.5rem)] font-black leading-[0.9] tracking-tighter text-black"
+                    className="text-[clamp(2.5rem,10vw,6.5rem)] font-black leading-[0.9] tracking-tighter text-black"
                   >
                     {slide.title}<br />
                     <span className="text-blue-infositel drop-shadow-[0_15px_30px_rgba(20,51,201,0.2)]">
@@ -209,7 +209,7 @@ export default function Hero() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="text-gray-400 text-xl font-medium max-w-lg mx-auto lg:mx-0 leading-relaxed"
+                  className="text-gray-400 text-base lg:text-xl font-medium max-w-lg mx-auto lg:mx-0 leading-relaxed hidden sm:block"
                 >
                   {slide.description}
                 </motion.p>
