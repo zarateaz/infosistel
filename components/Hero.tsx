@@ -86,7 +86,7 @@ function SlideBg({ accentColor }: { accentColor: string }) {
 /* ── Floating Image — Ultra sharp ── */
 function FloatingImage({ src, alt, accentColor, index }: { src: string; alt: string; accentColor: string; index: number }) {
   return (
-    <div className="hidden sm:flex relative h-[300px] md:h-[450px] lg:h-[600px] w-full items-center justify-center">
+    <div className="flex relative h-[250px] sm:h-[300px] md:h-[450px] lg:h-[600px] w-full items-center justify-center mt-12 lg:mt-0">
       {/* Kinetic Halo */}
       <motion.div
         className="absolute w-[450px] h-[450px] rounded-full border border-blue-infositel/10"
@@ -141,7 +141,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-[90vh] min-h-[650px] w-full overflow-hidden bg-white">
+    <section className="relative min-h-[100vh] lg:min-h-[650px] lg:h-[90vh] w-full overflow-hidden bg-white">
 
       {/* Futuristic Vertical Ticker */}
       <div className="absolute right-12 top-0 bottom-0 z-20 flex flex-col justify-center gap-12 pointer-events-none opacity-20 hidden xl:flex">
@@ -180,8 +180,8 @@ export default function Hero() {
               <SlideBg accentColor={slide.accentColor} />
             </div>
 
-            <div className="relative z-10 max-w-7xl mx-auto h-full px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-2 items-center gap-16 pt-12">
-              <div className="space-y-10 text-center lg:text-left">
+            <div className="relative z-10 max-w-7xl mx-auto h-full px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-16 pt-24 pb-32 lg:py-12">
+              <div className="space-y-6 lg:space-y-10 text-center lg:text-left">
                 <motion.div
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
