@@ -17,7 +17,7 @@ import {
   getRepairs, addRepair as addRepairAction, updateRepairProgress as updateRepairProgressAction, deleteRepair,
   getOrders, deleteOrder as deleteOrderAction,
   getUsers, addUser as addUserAction, deleteUser,
-  toggleProductOffer, editProduct as editProductAction
+  toggleProductOffer, editProduct as editProductAction, inlineUpdateProduct as inlineUpdateProductAction
 } from "./actions";
 
 export default function AdminPage() {
@@ -36,6 +36,7 @@ export default function AdminPage() {
     image: "/img/cooler.png", onSale: false, salePrice: ""
   });
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [inventorySearch, setInventorySearch] = useState("");
   const [newRepair, setNewRepair] = useState({
     dni: "", equipment: "", problem: "", progress: 0, statusText: ""
   });
@@ -178,6 +179,8 @@ export default function AdminPage() {
     { id: "usuarios", label: "Usuarios", icon: UsersIcon },
     { id: "ventas", label: "Ventas", icon: CartIcon },
   ] as const;
+
+  const filteredInventory = products.filter(p => p.name.toLowerCase().includes(inventorySearch.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden pt-24 pb-24">
@@ -426,7 +429,16 @@ export default function AdminPage() {
             </div>
 
             <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-100 overflow-x-auto">
-              <h3 className="text-xl font-black mb-6">Detalle de Inventario</h3>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+                <h3 className="text-xl font-black">Detalle de Inventario</h3>
+                <input
+                  type="text"
+                  placeholder="🔍 Buscar producto..."
+                  className="w-full md:w-64 p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-medium"
+                  value={inventorySearch}
+                  onChange={e => setInventorySearch(e.target.value)}
+                />
+              </div>
               <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
                   <tr className="border-b border-gray-100 text-xs font-black text-gray-400 uppercase tracking-widest">
@@ -439,7 +451,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {products.map(p => {
+                  {filteredInventory.map(p => {
                     const cost = p.costPrice || 0;
                     const profit = p.price - cost;
                     return (
@@ -449,9 +461,22 @@ export default function AdminPage() {
                           <span className="truncate max-w-[200px] block">{p.name}</span>
                         </td>
                         <td className="py-3 px-4 text-center font-black">
-                          <span className={`px-2 py-1 rounded-lg ${p.stock < 5 ? "bg-red-50 text-red-500" : "bg-green-50 text-green-500"}`}>{p.stock}</span>
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => inlineUpdateProductAction(p.id, { stock: Math.max(0, p.stock - 1) }).then(loadData)} className="w-6 h-6 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center">-</button>
+                            <span className={`w-8 text-center ${p.stock < 5 ? "text-red-500" : "text-green-500"}`}>{p.stock}</span>
+                            <button onClick={() => inlineUpdateProductAction(p.id, { stock: p.stock + 1 }).then(loadData)} className="w-6 h-6 rounded-full bg-green-50 text-green-500 hover:bg-green-100 flex items-center justify-center">+</button>
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-right text-gray-500 font-medium">S/. {cost.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <span className="text-gray-400 font-bold text-xs">S/.</span>
+                            <input type="number" 
+                              className="w-20 bg-gray-50 border border-gray-100 rounded-lg px-2 py-1 outline-none text-right font-medium text-gray-600 focus:ring-2 focus:ring-blue-infositel"
+                              defaultValue={cost}
+                              onBlur={(e) => inlineUpdateProductAction(p.id, { costPrice: e.target.value }).then(loadData)}
+                            />
+                          </div>
+                        </td>
                         <td className="py-3 px-4 text-right font-black">S/. {p.price.toFixed(2)}</td>
                         <td className="py-3 px-4 text-right font-black text-purple-500">S/. {profit.toFixed(2)}</td>
                         <td className="py-3 px-4 text-center">
@@ -464,7 +489,7 @@ export default function AdminPage() {
                   })}
                 </tbody>
               </table>
-              {products.length === 0 && <div className="text-center py-10 text-gray-400 font-bold">Inventario vacío.</div>}
+              {filteredInventory.length === 0 && <div className="text-center py-10 text-gray-400 font-bold">Sin resultados.</div>}
             </div>
           </div>
         )}

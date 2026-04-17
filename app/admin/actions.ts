@@ -61,6 +61,18 @@ export async function editProduct(id: string, data: any) {
   });
 }
 
+export async function inlineUpdateProduct(id: string, data: any) {
+  await ensureAuth();
+  const updateData: any = {};
+  if (data.stock !== undefined) updateData.stock = parseInt(data.stock);
+  if (data.costPrice !== undefined) updateData.costPrice = parseFloat(data.costPrice);
+  if (Object.keys(updateData).length === 0) return;
+  return prisma.product.update({
+    where: { id },
+    data: updateData,
+  });
+}
+
 export async function deleteProduct(id: string) {
   await ensureAuth();
   return prisma.product.delete({ where: { id } });
