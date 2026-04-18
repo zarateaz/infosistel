@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Phone, MapPin, Facebook, Instagram, MessageCircle, ArrowRight, Zap } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, MessageCircle, ArrowRight, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const TikTokIcon = ({ size = 16, className = "" }: { size?: number, className?: string }) => (
@@ -81,17 +81,16 @@ export default function Footer() {
               </p>
               <div className="flex items-center gap-2">
                 {[
-                  { Icon: Facebook, href: "https://www.facebook.com/share/1CAYDHW7va/" },
-                  { Icon: Instagram, href: "https://instagram.com" },
-                  { Icon: TikTokIcon, href: "https://www.tiktok.com/@infosistel6?_r=1&_t=ZS-95cScAQ9Obd" },
-                  { Icon: MessageCircle, href: "https://wa.me/51964648202" },
-                ].map(({ Icon, href }, i) => (
+                  { Icon: Facebook, href: "https://www.facebook.com/share/1CAYDHW7va/", colorClass: "text-[#1877F2]", hoverClass: "hover:bg-[#1877F2] hover:text-white" },
+                  { Icon: TikTokIcon, href: "https://www.tiktok.com/@infosistel6?_r=1&_t=ZS-95cScAQ9Obd", colorClass: "text-black", hoverClass: "hover:bg-black hover:text-white" },
+                  { Icon: MessageCircle, href: "https://wa.me/51964648202", colorClass: "text-[#25D366]", hoverClass: "hover:bg-[#25D366] hover:text-white" },
+                ].map(({ Icon, href, colorClass, hoverClass }, i) => (
                   <a
                     key={i}
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-blue-infositel hover:text-white transition-all duration-300"
+                    className={`w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center transition-all duration-300 ${colorClass} ${hoverClass}`}
                   >
                     <Icon size={16} />
                   </a>

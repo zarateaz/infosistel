@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { ShoppingCart, User, Facebook, Instagram, MessageCircle, Menu, X, Zap } from "lucide-react";
+import { ShoppingCart, User, Facebook, MessageCircle, Menu, X, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TikTokIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
@@ -30,10 +30,9 @@ export default function Navbar() {
   ];
 
   const socialLinks = [
-    { icon: <Facebook size={16} />, href: "https://www.facebook.com/share/1CAYDHW7va/", label: "Facebook" },
-    { icon: <Instagram size={16} />, href: "https://instagram.com", label: "Instagram" },
-    { icon: <TikTokIcon size={16} />, href: "https://www.tiktok.com/@infosistel6?_r=1&_t=ZS-95cScAQ9Obd", label: "TikTok" },
-    { icon: <MessageCircle size={16} />, href: "https://wa.me/51964648202", label: "WhatsApp" },
+    { icon: <Facebook size={16} />, href: "https://www.facebook.com/share/1CAYDHW7va/", label: "Facebook", color: "text-[#1877F2]" },
+    { icon: <TikTokIcon size={16} />, href: "https://www.tiktok.com/@infosistel6?_r=1&_t=ZS-95cScAQ9Obd", label: "TikTok", color: "text-black" },
+    { icon: <MessageCircle size={16} />, href: "https://wa.me/51964648202", label: "WhatsApp", color: "text-[#25D366]" },
   ];
 
   return (
@@ -102,7 +101,7 @@ export default function Navbar() {
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-xl text-gray-400 hover:text-blue-infositel hover:bg-blue-infositel/5 transition-all duration-300"
+                className={`p-2 rounded-xl transition-all duration-300 ${social.color} bg-gray-50/50 hover:bg-gray-100 hover:scale-110`}
                 aria-label={social.label}
               >
                 {social.icon}
@@ -156,7 +155,7 @@ export default function Navbar() {
             ))}
             <div className="flex items-center gap-4 py-4 px-4 mt-2 border-t border-gray-100">
               {socialLinks.map((social, idx) => (
-                <a key={idx} href={social.href} className="p-3 rounded-xl bg-gray-50 text-gray-500 hover:text-blue-infositel transition-colors">
+                <a key={idx} href={social.href} className={`p-3 rounded-xl bg-gray-50 transition-colors ${social.color}`}>
                   {social.icon}
                 </a>
               ))}
