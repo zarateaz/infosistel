@@ -241,7 +241,7 @@ export default function StorePage() {
                   <div className="my-5 min-h-[90px] flex flex-col justify-start">
                     {p.description.includes("*") || p.description.includes("\n") ? (
                       <ul className="space-y-2">
-                        {p.description.split(/[\*\n]/).filter(t => t.trim().length > 2).slice(0, 4).map((text, i) => (
+                        {p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2).slice(0, 4).map((text: string, i: number) => (
                           <motion.li 
                             key={i}
                             initial={{ opacity: 0, x: -10 }}
