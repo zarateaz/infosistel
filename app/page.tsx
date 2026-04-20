@@ -8,8 +8,9 @@ import OfferToast from "@/components/OfferToast";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, MapPin, Clock, Phone, Zap, Star } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Clock, Phone, Zap, Star, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getProducts } from "./admin/actions";
 
 interface Product {
   id: string;
@@ -24,46 +25,7 @@ interface Product {
   isFeatured?: boolean;
 }
 
-// ── 4 productos del showcase orbital ──
-const SHOWCASE_PRODUCTS: Product[] = [
-  {
-    id: "s1",
-    name: "Cooler Gamer Pro",
-    category: "Cooling",
-    description: "Sistema de enfriamiento de alto rendimiento.",
-    price: 250,
-    stock: 10,
-    image: "/img/cooler.png",
-  },
-  {
-    id: "s2",
-    name: "Gaming Mouse X7",
-    category: "Periféricos",
-    description: "Precisión extrema para gaming profesional.",
-    price: 180,
-    stock: 15,
-    image: "/img/mouse.png",
-  },
-  {
-    id: "s3",
-    name: "GPU RTX Serie Pro",
-    category: "Tarjeta Gráfica",
-    description: "Gráficos de última generación con ray tracing.",
-    price: 3400,
-    stock: 3,
-    image: "/img/tarjeta%20grafica.png",
-  },
-  {
-    id: "s4",
-    name: "Teclado Mecánico RGB",
-    category: "Accesorios",
-    description: "Respuesta táctica con iluminación RGB.",
-    price: 320,
-    stock: 8,
-    image: "/img/teclado.png",
-  },
-];
-
+// ── Helper to reveal text with blur/y-axis animation ──
 function RevealText({ text, className }: { text: string; className?: string }) {
   const words = text.split(" ");
   return (
@@ -84,96 +46,69 @@ function RevealText({ text, className }: { text: string; className?: string }) {
   );
 }
 
-// ── Orbital ring — each card orbits around the INFOSISTEL center ──
+// ── Orbital ring — each card orbits around the center ──
 function OrbitalShowcase({
+  products,
   onSelect,
 }: {
+  products: Product[];
   onSelect: (p: Product) => void;
 }) {
-  const ORBIT_DURATION = 22; // seconds for full revolution
+  const ORBIT_DURATION = 35; 
+
+  if (products.length === 0) return null;
 
   return (
-    <div className="relative w-[560px] h-[560px] flex items-center justify-center flex-shrink-0">
-      {/* ── Decorative static rings ── */}
-      {[520, 400, 270].map((size, i) => (
+    <div className="relative w-[600px] h-[600px] flex items-center justify-center flex-shrink-0 perspective-[1000px]">
+      {/* Decorative static rings */}
+      {[580, 440, 300].map((size, i) => (
         <motion.div
           key={size}
-          className="absolute rounded-full border border-blue-infositel pointer-events-none"
-          style={{ width: size, height: size, opacity: 0.04 + i * 0.02 }}
-          animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-          transition={{ duration: 60 + i * 20, repeat: Infinity, ease: "linear" }}
+          className="absolute rounded-full border border-blue-infositel/10 pointer-events-none"
+          style={{ width: size, height: size }}
+          animate={{ 
+            rotate: i % 2 === 0 ? 360 : -360,
+            scale: [1, 1.05, 1],
+          }}
+          transition={{ 
+            rotate: { duration: 80 + i * 20, repeat: Infinity, ease: "linear" },
+            scale: { duration: 10, repeat: Infinity, ease: "easeInOut" }
+          }}
         />
       ))}
 
-      {/* ── Dashed spinning ring ── */}
-      <motion.div
-        className="absolute rounded-full pointer-events-none"
-        style={{
-          width: 460,
-          height: 460,
-          border: "1.5px dashed rgba(20,51,201,0.12)",
-        }}
-        animate={{ rotate: -360 }}
-        transition={{ duration: ORBIT_DURATION, repeat: Infinity, ease: "linear" }}
-      />
-
-      {/* ── Glowing orbit dots ── */}
-      {[0, 90, 180, 270].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const r = 230;
-        const x = r * Math.cos(rad);
-        const y = r * Math.sin(rad);
-        return (
-          <motion.div
-            key={`dot-${i}`}
-            className="absolute w-2 h-2 rounded-full bg-blue-infositel pointer-events-none"
-            style={{ left: `calc(50% + ${x}px - 4px)`, top: `calc(50% + ${y}px - 4px)` }}
-            animate={{ scale: [1, 1.8, 1], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
-          />
-        );
-      })}
-
-      {/* ── CENTER: INFOSISTEL logo badge ── */}
+      {/* CENTER: INFOSISTEL logo badge */}
       <motion.div
         className="absolute z-20 flex flex-col items-center gap-3"
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       >
-        {/* Outer glow ring */}
         <div className="relative">
           <motion.div
-            className="absolute -inset-3 rounded-[2rem] bg-blue-infositel/20 blur-xl"
-            animate={{ opacity: [0.4, 0.9, 0.4], scale: [1, 1.1, 1] }}
-            transition={{ duration: 3, repeat: Infinity }}
+            className="absolute -inset-6 rounded-[2.5rem] bg-blue-infositel/10 blur-2xl"
+            animate={{ opacity: [0.3, 0.6, 0.3], scale: [0.8, 1.2, 0.8] }}
+            transition={{ duration: 4, repeat: Infinity }}
           />
-          <motion.div
-            className="relative w-20 h-20 bg-blue-infositel rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-blue-500/60"
-            animate={{ rotate: [0, 10, 0, -10, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            style={{ rotate: 6 }}
-          >
-            <Zap size={36} className="text-white fill-white" style={{ rotate: "-6deg" }} />
-          </motion.div>
+          <div className="relative w-24 h-24 bg-gradient-to-br from-blue-infositel to-blue-700 rounded-[2rem] flex items-center justify-center shadow-[0_20px_50px_rgba(20,51,201,0.4)]">
+            <Zap size={42} className="text-white fill-white animate-pulse" />
+          </div>
         </div>
         <div className="text-center">
-          <span className="block text-[9px] font-black text-blue-infositel tracking-[0.5em] uppercase">
-            INFO
-          </span>
-          <span className="block text-[9px] font-black text-black tracking-[0.4em] uppercase">
-            SISTEL
-          </span>
+          <span className="block text-[10px] font-black text-blue-infositel tracking-[0.6em] uppercase">INFOSISTEL</span>
+          <span className="block text-[8px] font-bold text-gray-400 tracking-[0.4em] uppercase mt-1">Innovation Hub</span>
         </div>
       </motion.div>
 
-      {/* ── ORBITING PRODUCT CARDS ── */}
-      {SHOWCASE_PRODUCTS.map((product, i) => {
-        const baseAngle = i * 90; // 0, 90, 180, 270 degrees
+      {/* DYNAMIC ORBITING PRODUCT CARDS */}
+      {products.map((product, i) => {
+        const step = 360 / products.length;
+        const baseAngle = i * step;
+        
         return (
-          // Arm that rotates around center
           <motion.div
             key={product.id}
-            className="absolute inset-0 flex items-center justify-end"
+            className="absolute inset-0 flex items-center justify-end origin-center"
+            style={{ transformStyle: "preserve-3d" }}
             animate={{ rotate: [baseAngle, baseAngle + 360] }}
             transition={{
               duration: ORBIT_DURATION,
@@ -181,7 +116,6 @@ function OrbitalShowcase({
               repeat: Infinity,
             }}
           >
-            {/* Card counter-rotates to stay upright */}
             <motion.div
               animate={{ rotate: [-baseAngle, -(baseAngle + 360)] }}
               transition={{
@@ -189,45 +123,29 @@ function OrbitalShowcase({
                 ease: "linear",
                 repeat: Infinity,
               }}
-              whileHover={{ scale: 1.12 }}
+              whileHover={{ 
+                scale: 1.15,
+                zIndex: 50,
+              }}
               onClick={() => onSelect(product)}
-              className="
-                group relative w-36 h-36 mr-6
-                bg-white rounded-[2rem]
-                border border-gray-100 hover:border-blue-infositel/40
-                shadow-[0_10px_40px_rgba(0,0,0,0.06)]
-                hover:shadow-[0_20px_60px_rgba(20,51,201,0.20)]
-                transition-shadow duration-300
-                cursor-pointer overflow-hidden
-                flex flex-col items-center justify-center p-3
-              "
+              className="group relative w-36 h-36 mr-4 cursor-pointer"
             >
-              {/* Blue glow behind image */}
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                animate={{ opacity: [0.1, 0.35, 0.1] }}
-                transition={{ duration: 3, repeat: Infinity, delay: i * 0.7 }}
-              >
-                <div className="w-20 h-20 rounded-full bg-blue-infositel/15 blur-2xl" />
-              </motion.div>
-
-              {/* Product image */}
-              <div className="relative w-20 h-20 z-10">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-contain drop-shadow-[0_8px_20px_rgba(20,51,201,0.2)] group-hover:drop-shadow-[0_12px_30px_rgba(20,51,201,0.35)] transition-all duration-300"
-                />
+              <div className="
+                relative w-full h-full p-4
+                bg-white/90 backdrop-blur-md rounded-[2.2rem]
+                border border-white/50 shadow-[0_15px_35px_rgba(0,0,0,0.05)]
+                group-hover:shadow-[0_25px_50px_rgba(20,51,201,0.15)]
+                group-hover:border-blue-infositel/30 transition-all duration-500
+                flex flex-col items-center justify-center overflow-hidden
+              ">
+                <div className="relative w-20 h-20 z-10 transition-transform duration-500 group-hover:scale-110">
+                  <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.1)]" />
+                </div>
+                <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 bg-gradient-to-t from-white via-white/80 to-transparent">
+                  <span className="block text-[8px] font-black text-blue-infositel tracking-widest uppercase truncate">{product.category}</span>
+                  <p className="text-[9px] font-bold text-gray-800 truncate px-1">{product.name}</p>
+                </div>
               </div>
-
-              {/* Category label */}
-              <span className="relative z-10 mt-2 text-[8px] font-black text-blue-infositel tracking-[0.25em] uppercase leading-none text-center">
-                {product.category}
-              </span>
-
-              {/* Hover shimmer */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
             </motion.div>
           </motion.div>
         );
@@ -237,8 +155,18 @@ function OrbitalShowcase({
 }
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      const all = await getProducts();
+      // Mostramos máximo 10 para no saturar el círculo orbital
+      setProducts(all.slice(0, 10));
+    }
+    load();
+  }, []);
 
   const handleSelectProduct = (p: Product) => {
     setSelectedProduct(p);
@@ -246,7 +174,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen">
       <Hero />
 
       <InstantCheckout
@@ -255,16 +183,12 @@ export default function Home() {
         onClose={() => setIsModalOpen(false)}
       />
 
-      {/* ── OFFER TOAST NOTIFICATION ── */}
       <OfferToast onSelect={handleSelectProduct} />
 
       <Services />
 
-      {/* ══════════════════════════════════════════════════════
-           ORBITAL PRODUCT SHOWCASE
-      ══════════════════════════════════════════════════════ */}
+      {/* ── ORBITAL PRODUCT SHOWCASE ── */}
       <section className="relative py-24 bg-white overflow-hidden">
-        {/* Subtle background grid */}
         <div
           className="absolute inset-0 opacity-[0.025] pointer-events-none"
           style={{
@@ -274,20 +198,8 @@ export default function Home() {
           }}
         />
 
-        {/* Radial glow center-right */}
-        <div
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(20,51,201,0.06) 0%, transparent 70%)",
-          }}
-        />
-
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* ── Desktop: 2-col layout ── */}
           <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-
-            {/* ── LEFT: Text + CTA ── */}
             <div className="flex-1 space-y-10 text-center lg:text-left max-w-lg">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -328,7 +240,6 @@ export default function Home() {
                 Hardware premium seleccionado para la excelencia. Cada producto, una experiencia única.
               </motion.p>
 
-              {/* Stats */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -340,13 +251,11 @@ export default function Home() {
                   { value: "500+", label: "Clientes", icon: Star },
                   { value: "100%", label: "Garantía", icon: Zap },
                   { value: "5 años", label: "Experiencia", icon: Clock },
-                ].map((stat, i) => (
+                ].map((stat) => (
                   <div key={stat.label} className="text-center">
                     <stat.icon className="text-blue-infositel mx-auto mb-1 opacity-50" size={16} />
                     <div className="text-2xl font-black text-black">{stat.value}</div>
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">
-                      {stat.label}
-                    </div>
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">{stat.label}</div>
                   </div>
                 ))}
               </motion.div>
@@ -370,7 +279,6 @@ export default function Home() {
               </motion.div>
             </div>
 
-            {/* ── RIGHT: Orbital display (desktop only) ── */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -378,13 +286,12 @@ export default function Home() {
               transition={{ duration: 1, ease: [0.2, 0.65, 0.3, 0.9] }}
               className="hidden lg:flex items-center justify-center"
             >
-              <OrbitalShowcase onSelect={handleSelectProduct} />
+              <OrbitalShowcase products={products} onSelect={handleSelectProduct} />
             </motion.div>
           </div>
 
-          {/* ── Mobile: 2x2 product grid (no price, no cart) ── */}
           <div className="lg:hidden grid grid-cols-2 gap-4 mt-16">
-            {SHOWCASE_PRODUCTS.map((product, i) => (
+            {products.map((product, i) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -394,33 +301,17 @@ export default function Home() {
                 onClick={() => handleSelectProduct(product)}
                 className="group relative bg-white rounded-[2rem] border border-gray-100 hover:border-blue-infositel/30 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer overflow-hidden p-5 flex flex-col items-center text-center"
               >
-                {/* Category */}
-                <span className="text-[9px] font-black text-blue-infositel tracking-[0.3em] uppercase mb-3 block">
-                  {product.category}
-                </span>
-
-                {/* Image */}
+                <span className="text-[9px] font-black text-blue-infositel tracking-[0.3em] uppercase mb-3 block">{product.category}</span>
                 <div className="relative w-28 h-28">
                   <motion.div
                     animate={{ y: [0, -6, 0] }}
                     transition={{ duration: 3, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
                     className="relative w-full h-full"
                   >
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-contain drop-shadow-[0_10px_25px_rgba(20,51,201,0.15)] group-hover:drop-shadow-[0_15px_35px_rgba(20,51,201,0.3)] transition-all duration-300"
-                    />
+                    <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-[0_10px_25px_rgba(20,51,201,0.15)] group-hover:drop-shadow-[0_15px_35px_rgba(20,51,201,0.3)] transition-all duration-300" />
                   </motion.div>
                 </div>
-
-                {/* Name */}
-                <h3 className="text-sm font-black text-black group-hover:text-blue-infositel transition-colors mt-3 leading-tight">
-                  {product.name}
-                </h3>
-
-                {/* Bottom bar */}
+                <h3 className="text-sm font-black text-black group-hover:text-blue-infositel transition-colors mt-3 leading-tight">{product.name}</h3>
                 <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-blue-infositel to-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
               </motion.div>
             ))}
@@ -428,10 +319,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── OFFERS SECTION ── */}
       <OffersSection onSelect={handleSelectProduct} />
 
-      {/* ── REPAIR TRACKING SECTION ── */}
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-4 text-center space-y-8">
           <motion.div
@@ -442,44 +331,24 @@ export default function Home() {
           >
             <Clock className="text-blue-infositel" size={48} />
           </motion.div>
-
-          <RevealText
-            text="¿Dejaste tu equipo?"
-            className="text-4xl md:text-5xl font-black text-black"
-          />
-
-          <p className="text-gray-400 text-lg font-medium">
-            Haz seguimiento al estado de tu reparación en tiempo real. Solo necesitas tu DNI o el
-            código que te entregamos.
-          </p>
-
-          <Link
-            href="/rastreo"
-            className="group relative inline-flex items-center justify-center border-2 border-blue-infositel/20 px-12 py-5 rounded-2xl font-black text-blue-infositel overflow-hidden transition-all hover:border-blue-infositel"
-          >
-            <span className="relative z-10 transition-opacity duration-300 group-hover:opacity-0">
-              Rastrear Mi Equipo
-            </span>
+          <RevealText text="¿Dejaste tu equipo?" className="text-4xl md:text-5xl font-black text-black" />
+          <p className="text-gray-400 text-lg font-medium">Haz seguimiento al estado de tu reparación en tiempo real. Solo necesitas tu DNI o el código que te entregamos.</p>
+          <Link href="/rastreo" className="group relative inline-flex items-center justify-center border-2 border-blue-infositel/20 px-12 py-5 rounded-2xl font-black text-blue-infositel overflow-hidden transition-all hover:border-blue-infositel">
+            <span className="relative z-10 transition-opacity duration-300 group-hover:opacity-0">Rastrear Mi Equipo</span>
             <div className="absolute inset-0 bg-blue-infositel translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-black z-20">
-              Rastrear Mi Equipo
-            </span>
+            <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-black z-20">Rastrear Mi Equipo</span>
           </Link>
         </div>
       </section>
 
-      {/* ── CONTACT SECTION ── */}
       <section id="contacto" className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-[4rem] p-8 md:p-16 shadow-sm border border-gray-100">
             <div className="space-y-12">
               <RevealText text="Visítanos en Huancayo" className="text-5xl font-black" />
-
               <div className="grid gap-10">
                 <div className="flex items-start space-x-8">
-                  <div className="p-5 bg-blue-50 rounded-[1.5rem] shrink-0">
-                    <MapPin className="text-blue-infositel" size={28} />
-                  </div>
+                  <div className="p-5 bg-blue-50 rounded-[1.5rem] shrink-0"><MapPin className="text-blue-infositel" size={28} /></div>
                   <div>
                     <h4 className="font-black text-xl mb-1">Dirección</h4>
                     <div className="text-gray-500 text-lg space-y-1">
@@ -488,48 +357,27 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-
                 <div className="flex items-start space-x-8">
-                  <div className="p-5 bg-green-50 rounded-[1.5rem] shrink-0">
-                    <Phone className="text-green-600" size={28} />
-                  </div>
+                  <div className="p-5 bg-green-50 rounded-[1.5rem] shrink-0"><Phone className="text-green-600" size={28} /></div>
                   <div>
                     <h4 className="font-black text-xl mb-1">Teléfono / WhatsApp</h4>
                     <p className="text-gray-500 font-black text-xl">+51 964 648 202</p>
                   </div>
                 </div>
-
                 <div className="flex items-start space-x-8">
-                  <div className="p-5 bg-gray-50 rounded-[1.5rem] shrink-0">
-                    <Clock className="text-gray-600" size={28} />
-                  </div>
+                  <div className="p-5 bg-gray-50 rounded-[1.5rem] shrink-0"><Clock className="text-gray-600" size={28} /></div>
                   <div>
                     <h4 className="font-black text-xl mb-1">Horario de Atención</h4>
                     <p className="text-gray-500 text-lg">Lunes a Sábado: 9:00 AM - 7:00 PM</p>
                   </div>
                 </div>
               </div>
-
               <div className="pt-8">
-                <a
-                  href="https://www.google.com/maps/search/?api=1&query=Av.+Giraldez+274+Huancayo"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="bg-blue-infositel text-white px-10 py-5 rounded-[1.5rem] font-black inline-block hover:scale-110 active:scale-95 transition-transform shadow-xl shadow-blue-500/20"
-                >
-                  Cómo llegar en Google Maps
-                </a>
+                <a href="https://www.google.com/maps/search/?api=1&query=Av.+Giraldez+274+Huancayo" target="_blank" rel="noreferrer" className="bg-blue-infositel text-white px-10 py-5 rounded-[1.5rem] font-black inline-block hover:scale-110 active:scale-95 transition-transform shadow-xl shadow-blue-500/20">Cómo llegar en Google Maps</a>
               </div>
             </div>
-
             <div className="min-h-[500px] rounded-[3rem] overflow-hidden border-[12px] border-gray-50 shadow-inner bg-gray-100 relative">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15606.884545237736!2d-75.2109!3d-12.0667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x910e96497f1f33f1%3A0xe7a5c7f8a3d13c7a!2sAv.%20Giraldez%20274%2C%20Huancayo%2012001!5e0!3m2!1ses!2spe!4v1712910000000!5m2!1ses!2spe"
-                className="absolute inset-0 w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-1000"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15606.884545237736!2d-75.2109!3d-12.0667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x910e96497f1f33f1%3A0xe7a5c7f8a3d13c7a!2sAv.%20Giraldez%20274%2C%20Huancayo%2012001!5e0!3m2!1ses!2spe!4v1712910000000!5m2!1ses!2spe" className="absolute inset-0 w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-1000" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
             </div>
           </div>
         </div>
