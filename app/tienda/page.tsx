@@ -237,7 +237,7 @@ export default function StorePage() {
                       {p.name}
                     </h3>
                   </div>
-                  <p className="text-gray-400 text-sm line-clamp-2 my-4">{p.description}</p>
+                  <p className="text-gray-400 text-sm line-clamp-5 my-4">{p.description}</p>
                   
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex flex-col">
