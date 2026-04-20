@@ -20,9 +20,12 @@ interface Product {
   price: number;
   stock: number;
   image: string;
-  onSale?: boolean;
-  salePrice?: number;
-  isFeatured?: boolean;
+  onSale: boolean;
+  salePrice: number | null;
+  isFeatured: boolean;
+  costPrice?: number | null;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 // ── Helper to reveal text with blur/y-axis animation ──
