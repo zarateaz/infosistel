@@ -5,17 +5,8 @@ import Image from "next/image";
 import { X, MessageCircle, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  price: number;
-  stock: number;
-  image: string;
-  onSale?: boolean;
-  salePrice?: number;
-}
+import { Product } from "@/types";
+
 
 export default function InstantCheckout({
   product,

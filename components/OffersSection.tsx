@@ -7,17 +7,8 @@ import { ArrowRight, ShoppingBag } from "lucide-react";
 import { useState, useEffect } from "react";
 import ImageFrame from "@/components/ImageFrame";
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  price: number;
-  stock: number;
-  image: string;
-  onSale?: boolean;
-  salePrice?: number;
-}
+import { Product } from "@/types";
+
 
 // Ofertas fallback — se muestran si no hay productos en oferta en la DB
 const FALLBACK_OFFERS: Product[] = [

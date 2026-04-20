@@ -12,21 +12,8 @@ import { ArrowRight, Clock, Phone, Zap, Star, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getProducts } from "./admin/actions";
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  price: number;
-  stock: number;
-  image: string;
-  onSale: boolean;
-  salePrice: number | null;
-  isFeatured: boolean;
-  costPrice?: number | null;
-  createdAt?: any;
-  updatedAt?: any;
-}
+import { Product } from "@/types";
+
 
 // ── Helper to reveal text with blur/y-axis animation ──
 function RevealText({ text, className }: { text: string; className?: string }) {

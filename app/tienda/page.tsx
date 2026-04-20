@@ -7,16 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import PageBg from "@/components/PageBg";
 import ImageFrame from "@/components/ImageFrame";
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  price: number;
-  stock: number;
-  image: string;
-  isFeatured?: boolean;
-}
+import { Product } from "@/types";
+
 
 const DEFAULT_PRODUCTS: Product[] = [
   {
