@@ -237,7 +237,30 @@ export default function StorePage() {
                       {p.name}
                     </h3>
                   </div>
-                  <p className="text-gray-400 text-sm line-clamp-5 my-4">{p.description}</p>
+                  {/* 💎 Refined Feature List / Description */}
+                  <div className="my-5 min-h-[90px] flex flex-col justify-start">
+                    {p.description.includes("*") || p.description.includes("\n") ? (
+                      <ul className="space-y-2">
+                        {p.description.split(/[\*\n]/).filter(t => t.trim().length > 2).slice(0, 4).map((text, i) => (
+                          <motion.li 
+                            key={i}
+                            initial={{ opacity: 0, x: -10 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 + (i * 0.1) }}
+                            className="flex items-start gap-2.5 text-[11px] leading-relaxed font-semibold text-slate-600/90 group/item"
+                          >
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-infositel shadow-[0_0_8px_rgba(20,51,201,0.4)] shrink-0 transition-transform group-hover/item:scale-125" />
+                            <span className="group-hover/item:text-blue-infositel transition-colors">{text.trim()}</span>
+                          </motion.li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-slate-500 text-[13px] leading-relaxed font-medium italic border-l-2 border-blue-infositel/10 pl-4 py-1">
+                        {p.description}
+                      </p>
+                    )}
+                  </div>
                   
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex flex-col">
