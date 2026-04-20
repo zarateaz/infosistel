@@ -196,7 +196,7 @@ export default function StorePage() {
                   }}
                   transition={{ duration: 0.6 }}
                   key={p.id}
-                  className={`group bg-white rounded-3xl p-6 transition-all duration-500 ${p.isFeatured ? 'shadow-[0_20px_60px_rgba(20,51,201,0.12)] z-10' : 'hover:shadow-[0_30px_80px_rgba(20,51,201,0.08)]'}`}
+                  className={`group bg-white rounded-3xl p-6 flex flex-col transition-all duration-500 ${p.isFeatured ? 'shadow-[0_20px_60px_rgba(20,51,201,0.12)] z-10' : 'hover:shadow-[0_30px_80px_rgba(20,51,201,0.08)]'}`}
                 >
                   {/* Image zone — no borders, pure glow */}
                   <div className="relative h-56 w-full rounded-2xl mb-6 overflow-hidden">
