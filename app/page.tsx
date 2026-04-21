@@ -151,12 +151,67 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const all = await getProducts();
-      // Mostramos máximo 10 para no saturar el círculo orbital
-      setProducts(all.slice(0, 10));
+      const all: Product[] = await getProducts();
+      if (!all || all.length === 0) return;
+
+      // ── LOGICA DE SELECCION INTELIGENTE Y ROTATIVA ──
+      // 1. Generar semilla basada en la hora actual del servidor
+      const hourSeed = Math.floor(Date.now() / (1000 * 60 * 60));
+      
+      // Función determinista para barajar basada en seed
+      const seededShuffle = (arr: any[], seed: number) => {
+        let m = arr.length, t, i;
+        const random = () => {
+          const x = Math.sin(seed++) * 10000;
+          return x - Math.floor(x);
+        };
+        while (m) {
+          i = Math.floor(random() * m--);
+          t = arr[m];
+          arr[m] = arr[i];
+          arr[i] = t;
+        }
+        return arr;
+      };
+
+      // 2. Agrupar por categorías
+      const byCategory: Record<string, Product[]> = {};
+      all.forEach(p => {
+        if (!byCategory[p.category]) byCategory[p.category] = [];
+        byCategory[p.category].push(p);
+      });
+
+      const categories = Object.keys(byCategory).sort();
+      let selected: Product[] = [];
+      let usedIds = new Set<string>();
+
+      // 3. Seleccionar al menos uno de cada categoría (si hay espacio)
+      categories.forEach((cat, idx) => {
+        const catProducts = byCategory[cat];
+        // Elegir uno determinísticamente basado en la hora
+        const pickIndex = (hourSeed + idx) % catProducts.length;
+        const picked = catProducts[pickIndex];
+        if (picked && selected.length < 10) {
+          selected.push(picked);
+          usedIds.add(picked.id);
+        }
+      });
+
+      // 4. Rellenar hasta 10 con el resto de productos (barajados por la hora)
+      if (selected.length < 10) {
+        const remaining = all.filter(p => !usedIds.has(p.id));
+        const shuffledRemaining = seededShuffle([...remaining], hourSeed);
+        const fillers = shuffledRemaining.slice(0, 10 - selected.length);
+        selected = [...selected, ...fillers];
+      }
+
+      // 5. Barajar el resultado final para que el orden en el círculo también rote
+      const finalShowcase = seededShuffle([...selected], hourSeed);
+      setProducts(finalShowcase);
     }
     load();
   }, []);
+
 
   const handleSelectProduct = (p: Product) => {
     setSelectedProduct(p);

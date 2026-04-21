@@ -38,8 +38,11 @@ DATABASE_URL="file:/home/angel/infosistel/prisma/dev.db" npx prisma db push --ac
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
-rm -rf .next
+# NUCLEAR CLEANUP: Eliminar rastro de builds anteriores y asegurar permisos
+sudo rm -rf .next
+sudo chown -R zarate:zarate .
 npm run build
+
 
 echo "✅ Build completado"
 
