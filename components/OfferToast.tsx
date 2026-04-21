@@ -29,8 +29,10 @@ export default function OfferToast({
         salePrice: 250,
         stock: 5,
         onSale: true,
+        isFeatured: false,
         image: "/img/cooler.png",
       };
+
 
       try {
         const res = await fetch("/api/products", { cache: "no-store" });

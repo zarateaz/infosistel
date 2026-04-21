@@ -19,7 +19,9 @@ const DEFAULT_PRODUCTS: Product[] = [
     price: 490,
     stock: 10,
     image: "/img/producto3mouse.webp",
-    isFeatured: true
+    isFeatured: true,
+    onSale: false,
+    salePrice: null
   },
   {
     id: "2",
@@ -29,7 +31,9 @@ const DEFAULT_PRODUCTS: Product[] = [
     price: 380,
     stock: 8,
     image: "/img/producto5teclado.webp",
-    isFeatured: true
+    isFeatured: true,
+    onSale: false,
+    salePrice: null
   },
   {
     id: "3",
@@ -39,9 +43,12 @@ const DEFAULT_PRODUCTS: Product[] = [
     price: 8900,
     stock: 3,
     image: "/img/fondo4laptop.webp",
-    isFeatured: true
+    isFeatured: true,
+    onSale: false,
+    salePrice: null
   },
 ];
+
 
 const DEFAULT_CATEGORIES = ["Todos", "Mouse", "Teclado", "Monitores", "Laptops", "SSD", "Cables"];
 

@@ -21,6 +21,7 @@ const FALLBACK_OFFERS: Product[] = [
     salePrice: 250,
     stock: 5,
     onSale: true,
+    isFeatured: false,
     image: "/img/cooler.png",
   },
   {
@@ -32,6 +33,7 @@ const FALLBACK_OFFERS: Product[] = [
     salePrice: 180,
     stock: 8,
     onSale: true,
+    isFeatured: false,
     image: "/img/mouse.png",
   },
   {
@@ -43,9 +45,11 @@ const FALLBACK_OFFERS: Product[] = [
     salePrice: 320,
     stock: 6,
     onSale: true,
+    isFeatured: false,
     image: "/img/teclado.png",
   },
 ];
+
 
 export default function OffersSection({
   onSelect,
