@@ -44,7 +44,7 @@ function OrbitalShowcase({
   products: Product[];
   onSelect: (p: Product) => void;
 }) {
-  const ORBIT_DURATION = 35; 
+  const ORBIT_DURATION = 35;
 
   if (products.length === 0) return null;
 
@@ -56,11 +56,11 @@ function OrbitalShowcase({
           key={size}
           className="absolute rounded-full border border-blue-infositel/10 pointer-events-none"
           style={{ width: size, height: size }}
-          animate={{ 
+          animate={{
             rotate: i % 2 === 0 ? 360 : -360,
             scale: [1, 1.05, 1],
           }}
-          transition={{ 
+          transition={{
             rotate: { duration: 80 + i * 20, repeat: Infinity, ease: "linear" },
             scale: { duration: 10, repeat: Infinity, ease: "easeInOut" }
           }}
@@ -85,7 +85,7 @@ function OrbitalShowcase({
         </div>
         <div className="text-center">
           <span className="block text-[10px] font-black text-blue-infositel tracking-[0.6em] uppercase">INFOSISTEL</span>
-          <span className="block text-[8px] font-bold text-gray-400 tracking-[0.4em] uppercase mt-1">Innovation Hub</span>
+          <span className="block text-[8px] font-bold text-gray-400 tracking-[0.4em] uppercase mt-1"></span>
         </div>
       </motion.div>
 
@@ -93,7 +93,7 @@ function OrbitalShowcase({
       {products.map((product, i) => {
         const step = 360 / products.length;
         const baseAngle = i * step;
-        
+
         return (
           <motion.div
             key={product.id}
@@ -113,7 +113,7 @@ function OrbitalShowcase({
                 ease: "linear",
                 repeat: Infinity,
               }}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.15,
                 zIndex: 50,
               }}
@@ -157,7 +157,7 @@ export default function Home() {
       // ── LOGICA DE SELECCION INTELIGENTE Y ROTATIVA ──
       // 1. Generar semilla basada en la hora actual del servidor
       const hourSeed = Math.floor(Date.now() / (1000 * 60 * 60));
-      
+
       // Función determinista para barajar basada en seed
       const seededShuffle = (arr: any[], seed: number) => {
         let m = arr.length, t, i;
