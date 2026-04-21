@@ -9,7 +9,8 @@ interface ImageFrameProps {
   badgeText?: string;
 }
 
-export default function ImageFrame({ children, className = "", badgeText = "PRO SERIES" }: ImageFrameProps) {
+export default function ImageFrame({ children, className = "", badgeText }: ImageFrameProps) {
+
   return (
     <div className={`relative group ${className}`}>
       {/* ── Outer Professional Borders ── */}
@@ -22,14 +23,16 @@ export default function ImageFrame({ children, className = "", badgeText = "PRO 
       <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-infositel rounded-br-[inherit] z-20 pointer-events-none shadow-[0_0_15px_rgba(20,51,201,0.4)]" />
 
       {/* ── Watermark Mask (Top Left Badge) ── */}
-      <div className="absolute top-3 left-3 z-30 pointer-events-none">
-        <div className="flex items-center gap-2 bg-blue-infositel/90 backdrop-blur-md px-3 py-1 rounded-md border border-white/20 shadow-lg">
-          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-          <span className="text-[8px] font-black text-white tracking-[0.2em] uppercase">
-            {badgeText}
-          </span>
+      {badgeText && (
+        <div className="absolute top-3 left-3 z-30 pointer-events-none">
+          <div className="flex items-center gap-2 bg-blue-infositel/90 backdrop-blur-md px-3 py-1 rounded-md border border-white/20 shadow-lg">
+            <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            <span className="text-[8px] font-black text-white tracking-[0.2em] uppercase">
+              {badgeText}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Scanline Effect (Only on Hover) ── */}
       <motion.div 

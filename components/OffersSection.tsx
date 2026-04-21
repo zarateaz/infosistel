@@ -187,7 +187,8 @@ export default function OffersSection({
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <ImageFrame className="w-full h-full rounded-[2rem]" badgeText="LIMITED">
+                    <ImageFrame className="w-full h-full rounded-[2rem]">
+
                       <Image
                         src={product.image}
                         alt={product.name}
