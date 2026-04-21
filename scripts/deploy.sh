@@ -5,9 +5,14 @@
 # ═══════════════════════════════════════════════════════
 set -e
 
-APP_DIR="/home/angel/infosistel"
+# ── Identificar el directorio de la app dinámicamente ──
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="$(dirname "$SCRIPT_DIR")"
 PM2_NAME="infosistel"
 NGINX_CONF="/etc/nginx/conf.d/infosistel.conf"
+
+echo "Detected APP_DIR: $APP_DIR"
+
 
 echo ""
 echo "╔════════════════════════════════════════╗"
@@ -44,7 +49,14 @@ echo "✅ Assets copiados"
 
 # ── 6. Actualizar Nginx ──
 echo "🌐 [6/7] Actualizando configuración de Nginx..."
-sudo cp "$APP_DIR/nginx.conf" "$NGINX_CONF"
+
+# Crear una versión temporal de nginx.conf con las rutas correctas para este VPS
+TEMP_NGINX="/tmp/infosistel_nginx.conf"
+sed "s|/home/angel/infosistel|$APP_DIR|g" "$APP_DIR/nginx.conf" > "$TEMP_NGINX"
+
+sudo cp "$TEMP_NGINX" "$NGINX_CONF"
+rm "$TEMP_NGINX"
+
 
 # Verificar que la config sea válida antes de recargar
 if sudo nginx -t 2>/dev/null; then
