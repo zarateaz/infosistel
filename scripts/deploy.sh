@@ -38,7 +38,9 @@ DATABASE_URL="file:/home/angel/infosistel/prisma/dev.db" npx prisma db push --ac
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
+rm -rf .next
 npm run build
+
 echo "✅ Build completado"
 
 # ── 5. Copiar assets al standalone ──
