@@ -104,6 +104,10 @@ export default function AdminPage() {
       alert("Por favor, completa el nombre y selecciona una categoría ⚠️");
       return;
     }
+    if (isUploading) {
+      alert("Por favor espera a que la imagen termine de subirse... ⏳");
+      return;
+    }
     try {
       await addProductAction(newProduct);
       setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
@@ -199,10 +203,15 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
-      if (data.success) setNewProduct({ ...newProduct, image: data.url });
-      else alert(data.error || "Error al subir la imagen");
+      if (data.success) {
+        setNewProduct({ ...newProduct, image: data.url });
+      } else {
+        alert(data.error || "Error al subir la imagen");
+        setImagePreview(null); // Limpiar preview si falló
+      }
     } catch {
       alert("Error de conexión al subir imagen");
+      setImagePreview(null);
     } finally {
       setIsUploading(false);
     }

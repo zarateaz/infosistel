@@ -62,10 +62,9 @@ export async function POST(request: NextRequest) {
     const uniqueName = `${Date.now()}-${sanitizedName}`;
 
     // 5. Directorio de uploads — ruta absoluta segura para el VPS
-    // En standalone cwd() apunta a .next/standalone/, así que forzamos la ruta real.
-    const uploadDir = process.env.NODE_ENV === "production" 
+    const uploadDir = process.env.UPLOADS_DIR || (process.env.NODE_ENV === "production" 
       ? "/home/angel/infosistel/public/uploads"
-      : join(process.cwd(), "public", "uploads");
+      : join(process.cwd(), "public", "uploads"));
     
     console.log("[UPLOAD_API] Directorio de destino:", uploadDir);
     

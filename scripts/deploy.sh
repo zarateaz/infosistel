@@ -43,6 +43,11 @@ git config --global --add safe.directory "$APP_DIR" || true
 # NUCLEAR CLEANUP: Eliminar rastro de builds anteriores y asegurar permisos
 sudo rm -rf .next
 sudo chown -R $(whoami): .
+
+# Asegurar que el directorio de uploads exista y tenga permisos de escritura
+mkdir -p public/uploads
+chmod -R 777 public/uploads
+
 npm run build
 
 
