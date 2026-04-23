@@ -26,14 +26,19 @@ export async function getProducts() {
 
 export async function addProduct(data: any) {
   await ensureAuth();
+  
+  const price = parseFloat(data.price);
+  const costPrice = parseFloat(data.costPrice);
+  const stock = parseInt(data.stock);
+
   return prisma.product.create({
     data: {
       name: data.name,
       category: data.category,
       description: data.description,
-      price: parseFloat(data.price),
-      costPrice: data.costPrice ? parseFloat(data.costPrice) : 0,
-      stock: parseInt(data.stock),
+      price: isNaN(price) ? 0 : price,
+      costPrice: isNaN(costPrice) ? 0 : costPrice,
+      stock: isNaN(stock) ? 0 : stock,
       image: data.image || "/img/producto3mouse.webp",
       onSale: data.onSale || false,
       salePrice: data.salePrice ? parseFloat(data.salePrice) : null,
@@ -44,15 +49,20 @@ export async function addProduct(data: any) {
 
 export async function editProduct(id: string, data: any) {
   await ensureAuth();
+
+  const price = parseFloat(data.price);
+  const costPrice = parseFloat(data.costPrice);
+  const stock = parseInt(data.stock);
+
   return prisma.product.update({
     where: { id },
     data: {
       name: data.name,
       category: data.category,
       description: data.description,
-      price: parseFloat(data.price),
-      costPrice: data.costPrice ? parseFloat(data.costPrice) : 0,
-      stock: parseInt(data.stock),
+      price: isNaN(price) ? 0 : price,
+      costPrice: isNaN(costPrice) ? 0 : costPrice,
+      stock: isNaN(stock) ? 0 : stock,
       image: data.image,
       onSale: data.onSale || false,
       salePrice: data.salePrice ? parseFloat(data.salePrice) : null,
@@ -64,8 +74,17 @@ export async function editProduct(id: string, data: any) {
 export async function inlineUpdateProduct(id: string, data: any) {
   await ensureAuth();
   const updateData: any = {};
-  if (data.stock !== undefined) updateData.stock = parseInt(data.stock);
-  if (data.costPrice !== undefined) updateData.costPrice = parseFloat(data.costPrice);
+  
+  if (data.stock !== undefined) {
+    const stock = parseInt(data.stock);
+    updateData.stock = isNaN(stock) ? 0 : stock;
+  }
+  
+  if (data.costPrice !== undefined) {
+    const costPrice = parseFloat(data.costPrice);
+    updateData.costPrice = isNaN(costPrice) ? 0 : costPrice;
+  }
+
   if (Object.keys(updateData).length === 0) return;
   return prisma.product.update({
     where: { id },

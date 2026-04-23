@@ -98,18 +98,31 @@ export default function AdminPage() {
   };
 
   const addProduct = async () => {
-    if (!newProduct.name || !newProduct.category) return;
-    await addProductAction(newProduct);
-    setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
-    setImagePreview(null);
-    loadData();
+    if (!newProduct.name || !newProduct.category) {
+      alert("Por favor, completa el nombre y selecciona una categoría ⚠️");
+      return;
+    }
+    try {
+      await addProductAction(newProduct);
+      setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
+      setImagePreview(null);
+      loadData();
+      alert("¡Producto guardado con éxito! 🚀");
+    } catch (err: any) {
+      alert("Error al guardar producto: " + (err.message || "Error desconocido"));
+    }
   };
   const saveEditedProduct = async () => {
     if (!editingProduct) return;
-    await editProductAction(editingProduct.id, editingProduct);
-    setEditingProduct(null);
-    setImagePreview(null);
-    loadData();
+    try {
+      await editProductAction(editingProduct.id, editingProduct);
+      setEditingProduct(null);
+      setImagePreview(null);
+      loadData();
+      alert("¡Cambios guardados con éxito! ✅");
+    } catch (err: any) {
+      alert("Error al editar producto: " + (err.message || "Error desconocido"));
+    }
   };
   const removeProduct = async (id: string) => {
     await deleteProduct(id);
@@ -361,7 +374,6 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Image upload */}
                   <div className="relative h-32 w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center overflow-hidden transition-all bg-gray-50 hover:bg-gray-100 border-gray-200 mt-2">
                     {imagePreview ? (
                       <Image src={imagePreview} alt="Preview" fill className="object-contain p-2" />
@@ -369,13 +381,31 @@ export default function AdminPage() {
                        <Upload className="mx-auto text-gray-400" size={24} />
                     )}
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
+                      disabled={isUploading}
                       onChange={async (e) => {
                         const file = e.target.files?.[0]; if (!file) return;
+                        setIsUploading(true);
                         const formData = new FormData(); formData.append("file", file);
-                        const res = await fetch("/api/upload", { method: "POST", body: formData });
-                        const data = await res.json();
-                        if (data.success) { setEditingProduct({ ...editingProduct, image: data.url }); setImagePreview(data.url); }
+                        try {
+                          const res = await fetch("/api/upload", { method: "POST", body: formData });
+                          const data = await res.json();
+                          if (data.success) { 
+                            setEditingProduct({ ...editingProduct, image: data.url }); 
+                            setImagePreview(data.url); 
+                          } else {
+                            alert(data.error || "Error al subir la imagen");
+                          }
+                        } catch {
+                           alert("Error de conexión al subir imagen");
+                        } finally {
+                          setIsUploading(false);
+                        }
                       }} />
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                        <Loader2 className="animate-spin text-blue-infositel" size={24} />
+                      </div>
+                    )}
                   </div>
 
                   <button onClick={saveEditedProduct}
