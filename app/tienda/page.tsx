@@ -209,12 +209,8 @@ export default function StorePage() {
                     >
                       <div className={`w-32 h-32 rounded-full blur-[50px] ${p.isFeatured ? 'bg-blue-infositel/15' : 'bg-blue-infositel/5'}`} />
                     </motion.div>
-                    {p.isFeatured && (
-                      <div className="absolute top-4 left-4 z-20 bg-blue-infositel text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-blue-500/25">
-                        Pro Series
-                      </div>
-                    )}
-                    <ImageFrame className="w-full h-full rounded-2xl" badgeText={p.isFeatured ? "ELITE" : "PRO"}>
+                    
+                    <ImageFrame className="w-full h-full rounded-2xl">
                       <Image
                         src={p.image}
                         alt={p.name}
@@ -237,25 +233,28 @@ export default function StorePage() {
                     </h3>
                   </div>
                   {/* 💎 Refined Feature List / Description */}
-                  <div className="my-5 min-h-[90px] flex flex-col justify-start">
+                  <div className="my-5 min-h-[110px] flex flex-col justify-start relative group/desc">
                     {p.description.includes("*") || p.description.includes("\n") ? (
-                      <ul className="space-y-2">
-                        {p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2).slice(0, 4).map((text: string, i: number) => (
+                      <ul className="space-y-1.5">
+                        {p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2).slice(0, 3).map((text: string, i: number) => (
                           <motion.li 
                             key={i}
                             initial={{ opacity: 0, x: -10 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: 0.2 + (i * 0.1) }}
-                            className="flex items-start gap-2.5 text-[11px] leading-relaxed font-semibold text-slate-600/90 group/item"
+                            transition={{ delay: 0.1 + (i * 0.1) }}
+                            className="flex items-start gap-2 text-[10px] leading-relaxed font-bold text-slate-500 group/item"
                           >
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-infositel shadow-[0_0_8px_rgba(20,51,201,0.4)] shrink-0 transition-transform group-hover/item:scale-125" />
-                            <span className="group-hover/item:text-blue-infositel transition-colors">{text.trim()}</span>
+                            <span className="mt-1.5 w-1 h-1 rounded-full bg-blue-infositel/30 shrink-0" />
+                            <span className="truncate">{text.trim()}</span>
                           </motion.li>
                         ))}
+                        {p.description.split(/[\*\n]/).length > 3 && (
+                           <p className="text-[10px] font-black text-blue-infositel/40 mt-1 cursor-pointer hover:text-blue-infositel transition-colors">Ver más detalles...</p>
+                        )}
                       </ul>
                     ) : (
-                      <p className="text-slate-500 text-[13px] leading-relaxed font-medium italic border-l-2 border-blue-infositel/10 pl-4 py-1">
+                      <p className="text-slate-400 text-[11px] leading-relaxed font-medium line-clamp-3">
                         {p.description}
                       </p>
                     )}
