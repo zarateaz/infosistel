@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   User, Lock, LogOut, Plus, Trash2, Package, Tag, 
   Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
@@ -24,6 +24,7 @@ import {
 
 export default function AdminPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<"productos" | "categorias" | "reparaciones" | "usuarios" | "ventas" | "inventario">("productos");
 
 
@@ -969,20 +970,29 @@ export default function AdminPage() {
                   </div>
 
                   {/* Image upload */}
-                  <div className={`relative h-44 w-full border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center overflow-hidden
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                  />
+                  
+                  <div 
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                    className={`relative h-44 w-full border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center overflow-hidden
                     transition-all cursor-pointer ${isUploading ? 'bg-blue-50/50 border-blue-200' : 'bg-gray-50 hover:bg-gray-100 border-gray-200'}`}
-                    onClick={() => !isUploading && document.getElementById('image-input')?.click()}
                   >
                     {isUploading ? (
                       <div className="flex flex-col items-center gap-3">
                         <Loader2 className="animate-spin text-blue-infositel" size={32} />
-                        <p className="text-[10px] font-black text-blue-500 animate-pulse">PROCESANDO IMAGEN...</p>
+                        <p className="text-[10px] font-black text-blue-500 animate-pulse text-center">PROCESANDO<br/>IMAGEN...</p>
                       </div>
                     ) : imagePreview ? (
                       <div className="relative h-full w-full">
                         <Image src={imagePreview} alt="Preview" fill className="object-contain p-4" />
-                        <div className="absolute inset-x-0 bottom-0 bg-blue-infositel/90 backdrop-blur-sm p-2">
-                           <p className="text-white text-[9px] text-center font-black">LISTO ✅ (CLICK PARA CAMBIAR)</p>
+                        <div className="absolute inset-x-0 bottom-0 bg-blue-infositel/90 backdrop-blur-sm p-2 text-center">
+                           <p className="text-white text-[9px] font-black uppercase">Click para cambiar imagen ✅</p>
                         </div>
                       </div>
                     ) : (
@@ -990,11 +1000,9 @@ export default function AdminPage() {
                         <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center mx-auto">
                           <Upload className="text-gray-300" size={20} />
                         </div>
-                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Toca para subir foto</p>
+                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest text-center px-4">Toca para <br/> subir foto de producto</p>
                       </div>
                     )}
-                    <input id="image-input" type="file" accept="image/*" className="hidden"
-                      onChange={handleImageUpload} disabled={isUploading} />
                   </div>
 
                   <button 
