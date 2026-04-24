@@ -30,24 +30,31 @@ git fetch origin
 git reset --hard origin/main
 echo "✅ Código actualizado: $(git log --oneline -1)"
 
+# Asegurar que el directorio de datos existe
+mkdir -p data/uploads
+sudo chmod -R 777 data || true
+
 # ── 3. Preparar Base de Datos y Dependencias ──
 echo "📦 [3/7] Instalando dependencias y sincronizando Base de Datos..."
 npm install --production=false --silent
-DATABASE_URL="file:$APP_DIR/prisma/dev.db" npx prisma generate
 
-# ── 4. Build de producción ──
-echo "🔨 [4/7] Construyendo en producción..."
-git config --global --add safe.directory "$APP_DIR" || true
-rm -rf .next
+# Mover base de datos a ruta persistente si aún no está allí
+if [ ! -f "data/dev.db" ]; then
+    if [ -f "dev.db" ]; then
+        echo "📦 Migrando dev.db de raíz a data/dev.db..."
+        mv dev.db data/dev.db
+    elif [ -f "prisma/dev.db" ]; then
+        echo "📦 Migrando prisma/dev.db a data/dev.db..."
+        mv prisma/dev.db data/dev.db
+    else
+        echo "📦 Creando base de datos inicial..."
+        touch data/dev.db
+    fi
+fi
+sudo chmod 666 data/dev.db || true
 
-# Asegurar que los directorios padres permitan el paso (traversal) para otros usuarios (Nginx/PM2)
-sudo chmod 755 /home/zarate || true
-sudo chmod 755 "$APP_DIR" || true
-sudo chmod 755 "$APP_DIR/public" || true
-
-# Asegurar que el directorio de uploads persistente exista y sea accesible
-mkdir -p data/uploads
-sudo chmod -R 777 data/uploads || true
+# Generar Prisma Client usando la ruta persistente
+DATABASE_URL="file:$APP_DIR/data/dev.db" npx prisma generate
 
 # Crear enlace simbólico de public/uploads a data/uploads si no existe (para modo dev)
 if [ ! -L "public/uploads" ]; then
@@ -60,8 +67,9 @@ if [ ! -L "public/uploads" ]; then
     ln -s ../data/uploads public/uploads
 fi
 
-sudo chmod 777 prisma || true
-sudo chmod 666 prisma/dev.db || true
+
+sudo chmod 777 data || true
+sudo chmod 666 data/dev.db || true
 
 npm run build
 
@@ -71,15 +79,12 @@ echo "✅ Build completado"
 echo "📂 [5/7] Copiando assets al directorio standalone..."
 cp -r .next/static    .next/standalone/.next/static
 cp -r public/.        .next/standalone/public/
-mkdir -p .next/standalone/prisma
-
-# PREVENIR PÉRDIDA DE DATOS: Solo copiar DB local si la de producción no existe
-if [ ! -f ".next/standalone/prisma/dev.db" ]; then
-    echo "⚠️ Primera vez: Copiando base de datos inicial a standalone..."
-    cp prisma/dev.db .next/standalone/prisma/dev.db || true
-else
-    echo "✅ Base de datos de producción existente. SALVAGUARDADA (no se sobrescribirá)."
-fi
+# PREVENIR PÉRDIDA DE DATOS: Asegurar que standalone use la base de datos persistente
+mkdir -p .next/standalone/data
+# No copiamos, sino que vinculamos o simplemente dejamos que el env var DATABASE_URL mande
+# Pero para seguridad, aseguramos que el directorio exista en standalone
+ln -snf ../../../data/dev.db .next/standalone/data/dev.db || true
+echo "✅ Base de datos vinculada al standalone"
 
 # PREVENIR PÉRDIDA DE IMÁGENES Y ASEGURAR CARGA EN PUERTO 3000
 echo "🔄 Sincronizando y vinculando imágenes para máxima compatibilidad..."
