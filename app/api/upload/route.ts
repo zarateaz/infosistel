@@ -61,18 +61,9 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
     const uniqueName = `${Date.now()}-${sanitizedName}`;
 
-    // 5. Directorio de uploads — Determinar ruta según entorno
-    let uploadDir = join(process.cwd(), "public", "uploads");
-    
-    // Si existe el directorio 'data/uploads' (usado por Nginx en VPS), lo priorizamos
-    const dataUploadDir = join(process.cwd(), "data", "uploads");
-    try {
-      await access(dataUploadDir);
-      uploadDir = dataUploadDir;
-      console.log("[UPLOAD_API] Usando directorio persistente:", uploadDir);
-    } catch (e) {
-      console.log("[UPLOAD_API] Usando directorio público por defecto:", uploadDir);
-    }
+    // 5. Directorio de uploads — ruta absoluta
+    // Nota: En el VPS 'public/uploads' es un enlace simbólico a 'data/uploads'
+    const uploadDir = join(process.cwd(), "public", "uploads");
     
     try {
       await mkdir(uploadDir, { recursive: true });

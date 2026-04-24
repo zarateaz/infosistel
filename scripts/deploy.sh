@@ -45,9 +45,21 @@ sudo chmod 755 /home/zarate || true
 sudo chmod 755 "$APP_DIR" || true
 sudo chmod 755 "$APP_DIR/public" || true
 
-# Asegurar que el directorio de uploads persistente (fuera del build) exista y sea accesible
+# Asegurar que el directorio de uploads persistente exista y sea accesible
 mkdir -p data/uploads
 sudo chmod -R 777 data/uploads || true
+
+# Crear enlace simbólico de public/uploads a data/uploads si no existe (para modo dev)
+if [ ! -L "public/uploads" ]; then
+    echo "🔗 Creando enlace simbólico public/uploads -> data/uploads..."
+    # Si public/uploads es una carpeta real, mover contenidos primero
+    if [ -d "public/uploads" ]; then
+        cp -rn public/uploads/* data/uploads/ 2>/dev/null || true
+        rm -rf public/uploads
+    fi
+    ln -s ../data/uploads public/uploads
+fi
+
 sudo chmod 777 prisma || true
 sudo chmod 666 prisma/dev.db || true
 
@@ -69,12 +81,18 @@ else
     echo "✅ Base de datos de producción existente. SALVAGUARDADA (no se sobrescribirá)."
 fi
 
-# PREVENIR PÉRDIDA DE IMÁGENES: Sincronizar public/uploads con data/uploads (VPS persistence)
-if [ -d "public/uploads" ]; then
-    echo "🔄 Sincronizando imágenes de public/uploads a data/uploads..."
+# PREVENIR PÉRDIDA DE IMÁGENES Y ASEGURAR CARGA EN PUERTO 3000
+echo "🔄 Sincronizando y vinculando imágenes para máxima compatibilidad..."
+# 1. Sincronizar por si acaso quedaron archivos en el public original
+if [ -d "public/uploads" ] && [ ! -L "public/uploads" ]; then
     cp -rn public/uploads/* data/uploads/ 2>/dev/null || true
 fi
-echo "✅ Assets copiados y data salvaguardada"
+
+# 2. Vincular data/uploads dentro del standalone para que Next.js lo sirva en el puerto 3001/3000
+rm -rf .next/standalone/public/uploads
+ln -s ../../../data/uploads .next/standalone/public/uploads
+
+echo "✅ Enlaces simbólicos creados y data salvaguardada"
 
 # ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
 echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3001)..."
