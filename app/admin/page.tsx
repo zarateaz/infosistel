@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { 
   User, Lock, LogOut, Plus, Trash2, Package, Tag, 
-  ShoppingCart, CreditCard, Mail, Tag as OfferTag,
+  Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
+  ShoppingCart as CartIcon, CreditCard, Mail, Tag as OfferTag,
   CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3, 
-  Calculator, CalculatorIcon, Percent, TrendingUp, DollarSign, PieChart
+  Calculator, CalculatorIcon, Percent, TrendingUp, DollarSign, PieChart, ShoppingCart
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
