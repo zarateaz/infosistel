@@ -19,8 +19,6 @@ module.exports = {
         // 64 hex chars = 32 bytes para AES-256-GCM
         ENCRYPTION_KEY: "696e666f73697374656c2d656e63727970742d6b65792d333262797465733200",
         COOKIE_SECURE: "false",  // Cambiar a true SOLO después de instalar SSL
-        // Ruta absoluta para uploads — fuera de .next/standalone (sobrevive rebuilds)
-        UPLOADS_DIR: "/home/zarate/infosistel/public/uploads",
       }
     }
   ]

@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
        return NextResponse.json({ error: "Extensión de archivo no permitida" }, { status: 400 });
     }
 
-    // 3. Security check: Validate file size (max 10MB for product images)
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 10MB" }, { status: 400 });
+    // 3. Security check: Validate file size (max 100MB for product images)
+    if (file.size > 100 * 1024 * 1024) {
+      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 100MB" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -61,10 +61,8 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
     const uniqueName = `${Date.now()}-${sanitizedName}`;
 
-    // 5. Directorio de uploads — ruta absoluta segura para el VPS
-    const uploadDir = process.env.UPLOADS_DIR || (process.env.NODE_ENV === "production" 
-      ? "/home/zarate/infosistel/public/uploads"
-      : join(process.cwd(), "public", "uploads"));
+    // 5. Directorio de uploads — ruta relativa al proceso para máxima portabilidad
+    const uploadDir = process.env.UPLOADS_DIR || join(process.cwd(), "public", "uploads");
     
     console.log("[UPLOAD_API] Directorio de destino:", uploadDir);
     
