@@ -133,56 +133,54 @@ export default function StorePage() {
     <div className="bg-white min-h-screen relative overflow-hidden">
       <PageBg intensity={0.6} />
       {/* Header Store */}
-      <div className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-gray-100 py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <h1 className="text-4xl font-black mb-4">Catálogo de Productos</h1>
-          <p className="text-gray-500 max-w-2xl">
-            Encuentra los mejores repuestos y accesorios para tu computadora con la garantía y soporte de INFOSISTEL.
+      <div className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-gray-100 py-10">
+        <div className="w-full px-4 md:px-12">
+          <h1 className="text-3xl md:text-5xl font-black mb-3">Catálogo Pro</h1>
+          <p className="text-gray-400 max-w-2xl text-sm md:text-base font-medium">
+            Repuestos y accesorios premium con garantía total de INFOSISTEL.
           </p>
         </div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 flex flex-col lg:flex-row gap-8 sm:gap-12">
-        {/* Sidebar Filters */}
-        <div className="w-full lg:w-56 xl:w-64 space-y-6 sm:space-y-8">
-          <div>
-            <h3 className="text-lg font-black mb-4 flex items-center gap-2">
-              <Filter size={18} /> Categorías
-            </h3>
-            <div className="flex flex-wrap gap-2 lg:flex-col">
+      <div className="relative z-10 w-full px-4 md:px-12 py-8 flex flex-col gap-10">
+        {/* Horizontal Filters & Search */}
+        <div className="space-y-8">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="relative flex-1 max-w-2xl">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Buscar en el catálogo..."
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-gray-100 border rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-infositel focus:outline-none transition-all shadow-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+                 <Filter size={14} /> {filteredProducts.length} Productos
+              </div>
+           </div>
+
+           {/* Horizontal Pill Categories */}
+           <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 no-scrollbar mask-fade-right">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all text-left touch-manipulation ${
+                  className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all ${
                     activeCategory === cat
-                      ? "bg-blue-infositel text-white shadow-lg shadow-blue-500/20 scale-105"
-                      : "bg-gray-100 text-gray-600 active:bg-gray-200"
+                      ? "bg-blue-infositel text-white shadow-xl shadow-blue-500/30 scale-105"
+                      : "bg-white text-gray-500 border border-gray-100 hover:border-blue-infositel/20"
                   }`}
                 >
                   {cat}
                 </button>
               ))}
-            </div>
-          </div>
+           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 space-y-8">
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              className="w-full pl-12 pr-4 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-infositel focus:outline-none transition-all"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {/* Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+        {/* Product Grid - Full Screen Optimized */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
             <AnimatePresence mode="popLayout">
               {filteredProducts.map((p) => (
                 <motion.div
@@ -306,8 +304,8 @@ export default function StorePage() {
           </div>
 
           {filteredProducts.length === 0 && (
-            <div className="text-center py-20 bg-gray-50 rounded-[3rem]">
-              <p className="text-gray-400 font-bold text-lg">No se encontraron productos en esta categoría.</p>
+            <div className="text-center py-20 bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100">
+              <p className="text-gray-400 font-black text-xl italic">No hay productos en esta categoría...</p>
             </div>
           )}
         </div>
