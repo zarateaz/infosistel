@@ -102,9 +102,8 @@ const nextConfig = {
       : false,
   },
 
-  experimental: {
-    allowedDevOrigins: ["127.0.0.1", "localhost"],
-  },
+  // ── Development configuration ──
+  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.1.50"],
 };
 
 module.exports = nextConfig;
