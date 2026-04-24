@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { 
   User, Lock, LogOut, Plus, Trash2, Package, Tag, 
-  Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
-  ShoppingCart as CartIcon, CreditCard, Mail, Tag as OfferTag,
-  CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3, Calculator, CalculatorIcon, Percent
+  ShoppingCart, CreditCard, Mail, Tag as OfferTag,
+  CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3, 
+  Calculator, CalculatorIcon, Percent, TrendingUp, DollarSign, PieChart
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -17,7 +17,8 @@ import {
   getRepairs, addRepair as addRepairAction, updateRepairProgress as updateRepairProgressAction, deleteRepair,
   getOrders, deleteOrder as deleteOrderAction,
   getUsers, addUser as addUserAction, deleteUser,
-  toggleProductOffer, editProduct as editProductAction, inlineUpdateProduct as inlineUpdateProductAction
+  toggleProductOffer, editProduct as editProductAction, inlineUpdateProduct as inlineUpdateProductAction,
+  getSales, getSaleStats, addSaleAction, deleteSaleAction
 } from "./actions";
 
 export default function AdminPage() {
@@ -59,14 +60,17 @@ export default function AdminPage() {
 
   const [inventoryView, setInventoryView] = useState<"table" | "showcase">("table");
 
+  const [sales, setSales] = useState<any[]>([]);
+  const [saleStats, setStats] = useState<any>(null);
+  const [newSale, setNewSale] = useState({ pName: "", price: "", costPrice: "", quantity: 1, category: "", productId: "", subtractStock: true });
+
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
-    setProducts(await getProducts());
-    setCategories(await getCategories());
-    setRepairs(await getRepairs());
-    setAdminUsers(await getUsers());
-    setOrders(await getOrders());
+    const [p, c, r, u, o, s, st] = await Promise.all([
+      getProducts(), getCategories(), getRepairs(), getUsers(), getOrders(), getSales(), getSaleStats()
+    ]);
+    setProducts(p); setCategories(c); setRepairs(r); setAdminUsers(u); setOrders(o); setSales(s); setStats(st);
   };
 
   const handleLogout = async () => {
@@ -191,6 +195,60 @@ export default function AdminPage() {
     loadData();
   };
 
+  const handleAddSale = async () => {
+    if (!newSale.pName || !newSale.price) {
+      alert("⚠️ Completa nombre y precio de venta.");
+      return;
+    }
+    try {
+      await addSaleAction({
+        pName: newSale.pName,
+        price: parseFloat(newSale.price),
+        costPrice: parseFloat(newSale.costPrice || "0"),
+        quantity: newSale.quantity,
+        category: newSale.category,
+        productId: newSale.productId,
+        subtractStock: newSale.subtractStock
+      });
+      setNewSale({ pName: "", price: "", costPrice: "", quantity: 1, category: "", productId: "", subtractStock: true });
+      loadData();
+      alert("✅ Venta registrada y stock actualizado.");
+    } catch {
+      alert("❌ Error al registrar la venta.");
+    }
+  };
+
+  const removeSale = async (id: string) => {
+    await deleteSaleAction(id);
+    setConfirmDelete(null);
+    loadData();
+  };
+
+  const handleSelectProductForSale = (pId: string) => {
+    const p = products.find(x => x.id === pId);
+    if (p) {
+      setNewSale({ 
+        ...newSale, 
+        productId: p.id, 
+        pName: p.name, 
+        price: p.price.toString(), 
+        costPrice: (p.costPrice || 0).toString(),
+        category: p.category
+      });
+    }
+  };
+
+  const quickSale = (p: any) => {
+    setActiveTab("ventas");
+    handleSelectProductForSale(p.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const [expandedInventario, setExpandedInventario] = useState<string[]>([]);
+  const toggleInventario = (id: string) => {
+     setExpandedInventario(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -269,6 +327,7 @@ export default function AdminPage() {
                     if (confirmDelete.type === "repair") removeRepair(confirmDelete.id);
                     if (confirmDelete.type === "user") removeAdminUser(confirmDelete.id);
                     if (confirmDelete.type === "category") removeCategory(confirmDelete.id);
+                    if (confirmDelete.type === "sale") removeSale(confirmDelete.id);
                   }}
                   className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black hover:bg-red-600 transition-all"
                 >
@@ -690,6 +749,16 @@ export default function AdminPage() {
                            <div>
                              <p className="text-[10px] font-black text-blue-infositel uppercase tracking-[0.2em] mb-1">{p.category}</p>
                              <h4 className="text-lg font-black text-gray-800 leading-tight group-hover:text-blue-infositel transition-colors">{p.name}</h4>
+                             <div className="mt-2 relative">
+                               <p className={`text-[10px] text-gray-400 font-bold leading-relaxed ${expandedInventario.includes(p.id) ? '' : 'line-clamp-2'}`}>
+                                 {p.description}
+                               </p>
+                               {p.description.length > 50 && (
+                                  <button onClick={() => toggleInventario(p.id)} className="text-[9px] font-black text-blue-infositel/50 uppercase mt-1 hover:text-blue-infositel transition-colors">
+                                    {expandedInventario.includes(p.id) ? 'Ver menos' : 'Ver detalles +'}
+                                  </button>
+                               )}
+                            </div>
                            </div>
 
                            <div className="flex items-end justify-between gap-4 pt-2">
@@ -713,14 +782,17 @@ export default function AdminPage() {
                            </div>
                            
                            <div className="grid grid-cols-2 gap-3 pt-2">
-                              <div className="bg-gray-100/50 p-2.5 rounded-2xl border border-gray-100">
+                              <div className="bg-gray-100/50 p-2.5 rounded-2xl border border-gray-100 leading-none">
                                 <p className="text-[10px] font-black text-gray-400 uppercase mb-0.5">Costo Unit.</p>
                                 <p className="font-bold text-gray-600 text-sm">S/. {(p.costPrice || 0).toFixed(2)}</p>
                               </div>
-                              <div className="bg-purple-100/50 p-2.5 rounded-2xl border border-purple-100">
-                                <p className="text-[10px] font-black text-purple-400 uppercase mb-0.5">Ganancia</p>
-                                <p className="font-bold text-purple-600 text-sm">S/. {(p.price - (p.costPrice || 0)).toFixed(2)}</p>
-                              </div>
+                              <button 
+                                 onClick={() => quickSale(p)}
+                                 className="bg-green-500 text-white rounded-2xl flex flex-col items-center justify-center gap-0.5 hover:bg-green-600 transition-all shadow-lg shadow-green-500/20"
+                               >
+                                 <p className="text-[9px] font-black uppercase tracking-tighter">Vender</p>
+                                 <ShoppingCart size={14} />
+                               </button>
                            </div>
                          </div>
                       </motion.div>
@@ -1038,73 +1110,154 @@ export default function AdminPage() {
 
         {/* ══════════════════ VENTAS TAB ══════════════════ */}
         {activeTab === "ventas" && (
-          <div className="space-y-6">
-            {/* Summary stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
-                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Total Ventas</p>
-                <h3 className="text-2xl md:text-4xl font-black text-blue-infositel">
-                  S/. {orders.reduce((acc, o) => acc + o.total, 0)}
-                </h3>
-              </div>
-              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
-                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Pedidos</p>
-                <h3 className="text-2xl md:text-4xl font-black">{orders.length}</h3>
-              </div>
-              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-100">
-                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Promedio</p>
-                <h3 className="text-2xl md:text-4xl font-black">
-                  S/. {orders.length > 0 ? (orders.reduce((acc, o) => acc + o.total, 0) / orders.length).toFixed(0) : 0}
-                </h3>
-              </div>
+          <div className="space-y-8 pb-20">
+            {/* Dashboard Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               {[
+                 { title: "Ventas de Hoy", val: saleStats?.day?.total, profit: saleStats?.day?.profit, icon: TrendingUp, color: "text-blue-infositel", bg: "bg-blue-50" },
+                 { title: "Semana Actual", val: saleStats?.week?.total, profit: saleStats?.week?.profit, icon: PieChart, color: "text-purple-500", bg: "bg-purple-50" },
+                 { title: "Este Mes", val: saleStats?.month?.total, profit: saleStats?.month?.profit, icon: DollarSign, color: "text-green-500", bg: "bg-green-50" },
+               ].map((s, i) => (
+                 <motion.div 
+                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+                   key={i} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 relative overflow-hidden"
+                 >
+                   <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} rounded-bl-[4rem] opacity-50`} />
+                   <s.icon className={`relative z-10 ${s.color} mb-4`} size={24} />
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{s.title}</p>
+                   <h3 className="text-3xl font-black mb-2">S/. {s.val?.toFixed(2)}</h3>
+                   <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg ${s.bg} ${s.color}`}>GANANCIA: S/. {s.profit?.toFixed(2)}</span>
+                   </div>
+                 </motion.div>
+               ))}
             </div>
 
-            {/* Orders list */}
-            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-black">Registro de Pedidos <span className="text-gray-300 font-medium text-base">({orders.length})</span></h3>
-              </div>
-              <div className="space-y-4">
-                {orders.map(o => (
-                  <div key={o.id} className="p-4 md:p-6 border border-gray-50 rounded-[1.5rem] hover:shadow-lg hover:shadow-blue-500/5 transition-all">
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gray-50 rounded-2xl text-blue-infositel shrink-0">
-                          <CreditCard size={20} />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400 font-bold">{new Date(o.date).toLocaleDateString()}</p>
-                          <h4 className="font-black">{o.customerName}</h4>
-                          <p className="text-xs text-blue-infositel font-bold">{o.customerPhone}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <span className="text-xl font-black">S/. {o.total}</span>
-                          <span className="block text-[10px] font-black text-gray-300 truncate max-w-[80px]">#{o.id.slice(0, 8)}</span>
-                        </div>
-                        {/* DELETE ORDER BUTTON */}
-                        <button
-                          onClick={() => setConfirmDelete({ type: "order", id: o.id })}
-                          className="p-2.5 bg-red-50 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all"
-                          title="Eliminar pedido"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Form to register manual sale */}
+              <div className="lg:col-span-1">
+                <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 lg:sticky lg:top-24">
+                  <h3 className="text-xl font-black mb-6 flex items-center gap-2">
+                    <Plus className="text-blue-infositel" size={20} /> Registrar Venta Diaria
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                       <p className="text-[10px] font-black text-gray-400 uppercase ml-2">Seleccionar de Inventario</p>
+                       <select 
+                        className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-bold"
+                        onChange={e => handleSelectProductForSale(e.target.value)}
+                        value={newSale.productId}
+                       >
+                         <option value="">-- Buscar Producto --</option>
+                         {products.map(p => (
+                           <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>
+                         ))}
+                       </select>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {o.items.map((item: any, idx: number) => (
-                        <span key={idx} className="px-3 py-1.5 bg-gray-50 rounded-full text-xs font-bold text-gray-500 border border-gray-100">
-                          {item.name} (x{item.quantity}) · <span className="text-blue-infositel">{item.category}</span>
-                        </span>
-                      ))}
+
+                    <textarea placeholder="Nombre o detalles de la venta..." rows={2}
+                      className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm"
+                      value={newSale.pName} onChange={e => setNewSale({ ...newSale, pName: e.target.value })} />
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                       <div className="space-y-1">
+                         <p className="text-[10px] font-black text-gray-400 uppercase ml-2">P. Venta</p>
+                         <input type="number" placeholder="0.00"
+                          className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-black"
+                          value={newSale.price} onChange={e => setNewSale({ ...newSale, price: e.target.value })} />
+                       </div>
+                       <div className="space-y-1">
+                         <p className="text-[10px] font-black text-gray-400 uppercase ml-2">P. Costo</p>
+                         <input type="number" placeholder="0.00"
+                          className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-black"
+                          value={newSale.costPrice} onChange={e => setNewSale({ ...newSale, costPrice: e.target.value })} />
+                       </div>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-3 items-center">
+                       <input type="number" placeholder="Cant."
+                        className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-black"
+                        value={newSale.quantity} onChange={e => setNewSale({ ...newSale, quantity: parseInt(e.target.value) || 1 })} />
+                       
+                       <label className="flex items-center gap-2 cursor-pointer p-4 bg-gray-50 rounded-2xl">
+                          <input type="checkbox" checked={newSale.subtractStock} onChange={e => setNewSale({...newSale, subtractStock: e.target.checked})} className="accent-blue-infositel w-4 h-4" />
+                          <span className="text-[10px] font-black text-gray-400 uppercase">Hacer Salida</span>
+                       </label>
+                    </div>
+
+                    <button onClick={handleAddSale} className="w-full bg-blue-infositel text-white py-4 rounded-2xl font-black hover:bg-blue-600 transition-all shadow-xl shadow-blue-500/20 text-sm">
+                      Registrar Operación
+                    </button>
                   </div>
-                ))}
-                {orders.length === 0 && (
-                  <div className="text-center py-16 text-gray-300 font-bold">No hay ventas registradas aún.</div>
-                )}
+                </div>
+              </div>
+
+              {/* Transactions List */}
+              <div className="lg:col-span-2 space-y-6">
+                 {/* Historial */}
+                 <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-8">
+                       <h3 className="text-xl font-black">Historial Consolidado</h3>
+                       <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Presencial</span>
+                          <span className="flex items-center gap-1 ml-4"><div className="w-1.5 h-1.5 rounded-full bg-green-500" /> Web</span>
+                       </div>
+                    </div>
+
+                    <div className="space-y-4">
+                       {/* Physical Sales */}
+                       {sales.map(s => (
+                         <div key={s.id} className="p-5 border border-gray-50 rounded-[1.8rem] hover:bg-gray-50 transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                               <div className="p-3 bg-blue-50 text-blue-infositel rounded-2xl shrink-0"><TrendingUp size={18} /></div>
+                               <div>
+                                  <p className="text-[10px] font-black text-gray-400 uppercase mb-0.5">{new Date(s.date).toLocaleDateString()} · {new Date(s.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                  <h4 className="font-black text-sm">{s.pName} <span className="text-blue-infositel/50 ml-1">x{s.quantity}</span></h4>
+                                  <div className="flex items-center gap-2 mt-1">
+                                     <span className="text-[10px] font-black text-blue-infositel bg-blue-100/50 px-2 py-0.5 rounded-lg">GANANCIA: S/. {s.profit.toFixed(2)}</span>
+                                  </div>
+                               </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                               <div className="text-right">
+                                  <span className="text-lg font-black block">S/. {(s.price * s.quantity).toFixed(2)}</span>
+                                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Tienda</span>
+                               </div>
+                               <button onClick={() => setConfirmDelete({ type: "sale", id: s.id })} className="p-2 text-gray-200 hover:text-red-500 transition-all">
+                                  <Trash2 size={16} />
+                               </button>
+                            </div>
+                         </div>
+                       ))}
+
+                       {/* Web Orders */}
+                       {orders.map(o => (
+                         <div key={o.id} className="p-5 border border-green-50 bg-green-50/10 rounded-[1.8rem] hover:bg-green-50/20 transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                               <div className="p-3 bg-green-50 text-green-500 rounded-2xl shrink-0"><ShoppingCart size={18} /></div>
+                               <div>
+                                  <p className="text-[10px] font-black text-gray-400 uppercase mb-0.5">{new Date(o.date).toLocaleDateString()}</p>
+                                  <h4 className="font-black text-sm">{o.customerName}</h4>
+                                  <p className="text-[10px] font-black text-green-600/60 uppercase">{o.customerPhone}</p>
+                               </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                               <div className="text-right">
+                                  <span className="text-lg font-black block">S/. {o.total.toFixed(2)}</span>
+                                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Web / WhatsApp</span>
+                               </div>
+                               <button onClick={() => setConfirmDelete({ type: "order", id: o.id })} className="p-2 text-gray-200 hover:text-red-500 transition-all">
+                                  <Trash2 size={16} />
+                               </button>
+                            </div>
+                         </div>
+                       ))}
+
+                       {sales.length === 0 && orders.length === 0 && (
+                         <div className="text-center py-20 text-gray-300 font-black italic">Sin movimientos registrados hoy.</div>
+                       )}
+                    </div>
+                 </div>
               </div>
             </div>
           </div>

@@ -62,6 +62,7 @@ export default function StorePage() {
   const [cart, setCart] = useState<{ product: any; quantity: number }[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [checkoutData, setCheckoutData] = useState({ name: "", phone: "" });
+  const [expandedProducts, setExpandedProducts] = useState<string[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -233,30 +234,50 @@ export default function StorePage() {
                     </h3>
                   </div>
                   {/* 💎 Refined Feature List / Description */}
-                  <div className="my-5 min-h-[110px] flex flex-col justify-start relative group/desc">
+                  <div className="my-5 min-h-[110px] flex flex-col justify-start relative group/desc transition-all duration-500">
                     {p.description.includes("*") || p.description.includes("\n") ? (
-                      <ul className="space-y-1.5">
-                        {p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2).slice(0, 3).map((text: string, i: number) => (
+                      <ul className="space-y-1.5 h-full">
+                        {(expandedProducts.includes(p.id) 
+                          ? p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2)
+                          : p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2).slice(0, 3)
+                        ).map((text: string, i: number) => (
                           <motion.li 
                             key={i}
                             initial={{ opacity: 0, x: -10 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 + (i * 0.1) }}
-                            className="flex items-start gap-2 text-[10px] leading-relaxed font-bold text-slate-500 group/item"
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-start gap-2 text-[10px] leading-relaxed font-bold text-slate-500"
                           >
                             <span className="mt-1.5 w-1 h-1 rounded-full bg-blue-infositel/30 shrink-0" />
-                            <span className="truncate">{text.trim()}</span>
+                            <span>{text.trim()}</span>
                           </motion.li>
                         ))}
                         {p.description.split(/[\*\n]/).length > 3 && (
-                           <p className="text-[10px] font-black text-blue-infositel/40 mt-1 cursor-pointer hover:text-blue-infositel transition-colors">Ver más detalles...</p>
+                           <button 
+                             onClick={() => setExpandedProducts(prev => 
+                               prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                             )}
+                             className="text-[9px] font-black text-blue-infositel/60 mt-2 uppercase tracking-widest hover:text-blue-infositel transition-colors border-b border-blue-infositel/10 w-fit"
+                           >
+                             {expandedProducts.includes(p.id) ? "Ver menos" : "Ver más detalles +"}
+                           </button>
                         )}
                       </ul>
                     ) : (
-                      <p className="text-slate-400 text-[11px] leading-relaxed font-medium line-clamp-3">
-                        {p.description}
-                      </p>
+                      <div className="space-y-2">
+                        <p className={`text-slate-400 text-[11px] leading-relaxed font-medium ${expandedProducts.includes(p.id) ? '' : 'line-clamp-3'}`}>
+                          {p.description}
+                        </p>
+                        {p.description.length > 80 && (
+                          <button 
+                            onClick={() => setExpandedProducts(prev => 
+                               prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                            )}
+                            className="text-[9px] font-black text-blue-infositel/60 uppercase tracking-widest hover:text-blue-infositel transition-colors border-b border-blue-infositel/10 w-fit"
+                          >
+                            {expandedProducts.includes(p.id) ? "Menos" : "Más"}
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                   

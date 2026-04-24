@@ -70,3 +70,15 @@ model OrderItem {
   quantity Int    @default(1)
   order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
+
+model Sale {
+  id        String   @id @default(cuid())
+  pName     String
+  category  String?
+  quantity  Int      @default(1)
+  price     Float
+  costPrice Float    @default(0)
+  profit    Float
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+}

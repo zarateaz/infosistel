@@ -161,6 +161,78 @@ export async function updateRepairProgress(id: string, progress: number) {
   });
 }
 
+// ══════════════════ VENTAS Y ESTADÍSTICAS ══════════════════
+
+export async function addSaleAction(data: { pName: string; category?: string; quantity: number; price: number; costPrice: number; subtractStock?: boolean; productId?: string }) {
+  await ensureAuth();
+  const profit = (data.price - data.costPrice) * data.quantity;
+  
+  const sale = await prisma.sale.create({
+    data: {
+      pName: data.pName,
+      category: data.category,
+      quantity: data.quantity,
+      price: data.price,
+      costPrice: data.costPrice,
+      profit: profit,
+    }
+  });
+
+  if (data.subtractStock && data.productId) {
+    await prisma.product.update({
+      where: { id: data.productId },
+      data: { stock: { decrement: data.quantity } }
+    });
+  }
+
+  return sale;
+}
+
+export async function getSales() {
+  await ensureAuth();
+  return await prisma.sale.findMany({
+    orderBy: { date: 'desc' }
+  });
+}
+
+export async function deleteSaleAction(id: string) {
+  await ensureAuth();
+  return await prisma.sale.delete({
+    where: { id }
+  });
+}
+
+export async function getSaleStats() {
+  await ensureAuth();
+  const now = new Date();
+  
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [daily, weekly, monthly] = await Promise.all([
+    prisma.sale.aggregate({
+      where: { date: { gte: startOfDay } },
+      _sum: { price: true, profit: true },
+      _count: true
+    }),
+    prisma.sale.aggregate({
+      where: { date: { gte: startOfWeek } },
+      _sum: { price: true, profit: true }
+    }),
+    prisma.sale.aggregate({
+      where: { date: { gte: startOfMonth } },
+      _sum: { price: true, profit: true }
+    })
+  ]);
+
+  return {
+    day: { total: daily._sum.price || 0, profit: daily._sum.profit || 0, count: daily._count },
+    week: { total: weekly._sum.price || 0, profit: weekly._sum.profit || 0 },
+    month: { total: monthly._sum.price || 0, profit: monthly._sum.profit || 0 }
+  };
+}
+
 export async function deleteRepair(id: string) {
   await ensureAuth();
   return prisma.repair.delete({ where: { id } });
