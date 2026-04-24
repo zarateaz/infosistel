@@ -38,37 +38,21 @@ export default function OfferToast({
         const res = await fetch("/api/products", { cache: "no-store" });
         if (res.ok) {
           const all: Product[] = await res.json();
-          const onSale = all.filter((p) => p.onSale && p.salePrice);
+          const onSale = all.filter((p) => p.onSale);
 
-          // Si hay productos en oferta en la DB, usar uno al azar
-          // Si no, usar el fallback para que el toast siempre aparezca
-          const pick =
-            onSale.length > 0
-              ? onSale[Math.floor(Math.random() * onSale.length)]
-              : FALLBACK;
-
-          setOffer(pick);
-
-          const t = setTimeout(() => setVisible(true), 1800);
-          const t2 = setTimeout(() => setDismissed(true), 13800);
-          return () => {
-            clearTimeout(t);
-            clearTimeout(t2);
-          };
-        } else {
-          // Si falla la API, mostrar fallback de todas formas
-          setOffer(FALLBACK);
-          const t = setTimeout(() => setVisible(true), 1800);
-          const t2 = setTimeout(() => setDismissed(true), 13800);
-          return () => { clearTimeout(t); clearTimeout(t2); };
+          if (onSale.length > 0) {
+            const pick = onSale[Math.floor(Math.random() * onSale.length)];
+            setOffer(pick);
+            const t = setTimeout(() => setVisible(true), 1800);
+            return () => clearTimeout(t);
+          } else {
+            setOffer(FALLBACK);
+            const t = setTimeout(() => setVisible(true), 2500);
+            return () => clearTimeout(t);
+          }
         }
       } catch (error) {
         console.error("Error fetching toast offer:", error);
-        // Fallback si hay error de red
-        setOffer(FALLBACK);
-        const t = setTimeout(() => setVisible(true), 1800);
-        const t2 = setTimeout(() => setDismissed(true), 13800);
-        return () => { clearTimeout(t); clearTimeout(t2); };
       }
     };
     fetchRandomOffer();

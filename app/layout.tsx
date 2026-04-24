@@ -14,10 +14,10 @@ export const metadata: Metadata = {
   keywords: "reparación de laptops huancayo, servicio técnico pc, mantenimiento impresoras, infosistel, repotenciación computadoras",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico?v=4" },
+      { url: "/favicon.png?v=4" },
     ],
-    apple: "/favicon.svg",
+    apple: "/favicon.png?v=4",
   },
 };
 

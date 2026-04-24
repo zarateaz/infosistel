@@ -26,11 +26,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"productos" | "categorias" | "reparaciones" | "usuarios" | "ventas" | "inventario">("productos");
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [repairs, setRepairs] = useState<any[]>([]);
-  const [adminUsers, setAdminUsers] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+
 
   const [newCategory, setNewCategory] = useState("");
   const [newProduct, setNewProduct] = useState({
@@ -67,11 +63,23 @@ export default function AdminPage() {
 
   useEffect(() => { loadData(); }, []);
 
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [repairs, setRepairs] = useState<any[]>([]);
+  const [adminUsers, setAdminUsers] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [isBatchLoading, setIsBatchLoading] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
+
   const loadData = async () => {
-    const [p, c, r, u, o, s, st] = await Promise.all([
-      getProducts(), getCategories(), getRepairs(), getUsers(), getOrders(), getSales(), getSaleStats()
-    ]);
-    setProducts(p); setCategories(c); setRepairs(r); setAdminUsers(u); setOrders(o); setSales(s); setStats(st);
+    try {
+      const [p, c, r, u, o, s, st] = await Promise.all([
+        getProducts(), getCategories(), getRepairs(), getUsers(), getOrders(), getSales(), getSaleStats()
+      ]);
+      setProducts(p); setCategories(c); setRepairs(r); setAdminUsers(u); setOrders(o); setSales(s); setStats(st);
+    } catch (err) {
+      console.error("Error cargando datos:", err);
+    }
   };
 
   const handleLogout = async () => {
@@ -94,9 +102,19 @@ export default function AdminPage() {
 
   const addCategory = async () => {
     if (!newCategory) return;
-    await addCategoryAction(newCategory);
-    setNewCategory("");
-    loadData();
+    try {
+      await addCategoryAction(newCategory);
+      setNewCategory("");
+      await loadData(); // Recargar lista inmediatamente
+      alert("✅ Categoría '" + newCategory.toUpperCase() + "' lista para usar.");
+    } catch (err: any) {
+      if (err.message.includes("ya existe")) {
+        alert("ℹ️ La categoría '" + newCategory.toUpperCase() + "' ya está en la lista. Búscala en el selector de abajo.");
+        setNewCategory("");
+      } else {
+        alert("⚠️ Error: " + err.message);
+      }
+    }
   };
   const removeCategory = async (id: string) => {
     await deleteCategory(id);
@@ -114,13 +132,16 @@ export default function AdminPage() {
       return;
     }
     try {
+      setIsBatchLoading(true);
       await addProductAction(newProduct);
       setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
       setImagePreview(null);
-      loadData();
+      await loadData();
       alert("¡Producto guardado con éxito! 🚀");
     } catch (err: any) {
       alert("Error al guardar producto: " + (err.message || "Error desconocido"));
+    } finally {
+      setIsBatchLoading(false);
     }
   };
   const saveEditedProduct = async () => {
@@ -239,15 +260,52 @@ export default function AdminPage() {
     }
   };
 
-  const quickSale = (p: any) => {
-    setActiveTab("ventas");
-    handleSelectProductForSale(p.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const quickSale = async (p: any) => {
+    if (isBatchLoading) return;
+    if (!window.confirm(`¿Confirmar venta rápida de 1 unidad de ${p.name}?`)) return;
+
+    setIsBatchLoading(true);
+    // Actualización optimista del stock en pantalla
+    setProducts(prev => prev.map(item => item.id === p.id ? { ...item, stock: Math.max(0, item.stock - 1) } : item));
+
+    try {
+      await addSaleAction({
+        pName: p.name,
+        category: p.category,
+        quantity: 1,
+        price: p.onSale && p.salePrice ? p.salePrice : p.price,
+        costPrice: p.costPrice || 0,
+        subtractStock: true,
+        productId: p.id
+      });
+      await loadData();
+    } catch (err: any) {
+      alert("⚠️ Error: " + err.message);
+      loadData();
+    } finally {
+      setIsBatchLoading(false);
+    }
   };
 
   const [expandedInventario, setExpandedInventario] = useState<string[]>([]);
   const toggleInventario = (id: string) => {
      setExpandedInventario(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  // --- Actualización Optimista de Stock ---
+  const handleStockUpdate = async (id: string, newStock: number) => {
+    // 1. Actualizar inmediatamente en la interfaz (Instante 0)
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, stock: newStock } : p));
+    
+    try {
+      // 2. Ejecutar en el servidor en segundo plano
+      await inlineUpdateProductAction(id, { stock: newStock });
+    } catch (err) {
+      // 3. Si falla, recargar datos originales para seguridad
+      console.error("Error al actualizar stock:", err);
+      loadData();
+      alert("⚠️ No se pudo sincronizar el stock con el servidor.");
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -668,10 +726,20 @@ export default function AdminPage() {
                               <span className="truncate max-w-[200px] block">{p.name}</span>
                             </td>
                             <td className="py-3 px-4 text-center font-black">
-                              <div className="flex items-center justify-center gap-2">
-                                <button onClick={() => inlineUpdateProductAction(p.id, { stock: Math.max(0, p.stock - 1) }).then(loadData)} className="w-6 h-6 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center">-</button>
-                                <span className={`w-8 text-center ${p.stock < 5 ? "text-red-500" : "text-green-500"}`}>{p.stock}</span>
-                                <button onClick={() => inlineUpdateProductAction(p.id, { stock: p.stock + 1 }).then(loadData)} className="w-6 h-6 rounded-full bg-green-50 text-green-500 hover:bg-green-100 flex items-center justify-center">+</button>
+                              <div className="flex items-center justify-center gap-3">
+                                <button 
+                                  onClick={() => handleStockUpdate(p.id, Math.max(0, p.stock - 1))}
+                                  className="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white active:scale-90 transition-all flex items-center justify-center font-black text-xl"
+                                >
+                                  -
+                                </button>
+                                <span className={`w-12 text-center text-lg ${p.stock < 5 ? "text-red-500 animate-pulse" : "text-green-500"}`}>{p.stock}</span>
+                                <button 
+                                  onClick={() => handleStockUpdate(p.id, p.stock + 1)}
+                                  className="w-10 h-10 rounded-full bg-green-50 text-green-500 hover:bg-green-500 hover:text-white active:scale-90 transition-all flex items-center justify-center font-black text-xl"
+                                >
+                                  +
+                                </button>
                               </div>
                             </td>
                             <td className="py-3 px-4 text-right">
@@ -778,21 +846,44 @@ export default function AdminPage() {
                            </div>
 
                            <div className="flex items-center justify-between gap-4">
-                             <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-100 p-4 rounded-[1.8rem] flex-1">
-                               <p className="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest">P. Venta</p>
-                               <div className="flex items-baseline gap-1">
-                                 <span className="text-blue-infositel font-black text-xs">S/.</span>
-                                 <span className="text-3xl font-black text-gray-900 tracking-tighter">{p.price.toFixed(2)}</span>
-                               </div>
-                               {p.onSale && <span className="text-[9px] font-black text-green-500 bg-green-50 px-2 py-0.5 rounded-lg mt-2 inline-block ring-1 ring-green-100">OFERTA ACTIVA 🔥</span>}
-                             </div>
+                              <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-100 p-4 rounded-[1.8rem] flex-1 relative overflow-hidden">
+                                {p.onSale && (
+                                  <div className="absolute top-0 right-0 bg-blue-infositel text-white text-[8px] font-black px-2 py-1 rounded-bl-xl">
+                                    PROMO 🔥
+                                  </div>
+                                )}
+                                <p className="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest">
+                                  {p.onSale ? "Precio Oferta" : "Precio Venta"}
+                                </p>
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-blue-infositel font-black text-xs">S/.</span>
+                                  <span className="text-3xl font-black text-gray-900 tracking-tighter">
+                                    {p.onSale ? p.salePrice?.toFixed(2) : p.price.toFixed(2)}
+                                  </span>
+                                  {p.onSale && (
+                                    <span className="text-xs text-gray-300 line-through font-bold">
+                                      S/. {p.price.toFixed(2)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
 
-                             <div className={`p-4 rounded-[1.8rem] min-w-[110px] text-center shadow-xl transition-all duration-500 ${p.stock < 5 ? 'bg-red-500 text-white shadow-red-500/30 ring-4 ring-red-50' : 'bg-blue-infositel text-white shadow-blue-500/30'}`}>
-                               <p className="text-[9px] font-black opacity-60 uppercase mb-1 tracking-widest">Stock</p>
-                               <div className="flex items-center justify-center gap-2">
-                                 <button onClick={() => inlineUpdateProductAction(p.id, { stock: Math.max(0, p.stock - 1) }).then(loadData)} className="hover:scale-125 transition-transform"><Trash2 size={12}/></button>
+                             <div className={`p-4 rounded-[1.8rem] min-w-[120px] text-center shadow-xl transition-all duration-500 ${p.stock < 5 ? 'bg-red-500 text-white shadow-red-500/30 ring-4 ring-red-50' : 'bg-blue-infositel text-white shadow-blue-500/30'}`}>
+                               <p className="text-[9px] font-black opacity-60 uppercase mb-1 tracking-widest">Stock Disponible</p>
+                               <div className="flex items-center justify-center gap-4">
+                                 <button 
+                                   onClick={() => handleStockUpdate(p.id, Math.max(0, p.stock - 1))}
+                                   className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 active:scale-75 transition-all flex items-center justify-center"
+                                 >
+                                   <Trash2 size={12}/>
+                                 </button>
                                  <span className="text-2xl font-black tracking-tighter">{p.stock}</span>
-                                 <button onClick={() => inlineUpdateProductAction(p.id, { stock: p.stock + 1 }).then(loadData)} className="hover:scale-125 transition-transform"><Plus size={12}/></button>
+                                 <button 
+                                   onClick={() => handleStockUpdate(p.id, p.stock + 1)}
+                                   className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 active:scale-75 transition-all flex items-center justify-center"
+                                 >
+                                   <Plus size={12}/>
+                                 </button>
                                </div>
                              </div>
                            </div>

@@ -31,6 +31,8 @@ export async function addProduct(data: any) {
   const costPrice = parseFloat(data.costPrice);
   const stock = parseInt(data.stock);
 
+  const salePrice = data.onSale && data.salePrice ? parseFloat(data.salePrice) : null;
+  
   return prisma.product.create({
     data: {
       name: data.name,
@@ -41,7 +43,7 @@ export async function addProduct(data: any) {
       stock: isNaN(stock) ? 0 : stock,
       image: data.image || "/img/producto3mouse.webp",
       onSale: data.onSale || false,
-      salePrice: data.salePrice ? parseFloat(data.salePrice) : null,
+      salePrice: isNaN(salePrice as number) ? null : salePrice,
       isFeatured: data.isFeatured || false,
     },
   });
@@ -53,6 +55,7 @@ export async function editProduct(id: string, data: any) {
   const price = parseFloat(data.price);
   const costPrice = parseFloat(data.costPrice);
   const stock = parseInt(data.stock);
+  const salePrice = data.onSale && data.salePrice ? parseFloat(data.salePrice) : null;
 
   return prisma.product.update({
     where: { id },
@@ -65,7 +68,7 @@ export async function editProduct(id: string, data: any) {
       stock: isNaN(stock) ? 0 : stock,
       image: data.image,
       onSale: data.onSale || false,
-      salePrice: data.salePrice ? parseFloat(data.salePrice) : null,
+      salePrice: isNaN(salePrice as number) ? null : salePrice,
       isFeatured: data.isFeatured || false,
     },
   });
@@ -119,7 +122,19 @@ export async function getCategories() {
 
 export async function addCategory(name: string) {
   await ensureAuth();
-  return prisma.category.create({ data: { name } });
+  const normalizedName = name.trim().toUpperCase();
+  
+  const existing = await prisma.category.findUnique({
+    where: { name: normalizedName }
+  });
+
+  if (existing) {
+    throw new Error(`La categoría "${normalizedName}" ya existe.`);
+  }
+
+  return prisma.category.create({ 
+    data: { name: normalizedName } 
+  });
 }
 
 export async function deleteCategory(id: string) {

@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- Blue rounded diamond background -->
-  <rect x="8" y="8" width="48" height="48" rx="14" fill="#1433C9" transform="rotate(45 32 32)"/>
-  <!-- Lightning bolt (Zap icon centered) -->
-  <path d="M37 12L20 35h14l-7 17L44 29H30z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
-</svg>

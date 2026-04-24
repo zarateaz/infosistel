@@ -64,11 +64,13 @@ export default function OffersSection({
         const res = await fetch("/api/products", { cache: "no-store" });
         if (res.ok) {
           const allProducts: Product[] = await res.json();
-          const onSale = allProducts.filter((p) => p.onSale && p.salePrice);
-          // Si hay ofertas reales en DB, usarlas. Si no, mostrar fallback.
-          setOffers(onSale.length > 0 ? onSale : FALLBACK_OFFERS);
-        } else {
-          setOffers(FALLBACK_OFFERS);
+          const onSale = allProducts.filter((p) => p.onSale); // Más flexible
+          
+          if (onSale.length > 0) {
+            setOffers(onSale);
+          } else {
+            setOffers(FALLBACK_OFFERS);
+          }
         }
       } catch (error) {
         console.error("Error fetching offers:", error);
