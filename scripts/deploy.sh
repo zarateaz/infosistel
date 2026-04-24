@@ -45,9 +45,16 @@ rm -rf .next
 # chown solo si es necesario (asumimos que el usuario ya es dueño)
 # sudo chown -R $(whoami): . || true
 
+# Asegurar que los directorios padres permitan el paso (traversal) para otros usuarios (Nginx/PM2)
+chmod 755 /home/zarate || true
+chmod 755 "$APP_DIR" || true
+chmod 755 "$APP_DIR/public" || true
+
 # Asegurar que el directorio de uploads exista y tenga permisos de escritura
 mkdir -p public/uploads
 chmod -R 777 public/uploads || true
+chmod 777 prisma || true
+chmod 666 prisma/dev.db || true
 
 npm run build
 
