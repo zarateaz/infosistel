@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Directorio de uploads — ruta absoluta segura para el VPS
     const uploadDir = process.env.UPLOADS_DIR || (process.env.NODE_ENV === "production" 
-      ? "/home/angel/infosistel/public/uploads"
+      ? "/home/zarate/infosistel/public/uploads"
       : join(process.cwd(), "public", "uploads"));
     
     console.log("[UPLOAD_API] Directorio de destino:", uploadDir);

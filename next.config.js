@@ -31,8 +31,7 @@ const nextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // Restrict browser APIs
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          // HSTS — once SSL is enabled, uncomment this:
-          // { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           {
             key: "Content-Security-Policy",
             value: [

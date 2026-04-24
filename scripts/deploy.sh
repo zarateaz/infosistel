@@ -34,7 +34,7 @@ echo "✅ Código actualizado: $(git log --oneline -1)"
 echo "📦 [3/7] Instalando dependencias y sincronizando Base de Datos..."
 npm install --production=false --silent
 npx prisma generate
-DATABASE_URL="file:/home/angel/infosistel/prisma/dev.db" npx prisma db push --accept-data-loss
+DATABASE_URL="file:$APP_DIR/prisma/dev.db" npx prisma db push --accept-data-loss
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
@@ -65,7 +65,7 @@ echo "🌐 [6/7] Actualizando configuración de Nginx..."
 
 # Crear una versión temporal de nginx.conf con las rutas correctas para este VPS
 TEMP_NGINX="/tmp/infosistel_nginx.conf"
-sed "s|/home/angel/infosistel|$APP_DIR|g" "$APP_DIR/nginx.conf" > "$TEMP_NGINX"
+sed "s|/home/zarate/infosistel|$APP_DIR|g" "$APP_DIR/nginx.conf" > "$TEMP_NGINX"
 
 sudo cp "$TEMP_NGINX" "$NGINX_CONF"
 rm "$TEMP_NGINX"
