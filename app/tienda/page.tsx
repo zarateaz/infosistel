@@ -190,12 +190,16 @@ export default function StorePage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                   key={p.id}
-                  className={`group bg-white rounded-[2.5rem] p-6 flex flex-col transition-all duration-700 ${p.isFeatured ? 'shadow-[0_40px_100px_rgba(20,51,201,0.15)] ring-2 ring-blue-infositel/10' : 'hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-transparent hover:border-gray-100'}`}
+                  className={`group bg-white rounded-[2.5rem] p-6 flex flex-col transition-all duration-700 border-2 ${
+                    p.isFeatured
+                      ? 'border-blue-infositel/40 shadow-[0_40px_100px_rgba(20,51,201,0.18)] ring-4 ring-blue-infositel/5'
+                      : 'border-blue-infositel/10 hover:border-blue-infositel/30 shadow-[0_10px_40px_rgba(20,51,201,0.05)] hover:shadow-[0_30px_80px_rgba(20,51,201,0.12)]'
+                  }`}
                 >
                     {/* Image zone — with magnetic energy */}
                    <div className="relative h-64 w-full rounded-[2rem] mb-6 overflow-hidden">
                      {/* Dynamic backdrop */}
-                     <div className={`absolute inset-0 transition-colors duration-700 ${p.isFeatured ? 'bg-gradient-to-br from-blue-100/30 via-white to-blue-50/20' : 'bg-gray-50'}`} />
+                     <div className={`absolute inset-0 transition-colors duration-700 ${p.isFeatured ? 'bg-gradient-to-br from-blue-100/30 via-white to-blue-50/20' : 'bg-gradient-to-br from-blue-50/20 to-white'}`} />
                      
                      {/* Floating energy core */}
                      <motion.div 
@@ -238,11 +242,11 @@ export default function StorePage() {
                    <div className="space-y-2">
                      <div className="flex items-center gap-2">
                         <span className="w-1 h-1 rounded-full bg-blue-infositel" />
-                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${p.isFeatured ? 'text-blue-infositel' : 'text-gray-400'}`}>
+                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${p.isFeatured ? 'text-blue-infositel' : 'text-blue-infositel/60'}`}>
                           {p.category}
                         </span>
                      </div>
-                     <h3 className={`text-2xl font-black leading-tight transition-colors ${p.isFeatured ? 'text-gray-900 group-hover:text-blue-infositel' : 'text-gray-800'}`}>
+                     <h3 className={`text-2xl font-black leading-tight transition-colors ${p.isFeatured ? 'text-gray-900 group-hover:text-blue-infositel' : 'text-gray-800 group-hover:text-blue-infositel'}`}>
                        {p.name}
                      </h3>
                    </div>
@@ -300,22 +304,23 @@ export default function StorePage() {
                     )}
                   </div>
                   
-                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-gray-50">
+                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-blue-infositel/5">
                      <div className="flex flex-col">
                        {p.isFeatured && <span className="text-[11px] text-blue-infositel font-black line-through opacity-40 italic">S/. {Math.round(p.price * 1.3)}.00</span>}
                        <div className="flex items-baseline gap-1">
-                          <span className={`${p.isFeatured ? 'text-blue-infositel shadow-blue-500/20' : 'text-gray-900'} text-3xl font-black tracking-tighter`}>
-                             S/. {p.price.toFixed(2)}
+                          <span className="text-blue-infositel/40 font-bold text-sm">S/.</span>
+                          <span className="text-gray-900 text-3xl font-black tracking-tighter">
+                             {p.price.toFixed(2)}
                           </span>
                        </div>
                      </div>
                      <motion.button
-                       whileHover={{ scale: 1.1, rotate: 5 }}
+                       whileHover={{ scale: 1.12, rotate: 5 }}
                        whileTap={{ scale: 0.9 }}
                        onClick={() => addToCart(p)}
-                       className={`h-16 w-16 rounded-3xl flex items-center justify-center transition-all relative group/btn overflow-hidden ${p.isFeatured ? 'bg-blue-infositel text-white shadow-[0_15px_40px_rgba(20,51,201,0.3)]' : 'bg-gray-900 text-white hover:bg-blue-infositel shadow-xl'}`}
+                       className="h-16 w-16 rounded-[1.5rem] flex items-center justify-center transition-all relative group/btn overflow-hidden bg-blue-infositel text-white shadow-[0_12px_35px_rgba(20,51,201,0.35)] hover:shadow-[0_20px_50px_rgba(20,51,201,0.45)]"
                      >
-                       <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-spring" />
+                       <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
                        <ShoppingCart size={24} className="relative z-10" />
                      </motion.button>
                    </div>
