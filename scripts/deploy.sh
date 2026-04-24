@@ -93,11 +93,11 @@ if [ -d "public/uploads" ] && [ ! -L "public/uploads" ]; then
     cp -rn public/uploads/* data/uploads/ 2>/dev/null || true
 fi
 
-# 2. Vincular data/uploads dentro del standalone para que Next.js lo sirva en el puerto 3001/3000
+# 2. Vincular data/uploads dentro del standalone usando RUTA ABSOLUTA para evitar fallos de profundidad
 rm -rf .next/standalone/public/uploads
-ln -s ../../../data/uploads .next/standalone/public/uploads
+ln -s "$APP_DIR/data/uploads" .next/standalone/public/uploads
 
-echo "✅ Enlaces simbólicos creados y data salvaguardada"
+echo "✅ Enlaces simbólicos (Rutas Absolutas) creados y data salvaguardada"
 
 # ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
 echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3001)..."

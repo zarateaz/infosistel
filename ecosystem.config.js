@@ -11,7 +11,7 @@ module.exports = {
       max_memory_restart: "1G",
       env: {
         NODE_ENV: "production",
-        DATABASE_URL: "file:/home/zarate/infosistel/data/dev.db",
+        DATABASE_URL: "file:data/dev.db",
         PORT: 3001,
         HOSTNAME: "0.0.0.0",
         // IMPORTANTE: JWT en este bloque 'env' (no env_production) para PM2
