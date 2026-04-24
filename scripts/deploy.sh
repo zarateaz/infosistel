@@ -42,15 +42,15 @@ git config --global --add safe.directory "$APP_DIR" || true
 rm -rf .next
 
 # Asegurar que los directorios padres permitan el paso (traversal) para otros usuarios (Nginx/PM2)
-chmod 755 /home/zarate || true
-chmod 755 "$APP_DIR" || true
-chmod 755 "$APP_DIR/public" || true
+sudo chmod 755 /home/zarate || true
+sudo chmod 755 "$APP_DIR" || true
+sudo chmod 755 "$APP_DIR/public" || true
 
 # Asegurar que el directorio de uploads exista y tenga permisos de escritura
 mkdir -p public/uploads
-chmod -R 777 public/uploads || true
-chmod 777 prisma || true
-chmod 666 prisma/dev.db || true
+sudo chmod -R 777 public/uploads || true
+sudo chmod 777 prisma || true
+sudo chmod 666 prisma/dev.db || true
 
 npm run build
 
