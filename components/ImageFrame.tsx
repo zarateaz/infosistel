@@ -14,13 +14,7 @@ export default function ImageFrame({ children, className = "", badgeText }: Imag
   return (
     <div className={`relative group ${className}`}>
       {/* ── Outer Professional Borders ── */}
-      <div className="absolute -inset-[1px] border border-blue-500/20 rounded-[inherit] pointer-events-none z-10" />
-      
-      {/* ── Corner Accents (Futuristic Blue Glow) ── */}
-      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-blue-infositel rounded-tl-[inherit] z-20 pointer-events-none shadow-[0_0_15px_rgba(20,51,201,0.4)]" />
-      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-infositel rounded-tr-[inherit] z-20 pointer-events-none shadow-[0_0_15px_rgba(20,51,201,0.4)]" />
-      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-blue-infositel rounded-bl-[inherit] z-20 pointer-events-none shadow-[0_0_15px_rgba(20,51,201,0.4)]" />
-      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-infositel rounded-br-[inherit] z-20 pointer-events-none shadow-[0_0_15px_rgba(20,51,201,0.4)]" />
+      <div className="absolute -inset-[0.5px] border border-gray-100 rounded-[inherit] pointer-events-none z-10 group-hover:border-blue-infositel/30 transition-colors duration-500" />
 
       {/* ── Watermark Mask (Top Left Badge) ── */}
       {badgeText && (
