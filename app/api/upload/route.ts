@@ -61,30 +61,31 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
     const uniqueName = `${Date.now()}-${sanitizedName}`;
 
-    // 5. Directorio de uploads — ruta absoluta para evitar ambigüedades en VPS
+    // 5. Directorio de uploads — ruta absoluta
     const uploadDir = join(process.cwd(), "public", "uploads");
-    
-    console.log("[UPLOAD_API] Intentando guardar en:", uploadDir);
     
     try {
       await mkdir(uploadDir, { recursive: true });
-    } catch (e) {
-      // Ignorar si ya existe
-    }
+    } catch (e) {}
 
     try {
       const path = join(uploadDir, uniqueName);
       await writeFile(path, buffer);
-      console.log("[UPLOAD_API] Archivo guardado correctamente en disco.");
+      
+      // COMANDO SENIOR: Asegurar que el archivo sea legible por el servidor web (chmod 644)
+      const { chmod } = await import("fs/promises");
+      await chmod(path, 0o644);
+      
+      console.log("[UPLOAD_API] Archivo guardado y permisos 644 aplicados.");
       
       return NextResponse.json({ 
         success: true, 
         url: `/uploads/${uniqueName}` 
       });
     } catch (writeError: any) {
-      console.error("[UPLOAD_API] ERROR CRÍTICO DE ESCRITURA:", writeError.message);
+      console.error("[UPLOAD_API] ERROR DE ESCRITURA:", writeError.message);
       return NextResponse.json({ 
-        error: "El servidor no tiene permisos para escribir en public/uploads. Ejecuta: chmod -R 777 public/uploads" 
+        error: "Falla de escritura en disco. Revisa permisos de carpeta." 
       }, { status: 500 });
     }
   } catch (error: any) {

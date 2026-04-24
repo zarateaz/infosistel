@@ -137,9 +137,9 @@ export default function AdminPage() {
       setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
       setImagePreview(null);
       await loadData();
-      alert("¡Producto guardado con éxito! 🚀");
+      alert("¡PRODUCTO GUARDADO CON ÉXITO! 🚀✨");
     } catch (err: any) {
-      alert("Error al guardar producto: " + (err.message || "Error desconocido"));
+      alert("⚠️ Error al guardar: " + (err.message || "Falla de red"));
     } finally {
       setIsBatchLoading(false);
     }
@@ -969,33 +969,55 @@ export default function AdminPage() {
                   </div>
 
                   {/* Image upload */}
-                  <div className="relative h-36 w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center overflow-hidden
-                    transition-all cursor-pointer bg-gray-50 hover:bg-gray-100 border-gray-200">
-                    {imagePreview ? (
+                  <div className={`relative h-44 w-full border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center overflow-hidden
+                    transition-all cursor-pointer ${isUploading ? 'bg-blue-50/50 border-blue-200' : 'bg-gray-50 hover:bg-gray-100 border-gray-200'}`}
+                    onClick={() => !isUploading && document.getElementById('image-input')?.click()}
+                  >
+                    {isUploading ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="animate-spin text-blue-infositel" size={32} />
+                        <p className="text-[10px] font-black text-blue-500 animate-pulse">PROCESANDO IMAGEN...</p>
+                      </div>
+                    ) : imagePreview ? (
                       <div className="relative h-full w-full">
-                        <Image src={imagePreview} alt="Preview" fill className="object-contain p-2" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <p className="text-white text-xs font-bold">Cambiar Imagen</p>
+                        <Image src={imagePreview} alt="Preview" fill className="object-contain p-4" />
+                        <div className="absolute inset-x-0 bottom-0 bg-blue-infositel/90 backdrop-blur-sm p-2">
+                           <p className="text-white text-[9px] text-center font-black">LISTO ✅ (CLICK PARA CAMBIAR)</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center space-y-2">
-                        <Upload className="mx-auto text-gray-400" size={28} />
-                        <p className="text-xs font-bold text-gray-400">Toca para subir foto</p>
+                      <div className="text-center space-y-3">
+                        <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center mx-auto">
+                          <Upload className="text-gray-300" size={20} />
+                        </div>
+                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Toca para subir foto</p>
                       </div>
                     )}
-                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
+                    <input id="image-input" type="file" accept="image/*" className="hidden"
                       onChange={handleImageUpload} disabled={isUploading} />
-                    {isUploading && (
-                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                        <Loader2 className="animate-spin text-blue-infositel" size={28} />
-                      </div>
-                    )}
                   </div>
 
-                  <button onClick={addProduct} disabled={isUploading}
-                    className="w-full bg-black text-white py-4 rounded-2xl font-black hover:bg-blue-infositel transition-all disabled:bg-gray-300 text-sm">
-                    {isUploading ? "Subiendo..." : "Guardar Producto"}
+                  <button 
+                    onClick={addProduct} 
+                    disabled={isUploading || isBatchLoading}
+                    className={`w-full py-5 rounded-[2rem] font-black transition-all flex items-center justify-center gap-3 shadow-xl 
+                      ${isUploading || isBatchLoading 
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                        : 'bg-black text-white hover:bg-blue-infositel active:scale-95 shadow-black/10'}`}
+                  >
+                    {isBatchLoading ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} />
+                        <span className="text-xs uppercase tracking-widest">Guardando Producto...</span>
+                      </>
+                    ) : isUploading ? (
+                      <>
+                        <Loader2 className="animate-spin" size={20} />
+                        <span className="text-xs uppercase tracking-widest">Subiendo Foto...</span>
+                      </>
+                    ) : (
+                      <span className="text-sm uppercase tracking-widest">Guardar Producto</span>
+                    )}
                   </button>
                 </div>
               </div>
