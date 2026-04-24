@@ -60,8 +60,20 @@ echo "📂 [5/7] Copiando assets al directorio standalone..."
 cp -r .next/static    .next/standalone/.next/static
 cp -r public/.        .next/standalone/public/
 mkdir -p .next/standalone/prisma
-cp prisma/dev.db .next/standalone/prisma/dev.db || true
-echo "✅ Assets copiados"
+
+# PREVENIR PÉRDIDA DE DATOS: Solo copiar DB local si la de producción no existe
+if [ ! -f ".next/standalone/prisma/dev.db" ]; then
+    echo "⚠️ Primera vez: Copiando base de datos inicial a standalone..."
+    cp prisma/dev.db .next/standalone/prisma/dev.db || true
+else
+    echo "✅ Base de datos de producción existente. SALVAGUARDADA (no se sobrescribirá)."
+fi
+
+# PREVENIR PÉRDIDA DE IMÁGENES: Asegurar que uploads antiguos sobrevivan (por si public/. sobrescribió con vacío)
+if [ -d "public/uploads" ]; then
+    cp -rn public/uploads/* .next/standalone/public/uploads/ 2>/dev/null || true
+fi
+echo "✅ Assets copiados y data salvaguardada"
 
 # ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
 echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3001)..."
