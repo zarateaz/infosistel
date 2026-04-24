@@ -704,7 +704,8 @@ export default function AdminPage() {
                             </td>
                           </tr>
                         );
-                      })}
+                     ))}
+
                     </tbody>
                   </table>
                 </div>
@@ -811,7 +812,7 @@ export default function AdminPage() {
                             </div>
                          </div>
                       </motion.div>
-                  })}
+                  ))}
                 </div>
               )}
               {filteredInventory.length === 0 && <div className="text-center py-20 text-gray-300 font-black italic">No se encontraron productos que coincidan.</div>}
