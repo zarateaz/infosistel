@@ -1,7 +1,7 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════
 #  deploy.sh — Script de despliegue Infosistel en VPS Hostinger
-#  Usuario: angel | Puerto: 3002 (PM2) | Proxy: Nginx 80 → 3002
+#  Usuario: angel | Puerto: 3002 (PM2) | Proxy: Nginx/Apache 80 → 3002
 # ═══════════════════════════════════════════════════════
 set -e
 
@@ -38,12 +38,8 @@ DATABASE_URL="file:$APP_DIR/prisma/dev.db" npx prisma db push --accept-data-loss
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
-# Asegurar que Git no bloquee la carpeta al cambiar de usuario
 git config --global --add safe.directory "$APP_DIR" || true
-# NUCLEAR CLEANUP: Eliminar rastro de builds anteriores y asegurar permisos
 rm -rf .next
-# chown solo si es necesario (asumimos que el usuario ya es dueño)
-# sudo chown -R $(whoami): . || true
 
 # Asegurar que los directorios padres permitan el paso (traversal) para otros usuarios (Nginx/PM2)
 chmod 755 /home/zarate || true
@@ -58,8 +54,6 @@ chmod 666 prisma/dev.db || true
 
 npm run build
 
-
-
 echo "✅ Build completado"
 
 # ── 5. Copiar assets al standalone ──
@@ -68,39 +62,47 @@ cp -r .next/static    .next/standalone/.next/static
 cp -r public/.        .next/standalone/public/
 echo "✅ Assets copiados"
 
-# ── 6. Actualizar Nginx ──
-echo "🌐 [6/7] Actualizando configuración de Nginx..."
+# ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
+echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3002)..."
+# Usar npx para asegurar que pm2 se encuentre si no está en el PATH global
+npx pm2 restart "$PM2_NAME" || npx pm2 start ecosystem.config.js
+npx pm2 save
+echo "✅ App reiniciada"
 
-# Crear una versión temporal de nginx.conf con las rutas correctas para este VPS
-TEMP_NGINX="/tmp/infosistel_nginx.conf"
-sed "s|/home/zarate/infosistel|$APP_DIR|g" "$APP_DIR/nginx.conf" > "$TEMP_NGINX"
+# ── 7. Actualizar Nginx (Opcional, si el directorio existe) ──
+echo "🌐 [7/7] Intentando actualizar configuración de Nginx..."
 
-sudo cp "$TEMP_NGINX" "$NGINX_CONF"
-rm "$TEMP_NGINX"
-
-
-# Verificar que la config sea válida antes de recargar
-if sudo nginx -t 2>/dev/null; then
-    sudo systemctl reload nginx
-    echo "✅ Nginx recargado con nueva configuración de seguridad"
+if [ -d "$(dirname "$NGINX_CONF")" ]; then
+    # Crear una versión temporal de nginx.conf con las rutas correctas para este VPS
+    TEMP_NGINX="/tmp/infosistel_nginx.conf"
+    sed "s|/home/zarate/infosistel|$APP_DIR|g" "$APP_DIR/nginx.conf" > "$TEMP_NGINX"
+    
+    if sudo cp "$TEMP_NGINX" "$NGINX_CONF" 2>/dev/null; then
+        rm "$TEMP_NGINX"
+        # Verificar que la config sea válida antes de recargar
+        if sudo nginx -t 2>/dev/null; then
+            sudo systemctl reload nginx
+            echo "✅ Nginx recargado con nueva configuración"
+        else
+            echo "⚠️  Error en nginx.conf — revisa manualmente con: nginx -t"
+        fi
+    else
+        echo "⚠️  No se pudo copiar a $NGINX_CONF (¿falta sudo?)"
+    fi
 else
-    echo "⚠️  Error en nginx.conf — revisa manualmente con: nginx -t"
-    echo "   La app seguirá funcionando con la config anterior"
+    echo "⚠️  Saltando Nginx: El directorio $(dirname "$NGINX_CONF") no existe."
+    echo "   Asegúrate de que Nginx esté instalado y configurado manualmente si es necesario."
 fi
 
-# ── 7. Reiniciar PM2 ──
-echo "🚀 [7/7] Reiniciando la app en PM2 (puerto 3002)..."
-pm2 restart "$PM2_NAME" || pm2 start ecosystem.config.js
-pm2 save
 echo ""
 echo "╔════════════════════════════════════════╗"
 echo "║   ✅ Deploy completado exitosamente    ║"
 echo "╚════════════════════════════════════════╝"
 echo ""
-pm2 list
+npx pm2 list
 echo ""
 echo "📊 Estado de servicios:"
 echo "  • App:   http://localhost:3002 (PM2)"
-echo "  • Web:   http://$(curl -s ifconfig.me 2>/dev/null || echo 'tu-ip') (Nginx)"
+echo "  • Web:   http://$(curl -s ifconfig.me 2>/dev/null || echo 'tu-ip') (Nginx/Apache)"
 echo "  • Nginx: $(systemctl is-active nginx 2>/dev/null || echo 'desconocido')"
 echo ""
