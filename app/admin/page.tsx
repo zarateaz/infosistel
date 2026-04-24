@@ -96,9 +96,14 @@ export default function AdminPage() {
     loadData();
   };
   const removeAdminUser = async (id: string) => {
-    await deleteUser(id);
+    setAdminUsers(prev => prev.filter(u => u.id !== id));
     setConfirmDelete(null);
-    loadData();
+    try {
+      await deleteUser(id);
+    } catch {
+      loadData();
+      alert("❌ Error al eliminar usuario.");
+    }
   };
 
   const addCategory = async () => {
@@ -118,9 +123,14 @@ export default function AdminPage() {
     }
   };
   const removeCategory = async (id: string) => {
-    await deleteCategory(id);
+    setCategories(prev => prev.filter(c => c.id !== id));
     setConfirmDelete(null);
-    loadData();
+    try {
+      await deleteCategory(id);
+    } catch {
+      loadData();
+      alert("❌ Error al eliminar categoría.");
+    }
   };
 
   const addProduct = async () => {
@@ -158,9 +168,17 @@ export default function AdminPage() {
     }
   };
   const removeProduct = async (id: string) => {
-    await deleteProduct(id);
+    // Actualización optimista: quitar de la lista inmediatamente
+    setProducts(prev => prev.filter(p => p.id !== id));
     setConfirmDelete(null);
-    loadData();
+    try {
+      await deleteProduct(id);
+    } catch (err) {
+      console.error("Error eliminando producto:", err);
+      // Revertir si hay error
+      loadData();
+      alert("⚠️ No se pudo eliminar el producto del servidor.");
+    }
   };
 
   const applyCalculatedPrice = async () => {
@@ -197,9 +215,14 @@ export default function AdminPage() {
 
   // Eliminar venta/pedido
   const removeOrder = async (id: string) => {
-    await deleteOrderAction(id);
+    setOrders(prev => prev.filter(o => o.id !== id));
     setConfirmDelete(null);
-    loadData();
+    try {
+      await deleteOrderAction(id);
+    } catch {
+      loadData();
+      alert("❌ Error al eliminar el pedido.");
+    }
   };
 
   const addRepair = async () => {
@@ -213,9 +236,14 @@ export default function AdminPage() {
     loadData();
   };
   const removeRepair = async (id: string) => {
-    await deleteRepair(id);
+    setRepairs(prev => prev.filter(r => r.id !== id));
     setConfirmDelete(null);
-    loadData();
+    try {
+      await deleteRepair(id);
+    } catch {
+      loadData();
+      alert("❌ Error al eliminar reparación.");
+    }
   };
 
   const handleAddSale = async () => {
@@ -242,9 +270,14 @@ export default function AdminPage() {
   };
 
   const removeSale = async (id: string) => {
-    await deleteSaleAction(id);
+    setSales(prev => prev.filter(s => s.id !== id));
     setConfirmDelete(null);
-    loadData();
+    try {
+      await deleteSaleAction(id);
+    } catch {
+      loadData();
+      alert("❌ Error al eliminar venta.");
+    }
   };
 
   const handleSelectProductForSale = (pId: string) => {
