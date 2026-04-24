@@ -188,49 +188,64 @@ export default function StorePage() {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  whileHover={{ 
-                    y: -12,
-                    transition: { duration: 0.3 } 
-                  }}
-                  transition={{ duration: 0.6 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                   key={p.id}
-                  className={`group bg-white rounded-3xl p-6 flex flex-col transition-all duration-500 ${p.isFeatured ? 'shadow-[0_20px_60px_rgba(20,51,201,0.12)] z-10' : 'hover:shadow-[0_30px_80px_rgba(20,51,201,0.08)]'}`}
+                  className={`group bg-white rounded-[2.5rem] p-6 flex flex-col transition-all duration-700 ${p.isFeatured ? 'shadow-[0_40px_100px_rgba(20,51,201,0.15)] ring-2 ring-blue-infositel/10' : 'hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-transparent hover:border-gray-100'}`}
                 >
-                  {/* Image zone — no borders, pure glow */}
-                  <div className="relative h-56 w-full rounded-2xl mb-6 overflow-hidden">
-                    {/* Gradient backdrop */}
-                    <div className={`absolute inset-0 ${p.isFeatured ? 'bg-gradient-to-br from-blue-50 via-white to-blue-50/30' : 'bg-gradient-to-br from-gray-50 to-white'}`} />
-                    {/* Floating energy glow */}
-                    <motion.div 
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                      animate={{ opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <div className={`w-32 h-32 rounded-full blur-[50px] ${p.isFeatured ? 'bg-blue-infositel/15' : 'bg-blue-infositel/5'}`} />
-                    </motion.div>
-                    
-                    <ImageFrame className="w-full h-full rounded-2xl">
-                      <Image
-                        src={p.image}
-                        alt={p.name}
-                        fill
-                        priority={p.isFeatured}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className={`object-contain p-4 transition-transform duration-700 ${p.isFeatured ? 'group-hover:scale-115' : 'group-hover:scale-110'}`}
-                        style={{ filter: `drop-shadow(0 15px 30px rgba(20,51,201,${p.isFeatured ? '0.2' : '0.1'}))` }}
-                      />
-                    </ImageFrame>
-                    {/* Shimmer on hover */}
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
-                  </div>
-                  <div className="space-y-1">
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${p.isFeatured ? 'text-blue-infositel' : 'text-gray-300'}`}>
-                      {p.category}
-                    </span>
-                    <h3 className={`text-xl font-bold transition-colors ${p.isFeatured ? 'text-black group-hover:text-blue-infositel' : 'text-gray-800'}`}>
-                      {p.name}
-                    </h3>
-                  </div>
+                    {/* Image zone — with magnetic energy */}
+                   <div className="relative h-64 w-full rounded-[2rem] mb-6 overflow-hidden">
+                     {/* Dynamic backdrop */}
+                     <div className={`absolute inset-0 transition-colors duration-700 ${p.isFeatured ? 'bg-gradient-to-br from-blue-100/30 via-white to-blue-50/20' : 'bg-gray-50'}`} />
+                     
+                     {/* Floating energy core */}
+                     <motion.div 
+                       className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
+                       animate={{ 
+                         scale: [1, 1.2, 1],
+                         opacity: [0.4, 0.8, 0.4],
+                         rotate: [0, 90, 0]
+                       }}
+                       transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                     >
+                       <div className={`w-40 h-40 rounded-full blur-[60px] ${p.isFeatured ? 'bg-blue-infositel/20' : 'bg-blue-infositel/10'}`} />
+                     </motion.div>
+                     
+                     <motion.div 
+                        whileHover={{ scale: 1.15, rotate: -2, y: -5 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                        className="relative z-10 w-full h-full p-4"
+                     >
+                        <Image
+                          src={p.image}
+                          alt={p.name}
+                          fill
+                          priority={p.isFeatured}
+                          className="object-contain drop-shadow-[0_20px_40px_rgba(20,51,201,0.2)]"
+                        />
+                     </motion.div>
+
+                     {/* Premium Ribbon */}
+                     {p.isFeatured && (
+                       <div className="absolute top-4 left-4 z-20 bg-blue-infositel text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-blue-500/30 tracking-tighter">
+                          RECOMENDADO ⭐
+                       </div>
+                     )}
+
+                     {/* Glass Overlay on Hover */}
+                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-white/10 via-transparent to-blue-infositel/5 pointer-events-none" />
+                   </div>
+
+                   <div className="space-y-2">
+                     <div className="flex items-center gap-2">
+                        <span className="w-1 h-1 rounded-full bg-blue-infositel" />
+                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${p.isFeatured ? 'text-blue-infositel' : 'text-gray-400'}`}>
+                          {p.category}
+                        </span>
+                     </div>
+                     <h3 className={`text-2xl font-black leading-tight transition-colors ${p.isFeatured ? 'text-gray-900 group-hover:text-blue-infositel' : 'text-gray-800'}`}>
+                       {p.name}
+                     </h3>
+                   </div>
                   {/* 💎 Refined Interactive Description Section */}
                   <div className="my-5 min-h-[110px] flex flex-col justify-start relative group/desc transition-all duration-700 ease-in-out">
                     <AnimatePresence initial={false}>
@@ -285,19 +300,25 @@ export default function StorePage() {
                     )}
                   </div>
                   
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className="flex flex-col">
-                      {p.isFeatured && <span className="text-[10px] text-blue-infositel font-black line-through opacity-50">S/. {Math.round(p.price * 1.2)}</span>}
-                      <span className={`text-2xl font-black ${p.isFeatured ? 'text-blue-infositel' : 'text-black'}`}>S/. {p.price}</span>
-                    </div>
-                    <button
-                      onClick={() => addToCart(p)}
-                      className={`p-4 rounded-xl transition-all overflow-hidden relative group/btn ${p.isFeatured ? 'bg-blue-infositel text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35' : 'bg-black text-white hover:bg-blue-infositel'}`}
-                    >
-                      <div className="absolute inset-0 bg-white/15 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
-                      <ShoppingCart size={20} className="relative z-10" />
-                    </button>
-                  </div>
+                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-gray-50">
+                     <div className="flex flex-col">
+                       {p.isFeatured && <span className="text-[11px] text-blue-infositel font-black line-through opacity-40 italic">S/. {Math.round(p.price * 1.3)}.00</span>}
+                       <div className="flex items-baseline gap-1">
+                          <span className={`${p.isFeatured ? 'text-blue-infositel shadow-blue-500/20' : 'text-gray-900'} text-3xl font-black tracking-tighter`}>
+                             S/. {p.price.toFixed(2)}
+                          </span>
+                       </div>
+                     </div>
+                     <motion.button
+                       whileHover={{ scale: 1.1, rotate: 5 }}
+                       whileTap={{ scale: 0.9 }}
+                       onClick={() => addToCart(p)}
+                       className={`h-16 w-16 rounded-3xl flex items-center justify-center transition-all relative group/btn overflow-hidden ${p.isFeatured ? 'bg-blue-infositel text-white shadow-[0_15px_40px_rgba(20,51,201,0.3)]' : 'bg-gray-900 text-white hover:bg-blue-infositel shadow-xl'}`}
+                     >
+                       <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-spring" />
+                       <ShoppingCart size={24} className="relative z-10" />
+                     </motion.button>
+                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>

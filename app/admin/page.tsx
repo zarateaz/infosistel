@@ -6,7 +6,7 @@ import {
   Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
   ShoppingCart as CartIcon, CreditCard, Mail, Tag as OfferTag,
   CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3, 
-  Calculator, CalculatorIcon, Percent, TrendingUp, DollarSign, PieChart, ShoppingCart
+  Calculator, CalculatorIcon, Percent, TrendingUp, DollarSign, PieChart, ShoppingCart, ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -711,93 +711,106 @@ export default function AdminPage() {
               ) : (
                 /* SHOWCASE MODE - BIG CARDS FOR CLIENTS */
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredInventory.map(p => {
-                    const cost = p.costPrice || 0;
-                    const profit = p.price - cost;
-                    return (
-                      <motion.div 
+                  {filteredInventory.map(p => (
+                    <motion.div 
                         layout
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ y: -10, scale: 1.02 }}
                         key={p.id} 
-                        className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100 hover:shadow-2xl transition-all group overflow-hidden relative"
+                        className={`bg-white rounded-[3rem] p-6 border-2 transition-all group relative ${p.stock < 5 ? 'border-red-100 shadow-[0_20px_50px_rgba(239,68,68,0.1)]' : 'border-gray-50 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_40px_80px_rgba(20,51,201,0.1)]'}`}
                       >
-                         <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
-                           <button 
-                              onClick={() => { setEditingProduct(p); setImagePreview(p.image); setActiveTab("productos"); }}
-                              className="p-3 bg-white/80 backdrop-blur-md text-gray-400 rounded-2xl hover:text-blue-infositel hover:scale-110 transition-all shadow-sm"
-                            >
-                              <Edit3 size={18} />
-                            </button>
+                         {/* Low Stock Badge */}
+                         {p.stock < 5 && (
+                           <div className="absolute top-6 left-6 z-20 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-full animate-bounce shadow-lg shadow-red-500/40">
+                             STOCK BAJO ⚠️
+                           </div>
+                         )}
+
+                         <div className="absolute top-6 right-6 z-20 flex flex-col gap-2">
                             <button 
-                              onClick={() => {
-                                setCalcTargetId(p.id);
-                                setCalcCost((p.costPrice || 0).toString());
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              }}
-                              className={`p-3 backdrop-blur-md rounded-2xl hover:scale-110 transition-all shadow-sm ${calcTargetId === p.id ? 'bg-blue-infositel text-white' : 'bg-white/80 text-blue-500'}`}
-                            >
-                              <CalculatorIcon size={18} />
-                            </button>
+                               onClick={() => { setEditingProduct(p); setImagePreview(p.image); setActiveTab("productos"); }}
+                               className="p-3 bg-white/90 backdrop-blur-md text-gray-400 rounded-2xl hover:text-blue-infositel hover:scale-110 transition-all border border-gray-100 shadow-sm"
+                             >
+                               <Edit3 size={18} />
+                             </button>
+                             <button 
+                               onClick={() => {
+                                 setCalcTargetId(p.id);
+                                 setCalcCost((p.costPrice || 0).toString());
+                                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                               }}
+                               className={`p-3 backdrop-blur-md rounded-2xl hover:scale-110 transition-all border shadow-sm ${calcTargetId === p.id ? 'bg-blue-infositel text-white border-blue-500' : 'bg-white/90 text-blue-500 border-gray-100'}`}
+                             >
+                               <CalculatorIcon size={18} />
+                             </button>
                          </div>
                          
-                         <div className="relative h-64 w-full bg-white rounded-[2rem] overflow-hidden mb-6 border border-gray-100 p-6 group-hover:scale-[1.02] transition-transform duration-500">
-                           <Image src={p.image} alt={p.name} fill className="object-contain" />
-                           <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                         <div className="relative h-64 w-full bg-gray-50 rounded-[2.5rem] overflow-hidden mb-8 border border-gray-100 p-8 group-hover:bg-white transition-colors duration-500">
+                           <motion.div 
+                              whileHover={{ scale: 1.1, rotate: 2 }}
+                              className="relative h-full w-full"
+                           >
+                              <Image src={p.image} alt={p.name} fill className="object-contain" />
+                           </motion.div>
+                           <div className="absolute inset-0 bg-gradient-to-t from-blue-infositel/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                          </div>
 
-                         <div className="space-y-4">
+                         <div className="space-y-6">
                            <div>
-                             <p className="text-[10px] font-black text-blue-infositel uppercase tracking-[0.2em] mb-1">{p.category}</p>
-                             <h4 className="text-lg font-black text-gray-800 leading-tight group-hover:text-blue-infositel transition-colors">{p.name}</h4>
-                             <div className="mt-2 relative">
-                               <p className={`text-[10px] text-gray-400 font-bold leading-relaxed ${expandedInventario.includes(p.id) ? '' : 'line-clamp-2'}`}>
+                             <div className="flex items-center gap-2 mb-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-infositel" />
+                                <p className="text-[10px] font-black text-blue-infositel uppercase tracking-[0.2em]">{p.category}</p>
+                             </div>
+                             <h4 className="text-xl font-extrabold text-gray-900 leading-tight group-hover:text-blue-infositel transition-colors">{p.name}</h4>
+                             <div className="mt-3 relative">
+                               <p className={`text-[11px] text-gray-400 font-bold leading-relaxed ${expandedInventario.includes(p.id) ? '' : 'line-clamp-2'}`}>
                                  {p.description}
                                </p>
                                {p.description.length > 50 && (
-                                  <button onClick={() => toggleInventario(p.id)} className="text-[9px] font-black text-blue-infositel/50 uppercase mt-1 hover:text-blue-infositel transition-colors">
-                                    {expandedInventario.includes(p.id) ? 'Ver menos' : 'Ver detalles +'}
+                                  <button onClick={() => toggleInventario(p.id)} className="text-[10px] font-black text-blue-infositel/40 mt-1 hover:text-blue-infositel transition-colors flex items-center gap-1 group/expand">
+                                    {expandedInventario.includes(p.id) ? 'Cerrar' : 'Detalles completos'}
+                                    <ChevronRight size={10} className={`transition-transform ${expandedInventario.includes(p.id) ? '-rotate-90' : 'rotate-90'}`} />
                                   </button>
                                )}
                             </div>
                            </div>
 
-                           <div className="flex items-end justify-between gap-4 pt-2">
-                             <div className="bg-white/50 backdrop-blur-sm border border-white p-3 rounded-2xl flex-1">
-                               <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Precio Venta</p>
+                           <div className="flex items-center justify-between gap-4">
+                             <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-100 p-4 rounded-[1.8rem] flex-1">
+                               <p className="text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest">P. Venta</p>
                                <div className="flex items-baseline gap-1">
                                  <span className="text-blue-infositel font-black text-xs">S/.</span>
-                                 <span className="text-2xl font-black text-gray-900">{p.price.toFixed(2)}</span>
+                                 <span className="text-3xl font-black text-gray-900 tracking-tighter">{p.price.toFixed(2)}</span>
                                </div>
-                               {p.onSale && <span className="text-[10px] font-black text-green-500 bg-green-50 px-2 py-0.5 rounded-full mt-1 inline-block">EN OFERTA 🔥</span>}
+                               {p.onSale && <span className="text-[9px] font-black text-green-500 bg-green-50 px-2 py-0.5 rounded-lg mt-2 inline-block ring-1 ring-green-100">OFERTA ACTIVA 🔥</span>}
                              </div>
 
-                             <div className="bg-blue-infositel text-white p-3 rounded-2xl min-w-[100px] text-center shadow-lg shadow-blue-500/20">
-                               <p className="text-[10px] font-black text-blue-200 uppercase mb-1">Stock Disp.</p>
+                             <div className={`p-4 rounded-[1.8rem] min-w-[110px] text-center shadow-xl transition-all duration-500 ${p.stock < 5 ? 'bg-red-500 text-white shadow-red-500/30 ring-4 ring-red-50' : 'bg-blue-infositel text-white shadow-blue-500/30'}`}>
+                               <p className="text-[9px] font-black opacity-60 uppercase mb-1 tracking-widest">Stock</p>
                                <div className="flex items-center justify-center gap-2">
-                                 <button onClick={() => inlineUpdateProductAction(p.id, { stock: Math.max(0, p.stock - 1) }).then(loadData)} className="hover:scale-125 transition-transform"><Trash2 size={12} className="text-blue-300"/></button>
-                                 <span className="text-xl font-black">{p.stock}</span>
-                                 <button onClick={() => inlineUpdateProductAction(p.id, { stock: p.stock + 1 }).then(loadData)} className="hover:scale-125 transition-transform"><Plus size={12} className="text-blue-300"/></button>
+                                 <button onClick={() => inlineUpdateProductAction(p.id, { stock: Math.max(0, p.stock - 1) }).then(loadData)} className="hover:scale-125 transition-transform"><Trash2 size={12}/></button>
+                                 <span className="text-2xl font-black tracking-tighter">{p.stock}</span>
+                                 <button onClick={() => inlineUpdateProductAction(p.id, { stock: p.stock + 1 }).then(loadData)} className="hover:scale-125 transition-transform"><Plus size={12}/></button>
                                </div>
                              </div>
                            </div>
                            
-                           <div className="grid grid-cols-2 gap-3 pt-2">
-                              <div className="bg-gray-100/50 p-2.5 rounded-2xl border border-gray-100 leading-none">
-                                <p className="text-[10px] font-black text-gray-400 uppercase mb-0.5">Costo Unit.</p>
-                                <p className="font-bold text-gray-600 text-sm">S/. {(p.costPrice || 0).toFixed(2)}</p>
-                              </div>
-                              <button 
+                           <div className="flex items-center gap-3 pt-2">
+                               <div className="bg-gray-100/50 p-3 rounded-2xl border border-gray-100 flex-1">
+                                 <p className="text-[9px] font-black text-gray-400 uppercase mb-0.5 tracking-widest">Costo Unit.</p>
+                                 <p className="font-bold text-gray-600">S/. {(p.costPrice || 0).toFixed(2)}</p>
+                               </div>
+                               <button 
                                  onClick={() => quickSale(p)}
-                                 className="bg-green-500 text-white rounded-2xl flex flex-col items-center justify-center gap-0.5 hover:bg-green-600 transition-all shadow-lg shadow-green-500/20"
+                                 className="bg-green-500 text-white h-[58px] px-8 rounded-2xl flex items-center justify-center gap-2 hover:bg-green-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-green-500/20 group/vender"
                                >
-                                 <p className="text-[9px] font-black uppercase tracking-tighter">Vender</p>
-                                 <ShoppingCart size={14} />
+                                 <span className="font-extrabold text-sm uppercase tracking-widest">Vender</span>
+                                 <ShoppingCart size={18} className="group-hover/vender:animate-bounce" />
                                </button>
-                           </div>
+                            </div>
                          </div>
                       </motion.div>
-                    );
                   })}
                 </div>
               )}
