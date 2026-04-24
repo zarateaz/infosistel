@@ -33,8 +33,7 @@ echo "✅ Código actualizado: $(git log --oneline -1)"
 # ── 3. Preparar Base de Datos y Dependencias ──
 echo "📦 [3/7] Instalando dependencias y sincronizando Base de Datos..."
 npm install --production=false --silent
-npx prisma generate
-DATABASE_URL="file:$APP_DIR/prisma/dev.db" npx prisma db push --accept-data-loss
+DATABASE_URL="file:$APP_DIR/prisma/dev.db" npx prisma generate
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
@@ -60,10 +59,12 @@ echo "✅ Build completado"
 echo "📂 [5/7] Copiando assets al directorio standalone..."
 cp -r .next/static    .next/standalone/.next/static
 cp -r public/.        .next/standalone/public/
+mkdir -p .next/standalone/prisma
+cp prisma/dev.db .next/standalone/prisma/dev.db || true
 echo "✅ Assets copiados"
 
 # ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
-echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3002)..."
+echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3001)..."
 # Usar npx para asegurar que pm2 se encuentre si no está en el PATH global
 npx pm2 restart "$PM2_NAME" || npx pm2 start ecosystem.config.js
 npx pm2 save
@@ -102,7 +103,7 @@ echo ""
 npx pm2 list
 echo ""
 echo "📊 Estado de servicios:"
-echo "  • App:   http://localhost:3002 (PM2)"
+echo "  • App:   http://localhost:3001 (PM2)"
 echo "  • Web:   http://$(curl -s ifconfig.me 2>/dev/null || echo 'tu-ip') (Nginx/Apache)"
 echo "  • Nginx: $(systemctl is-active nginx 2>/dev/null || echo 'desconocido')"
 echo ""

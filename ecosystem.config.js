@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "infosistel",
       script: ".next/standalone/server.js",
-      cwd: "/home/zarate/infosistel",
+      cwd: "./",
       instances: 1,
       exec_mode: "fork",
       autorestart: true,
@@ -11,8 +11,8 @@ module.exports = {
       max_memory_restart: "1G",
       env: {
         NODE_ENV: "production",
-        DATABASE_URL: "file:/home/zarate/infosistel/prisma/dev.db",
-        PORT: 3002,
+        DATABASE_URL: "file:./prisma/dev.db",
+        PORT: 3001,
         HOSTNAME: "0.0.0.0",
         // IMPORTANTE: JWT en este bloque 'env' (no env_production) para PM2
         JWT_SECRET: "infosistel-jwt-super-secret-key-2026!!",
