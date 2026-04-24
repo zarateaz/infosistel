@@ -45,9 +45,9 @@ sudo chmod 755 /home/zarate || true
 sudo chmod 755 "$APP_DIR" || true
 sudo chmod 755 "$APP_DIR/public" || true
 
-# Asegurar que el directorio de uploads exista y tenga permisos de escritura
-mkdir -p public/uploads
-sudo chmod -R 777 public/uploads || true
+# Asegurar que el directorio de uploads persistente (fuera del build) exista y sea accesible
+mkdir -p data/uploads
+sudo chmod -R 777 data/uploads || true
 sudo chmod 777 prisma || true
 sudo chmod 666 prisma/dev.db || true
 
@@ -69,9 +69,10 @@ else
     echo "✅ Base de datos de producción existente. SALVAGUARDADA (no se sobrescribirá)."
 fi
 
-# PREVENIR PÉRDIDA DE IMÁGENES: Asegurar que uploads antiguos sobrevivan (por si public/. sobrescribió con vacío)
+# PREVENIR PÉRDIDA DE IMÁGENES: Sincronizar public/uploads con data/uploads (VPS persistence)
 if [ -d "public/uploads" ]; then
-    cp -rn public/uploads/* .next/standalone/public/uploads/ 2>/dev/null || true
+    echo "🔄 Sincronizando imágenes de public/uploads a data/uploads..."
+    cp -rn public/uploads/* data/uploads/ 2>/dev/null || true
 fi
 echo "✅ Assets copiados y data salvaguardada"
 
