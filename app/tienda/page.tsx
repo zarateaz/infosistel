@@ -309,7 +309,6 @@ export default function StorePage() {
             </div>
           )}
         </div>
-      </div>
 
       {/* Cart Drawer */}
       <AnimatePresence>
