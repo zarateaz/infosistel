@@ -233,51 +233,57 @@ export default function StorePage() {
                       {p.name}
                     </h3>
                   </div>
-                  {/* 💎 Refined Feature List / Description */}
-                  <div className="my-5 min-h-[110px] flex flex-col justify-start relative group/desc transition-all duration-500">
-                    {p.description.includes("*") || p.description.includes("\n") ? (
-                      <ul className="space-y-1.5 h-full">
-                        {(expandedProducts.includes(p.id) 
-                          ? p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2)
-                          : p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 2).slice(0, 3)
-                        ).map((text: string, i: number) => (
-                          <motion.li 
-                            key={i}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="flex items-start gap-2 text-[10px] leading-relaxed font-bold text-slate-500"
-                          >
-                            <span className="mt-1.5 w-1 h-1 rounded-full bg-blue-infositel/30 shrink-0" />
-                            <span>{text.trim()}</span>
-                          </motion.li>
-                        ))}
-                        {p.description.split(/[\*\n]/).length > 3 && (
-                           <button 
-                             onClick={() => setExpandedProducts(prev => 
-                               prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
-                             )}
-                             className="text-[9px] font-black text-blue-infositel/60 mt-2 uppercase tracking-widest hover:text-blue-infositel transition-colors border-b border-blue-infositel/10 w-fit"
-                           >
-                             {expandedProducts.includes(p.id) ? "Ver menos" : "Ver más detalles +"}
-                           </button>
+                  {/* 💎 Refined Interactive Description Section */}
+                  <div className="my-5 min-h-[110px] flex flex-col justify-start relative group/desc transition-all duration-700 ease-in-out">
+                    <AnimatePresence initial={false}>
+                      <motion.div
+                        key={expandedProducts.includes(p.id) ? 'expanded' : 'collapsed'}
+                        initial={{ opacity: 0, height: 80 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        {p.description.includes("*") || p.description.includes("\n") ? (
+                          <ul className="space-y-2">
+                             {(expandedProducts.includes(p.id) 
+                               ? p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 1)
+                               : p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 1).slice(0, 3)
+                             ).map((text: string, i: number) => (
+                               <motion.li 
+                                 key={i}
+                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                 className="flex items-start gap-2.5 text-[11px] leading-relaxed font-bold text-slate-500"
+                               >
+                                 <span className="mt-2 w-1 h-1 rounded-full bg-blue-infositel shrink-0 shadow-[0_0_5px_rgba(20,51,201,0.3)]" />
+                                 <span className="flex-1">{text.trim()}</span>
+                               </motion.li>
+                             ))}
+                          </ul>
+                        ) : (
+                          <p className={`text-slate-500 text-[12px] leading-relaxed font-semibold ${expandedProducts.includes(p.id) ? '' : 'line-clamp-3'}`}>
+                             {p.description}
+                          </p>
                         )}
-                      </ul>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className={`text-slate-400 text-[11px] leading-relaxed font-medium ${expandedProducts.includes(p.id) ? '' : 'line-clamp-3'}`}>
-                          {p.description}
-                        </p>
-                        {p.description.length > 80 && (
-                          <button 
-                            onClick={() => setExpandedProducts(prev => 
-                               prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
-                            )}
-                            className="text-[9px] font-black text-blue-infositel/60 uppercase tracking-widest hover:text-blue-infositel transition-colors border-b border-blue-infositel/10 w-fit"
-                          >
-                            {expandedProducts.includes(p.id) ? "Menos" : "Más"}
-                          </button>
-                        )}
-                      </div>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {(p.description.split(/[\*\n]/).length > 3 || p.description.length > 90) && (
+                       <button 
+                         onClick={() => setExpandedProducts(prev => 
+                           prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                         )}
+                         className="mt-3 flex items-center gap-2 group/more"
+                       >
+                         <span className="text-[10px] font-black text-blue-infositel uppercase tracking-widest border-b-2 border-blue-infositel/10 group-hover/more:border-blue-infositel transition-all">
+                           {expandedProducts.includes(p.id) ? "Mostrar menos ▲" : "Ver detalles completos ▼"}
+                         </span>
+                         <motion.div
+                            animate={{ y: expandedProducts.includes(p.id) ? 0 : [0, 3, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                         >
+                            <ChevronRight size={10} className={`text-blue-infositel transition-transform duration-300 ${expandedProducts.includes(p.id) ? '-rotate-90' : 'rotate-90'}`} />
+                         </motion.div>
+                       </button>
                     )}
                   </div>
                   
