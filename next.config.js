@@ -16,6 +16,9 @@ const nextConfig = {
 
   // ── HTTP Security Headers ──
   async headers() {
+    // Solo aplicar cabeceras de seguridad estrictas en producción para no romper el modo dev (HMR)
+    if (process.env.NODE_ENV !== "production") return [];
+
     return [
       {
         // Apply to all routes
@@ -99,7 +102,9 @@ const nextConfig = {
       : false,
   },
 
-  experimental: {},
+  experimental: {
+    allowedDevOrigins: ["127.0.0.1", "localhost"],
+  },
 };
 
 module.exports = nextConfig;
