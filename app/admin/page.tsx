@@ -19,7 +19,8 @@ import {
   getOrders, deleteOrder as deleteOrderAction,
   getUsers, addUser as addUserAction, deleteUser,
   toggleProductOffer, editProduct as editProductAction, inlineUpdateProduct as inlineUpdateProductAction,
-  getSales, getSaleStats, addSaleAction, deleteSaleAction
+  getSales, getSaleStats, addSaleAction, deleteSaleAction,
+  updateCategory as updateCategoryAction
 } from "./actions";
 
 export default function AdminPage() {
@@ -61,6 +62,9 @@ export default function AdminPage() {
   const [sales, setSales] = useState<any[]>([]);
   const [saleStats, setStats] = useState<any>(null);
   const [newSale, setNewSale] = useState({ pName: "", price: "", costPrice: "", quantity: 1, category: "", productId: "", subtractStock: true });
+  
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [editCategoryValue, setEditCategoryValue] = useState("");
   
   // Feedback states
   const [showProductSuccess, setShowProductSuccess] = useState(false);
@@ -144,6 +148,24 @@ export default function AdminPage() {
     } catch {
       loadData();
       alert("❌ Error al eliminar categoría.");
+    }
+  };
+  const saveCategoryEdit = async (id: string) => {
+    if (!editCategoryValue) { setEditingCategory(null); return; }
+    const newName = editCategoryValue.trim().toUpperCase();
+    
+    // Optimistic UI
+    setCategories(prev => prev.map(c => c.id === id ? { ...c, name: newName } : c));
+    setProducts(prev => prev.map(p => p.category === categories.find(x => x.id === id)?.name ? { ...p, category: newName } : p));
+    setEditingCategory(null);
+    setShowCategorySuccess(true);
+    setTimeout(() => setShowCategorySuccess(false), 2000);
+
+    try {
+      await updateCategoryAction(id, newName);
+    } catch (err: any) {
+      loadData();
+      alert("⚠️ Error al actualizar categoría: " + err.message);
     }
   };
 
@@ -1161,16 +1183,39 @@ export default function AdminPage() {
                 </button>
               </div>
             </div>
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+             <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
               <div className="flex flex-wrap gap-3">
                 {categories.map(c => (
-                  <div key={c.id} className="flex items-center gap-3 bg-gray-50 px-5 py-3 rounded-2xl border border-gray-100 group">
-                    <span className="font-bold text-sm">{c.name}</span>
-                    {c.name !== "Todos" && (
-                      <button onClick={() => setConfirmDelete({ type: "category", id: c.id })}
-                        className="text-gray-300 hover:text-red-500 transition-colors">
-                        <X size={16} />
-                      </button>
+                  <div key={c.id} className="flex items-center gap-3 bg-gray-50 px-5 py-3 rounded-2xl border border-gray-100 group transition-all hover:border-blue-100">
+                    {editingCategory === c.id ? (
+                      <div className="flex items-center gap-2">
+                        <input 
+                          autoFocus
+                          type="text" 
+                          className="bg-white border border-blue-200 rounded-lg px-2 py-1 text-sm font-bold outline-none uppercase"
+                          value={editCategoryValue}
+                          onChange={e => setEditCategoryValue(e.target.value)}
+                          onKeyDown={e => e.key === "Enter" && saveCategoryEdit(c.id)}
+                          onBlur={() => saveCategoryEdit(c.id)}
+                        />
+                        <button onClick={() => saveCategoryEdit(c.id)} className="text-green-500"><CheckCircle size={16} /></button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="font-bold text-sm">{c.name}</span>
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => { setEditingCategory(c.id); setEditCategoryValue(c.name); }}
+                            className="text-gray-400 hover:text-blue-500 transition-colors">
+                            <Edit3 size={14} />
+                          </button>
+                          {c.name !== "Todos" && (
+                            <button onClick={() => setConfirmDelete({ type: "category", id: c.id })}
+                              className="text-gray-300 hover:text-red-500 transition-colors">
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 ))}

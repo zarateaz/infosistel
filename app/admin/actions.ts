@@ -142,6 +142,33 @@ export async function deleteCategory(id: string) {
   return prisma.category.delete({ where: { id } });
 }
 
+export async function updateCategory(id: string, newName: string) {
+  await ensureAuth();
+  const normalizedName = newName.trim().toUpperCase();
+  
+  // 1. Obtener el nombre actual para actualizar productos después
+  const oldCategory = await prisma.category.findUnique({ where: { id } });
+  if (!oldCategory) throw new Error("Categoría no encontrada");
+
+  // 2. Verificar que el nombre nuevo no exista ya
+  const existing = await prisma.category.findUnique({ where: { name: normalizedName } });
+  if (existing && existing.id !== id) throw new Error("Ya existe otra categoría con este nombre");
+
+  // 3. Actualizar la categoría
+  const updated = await prisma.category.update({
+    where: { id },
+    data: { name: normalizedName }
+  });
+
+  // 4. Actualizar todos los productos que usaban el nombre viejo (Sincronización)
+  await prisma.product.updateMany({
+    where: { category: oldCategory.name },
+    data: { category: normalizedName }
+  });
+
+  return updated;
+}
+
 // --- Repairs ---
 export async function getRepairs() {
   await ensureAuth();
