@@ -56,23 +56,22 @@ sudo chmod 666 data/dev.db || true
 # Generar Prisma Client usando la ruta persistente
 DATABASE_URL="file:$APP_DIR/data/dev.db" npx prisma generate
 
-# Crear enlace simbólico de public/uploads a data/uploads si no existe (para modo dev)
-if [ ! -L "public/uploads" ]; then
-    echo "🔗 Creando enlace simbólico public/uploads -> data/uploads..."
-    # Si public/uploads es una carpeta real, mover contenidos primero
-    if [ -d "public/uploads" ]; then
-        cp -rn public/uploads/* data/uploads/ 2>/dev/null || true
-        rm -rf public/uploads
-    fi
-    ln -s ../data/uploads public/uploads
-fi
-
-
+# Asegurar permisos de carpetas críticas
 sudo chmod 777 data || true
+sudo chmod 777 data/uploads || true
 sudo chmod 666 data/dev.db || true
 
-npm run build
+# ── 4. Build de producción ──
+echo "🔨 [4/7] Construyendo en producción..."
+git config --global --add safe.directory "$APP_DIR" || true
+rm -rf .next
 
+# Asegurar que los directorios padres permitan el paso (traversal) para otros usuarios (Nginx/PM2)
+sudo chmod 755 /home/zarate || true
+sudo chmod 755 "$APP_DIR" || true
+sudo chmod 755 "$APP_DIR/public" || true
+
+npm run build
 echo "✅ Build completado"
 
 # ── 5. Copiar assets al standalone ──
@@ -86,18 +85,18 @@ mkdir -p .next/standalone/data
 ln -snf ../../../data/dev.db .next/standalone/data/dev.db || true
 echo "✅ Base de datos vinculada al standalone"
 
-# PREVENIR PÉRDIDA DE IMÁGENES Y ASEGURAR CARGA EN PUERTO 3000
-echo "🔄 Sincronizando y vinculando imágenes para máxima compatibilidad..."
-# 1. Sincronizar por si acaso quedaron archivos en el public original
-if [ -d "public/uploads" ] && [ ! -L "public/uploads" ]; then
+# PERSISTENCIA TOTAL DE IMÁGENES
+echo "🔄 Sincronizando imágenes y vinculando base de datos..."
+# Sincronizar por si acaso
+if [ -d "public/uploads" ]; then
     cp -rn public/uploads/* data/uploads/ 2>/dev/null || true
 fi
 
-# 2. Vincular data/uploads dentro del standalone usando RUTA ABSOLUTA para evitar fallos de profundidad
-rm -rf .next/standalone/public/uploads
-ln -s "$APP_DIR/data/uploads" .next/standalone/public/uploads
+# Vinculamos la base de datos dentro del standalone
+mkdir -p .next/standalone/data
+ln -snf "$APP_DIR/data/dev.db" .next/standalone/data/dev.db || true
 
-echo "✅ Enlaces simbólicos (Rutas Absolutas) creados y data salvaguardada"
+echo "✅ Sistema de persistencia vinculado"
 
 # ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
 echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3001)..."
