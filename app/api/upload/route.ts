@@ -61,9 +61,8 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
     const uniqueName = `${Date.now()}-${sanitizedName}`;
 
-    // 5. Directorio de uploads — ruta absoluta
-    // Nota: En el VPS 'public/uploads' es un enlace simbólico a 'data/uploads'
-    const uploadDir = join(process.cwd(), "public", "uploads");
+    // 5. Directorio de uploads — ruta absoluta persistente
+    const uploadDir = join(process.cwd(), "data", "uploads");
     
     try {
       await mkdir(uploadDir, { recursive: true });
