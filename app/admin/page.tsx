@@ -61,6 +61,10 @@ export default function AdminPage() {
   const [sales, setSales] = useState<any[]>([]);
   const [saleStats, setStats] = useState<any>(null);
   const [newSale, setNewSale] = useState({ pName: "", price: "", costPrice: "", quantity: 1, category: "", productId: "", subtractStock: true });
+  
+  // Feedback states
+  const [showProductSuccess, setShowProductSuccess] = useState(false);
+  const [showCategorySuccess, setShowCategorySuccess] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -108,17 +112,27 @@ export default function AdminPage() {
 
   const addCategory = async () => {
     if (!newCategory) return;
-    try {
-      await addCategoryAction(newCategory);
+    const catName = newCategory.trim().toUpperCase();
+    
+    // Optimistic UI
+    if (categories.some(c => c.name === catName)) {
       setNewCategory("");
-      await loadData(); // Recargar lista inmediatamente
-      alert("✅ Categoría '" + newCategory.toUpperCase() + "' lista para usar.");
+      return;
+    }
+
+    const tempId = Date.now().toString();
+    setCategories(prev => [...prev, { id: tempId, name: catName }]);
+    setNewCategory("");
+    setShowCategorySuccess(true);
+    setTimeout(() => setShowCategorySuccess(false), 3000);
+
+    try {
+      await addCategoryAction(catName);
+      // No necesitamos recargar todo, ya lo añadimos.
     } catch (err: any) {
-      if (err.message.includes("ya existe")) {
-        alert("ℹ️ La categoría '" + newCategory.toUpperCase() + "' ya está en la lista. Búscala en el selector de abajo.");
-        setNewCategory("");
-      } else {
-        alert("⚠️ Error: " + err.message);
+      loadData(); // Revertir si hay error
+      if (!err.message.includes("ya existe")) {
+         alert("⚠️ Error: " + err.message);
       }
     }
   };
@@ -148,7 +162,8 @@ export default function AdminPage() {
       setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
       setImagePreview(null);
       await loadData();
-      alert("¡PRODUCTO GUARDADO CON ÉXITO! 🚀✨");
+      setShowProductSuccess(true);
+      setTimeout(() => setShowProductSuccess(false), 3000);
     } catch (err: any) {
       alert("⚠️ Error al guardar: " + (err.message || "Falla de red"));
     } finally {
@@ -162,7 +177,8 @@ export default function AdminPage() {
       setEditingProduct(null);
       setImagePreview(null);
       loadData();
-      alert("¡Cambios guardados con éxito! ✅");
+      setShowProductSuccess(true);
+      setTimeout(() => setShowProductSuccess(false), 3000);
     } catch (err: any) {
       alert("Error al editar producto: " + (err.message || "Error desconocido"));
     }
@@ -1044,7 +1060,7 @@ export default function AdminPage() {
                     className={`w-full py-5 rounded-[2rem] font-black transition-all flex items-center justify-center gap-3 shadow-xl 
                       ${isUploading || isBatchLoading 
                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                        : 'bg-black text-white hover:bg-blue-infositel active:scale-95 shadow-black/10'}`}
+                        : showProductSuccess ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-black text-white hover:bg-blue-infositel active:scale-95 shadow-black/10'}`}
                   >
                     {isBatchLoading ? (
                       <>
@@ -1055,6 +1071,11 @@ export default function AdminPage() {
                       <>
                         <Loader2 className="animate-spin" size={20} />
                         <span className="text-xs uppercase tracking-widest">Subiendo Foto...</span>
+                      </>
+                    ) : showProductSuccess ? (
+                      <>
+                        <CheckCircle size={20} />
+                        <span className="text-xs uppercase tracking-widest">Guardado con Éxito</span>
                       </>
                     ) : (
                       <span className="text-sm uppercase tracking-widest">Guardar Producto</span>
@@ -1135,8 +1156,8 @@ export default function AdminPage() {
                   value={newCategory} onChange={e => setNewCategory(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && addCategory()} />
                 <button onClick={addCategory}
-                  className="bg-blue-infositel text-white px-6 rounded-2xl font-black hover:bg-blue-700 transition-all text-sm whitespace-nowrap">
-                  Añadir
+                  className={`px-6 rounded-2xl font-black transition-all text-sm whitespace-nowrap flex items-center gap-2 ${showCategorySuccess ? 'bg-blue-600 text-white shadow-lg' : 'bg-blue-infositel text-white hover:bg-blue-700'}`}>
+                  {showCategorySuccess ? <><CheckCircle size={16} /> Listo</> : "Añadir"}
                 </button>
               </div>
             </div>
