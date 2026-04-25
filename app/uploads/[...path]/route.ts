@@ -5,11 +5,11 @@ import { existsSync } from "fs";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  // 1. Obtener la ruta del archivo solicitado
-  // params.path será un array con las partes de la URL, ej: ["123-foto.jpg"]
-  const fileName = params.path.join("/");
+  // 1. Obtener la ruta del archivo solicitado (Awaiting params para Next.js 15+)
+  const { path: pathSegments } = await params;
+  const fileName = pathSegments.join("/");
   
   // 2. Definir la ruta absoluta en la carpeta persistente 'data/uploads'
   const filePath = join(process.cwd(), "data", "uploads", fileName);
