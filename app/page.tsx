@@ -151,26 +151,32 @@ function MagicalOrbitalShowcase({
                     flex flex-col items-center justify-center overflow-hidden
                   ">
                     {/* Floating Price Tag (THE 'PRO' ETIQUETA) */}
-                    <div className="absolute top-4 right-4 z-20">
-                      <div className="bg-blue-infositel text-white px-3 py-1 rounded-full text-[10px] font-black shadow-lg translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <div className="absolute top-2 right-2 z-20">
+                      <div className="bg-blue-infositel/10 backdrop-blur-md text-blue-infositel border border-blue-infositel/20 px-2 py-0.5 rounded-full text-[8px] font-black group-hover:bg-blue-infositel group-hover:text-white transition-colors duration-500">
                         S/. {product.salePrice || product.price}
                       </div>
                     </div>
 
+                    {/* PERSISTENT PRODUCT LABEL (MAX 10 CHARS) */}
+                    <div className="absolute top-4 inset-x-0 text-center px-4 z-20">
+                      <p className="text-[10px] font-black text-gray-800 uppercase tracking-tighter truncate leading-none">
+                        {product.name.length > 10 ? product.name.substring(0, 10) + "..." : product.name}
+                      </p>
+                    </div>
+
                     {/* Product Image */}
-                    <div className="relative w-32 h-32 z-10 transition-transform duration-700 group-hover:scale-110 group-hover:-translate-y-3">
+                    <div className="relative w-28 h-28 z-10 transition-transform duration-700 group-hover:scale-110 group-hover:translate-y-2">
                       <Image 
                         src={product.image} 
                         alt={product.name} 
                         fill 
-                        className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.2)]" 
+                        className="object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.15)]" 
                       />
                     </div>
                     
-                    {/* Info Overlay */}
-                    <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-white via-white/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col items-center">
-                      <span className="text-[9px] font-black text-blue-infositel uppercase tracking-[0.3em] mb-1">{product.category}</span>
-                      <h4 className="text-[11px] font-bold text-gray-900 truncate w-full text-center">{product.name}</h4>
+                    {/* Info Overlay (Secondary info on hover) */}
+                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-blue-infositel/5 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col items-center">
+                      <span className="text-[7px] font-black text-blue-infositel uppercase tracking-[0.4em]">{product.category}</span>
                     </div>
 
                     {/* Cyber-Glass Shine */}
