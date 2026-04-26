@@ -12,7 +12,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         DATABASE_URL: "file:data/dev.db",
-        PORT: 3001,
+        PORT: 3000,
         HOSTNAME: "0.0.0.0",
         // IMPORTANTE: JWT en este bloque 'env' (no env_production) para PM2
         JWT_SECRET: "infosistel-jwt-super-secret-key-2026!!",

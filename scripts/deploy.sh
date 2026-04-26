@@ -85,26 +85,19 @@ mkdir -p .next/standalone/data
 ln -snf ../../../data/dev.db .next/standalone/data/dev.db || true
 echo "✅ Base de datos vinculada al standalone"
 
-# PERSISTENCIA TOTAL DE IMÁGENES Y ASSETS PÚBLICOS
-echo "🔄 Sincronizando assets públicos en /var/www/infosistel..."
-sudo mkdir -p /var/www/infosistel/_next/static
-sudo mkdir -p /var/www/infosistel/uploads
-sudo mkdir -p /var/www/infosistel/public/img
+# PERSISTENCIA Y ASSETS
+echo "🔄 Asegurando permisos de datos..."
+sudo mkdir -p data/uploads
+sudo chmod -R 777 data || true
 
-# Copiar archivos a zona pública con estructura Next.js
-sudo cp -r .next/static/. /var/www/infosistel/_next/static/
-sudo cp -r data/uploads/. /var/www/infosistel/uploads/
-sudo cp -r public/img/. /var/www/infosistel/public/img/
-sudo cp -r public/favicon.ico /var/www/infosistel/favicon.ico 2>/dev/null || true
+# Vinculamos la base de datos dentro del standalone
+mkdir -p .next/standalone/data
+ln -snf "$APP_DIR/data/dev.db" .next/standalone/data/dev.db || true
 
-# Asegurar permisos en zona pública
-sudo chown -R nginx:nginx /var/www/infosistel 2>/dev/null || sudo chown -R http:http /var/www/infosistel 2>/dev/null || sudo chown -R www-data:www-data /var/www/infosistel 2>/dev/null
-sudo chmod -R 755 /var/www/infosistel
-
-echo "✅ Sistema de persistencia y assets públicos vinculados"
+echo "✅ Sistema de persistencia vinculado"
 
 # ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
-echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3001)..."
+echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3000)..."
 # Usar npx para asegurar que pm2 se encuentre si no está en el PATH global
 npx pm2 restart "$PM2_NAME" || npx pm2 start ecosystem.config.js
 npx pm2 save
@@ -143,7 +136,7 @@ echo ""
 npx pm2 list
 echo ""
 echo "📊 Estado de servicios:"
-echo "  • App:   http://localhost:3001 (PM2)"
+echo "  • App:   http://localhost:3000 (PM2)"
 echo "  • Web:   http://$(curl -s ifconfig.me 2>/dev/null || echo 'tu-ip') (Nginx/Apache)"
 echo "  • Nginx: $(systemctl is-active nginx 2>/dev/null || echo 'desconocido')"
 echo ""
