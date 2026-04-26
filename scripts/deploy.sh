@@ -87,14 +87,15 @@ echo "✅ Base de datos vinculada al standalone"
 
 # PERSISTENCIA TOTAL DE IMÁGENES Y ASSETS PÚBLICOS
 echo "🔄 Sincronizando assets públicos en /var/www/infosistel..."
-sudo mkdir -p /var/www/infosistel/static
+sudo mkdir -p /var/www/infosistel/_next/static
 sudo mkdir -p /var/www/infosistel/uploads
 sudo mkdir -p /var/www/infosistel/public/img
 
-# Copiar archivos a zona pública
-sudo cp -r .next/static/. /var/www/infosistel/static/
+# Copiar archivos a zona pública con estructura Next.js
+sudo cp -r .next/static/. /var/www/infosistel/_next/static/
 sudo cp -r data/uploads/. /var/www/infosistel/uploads/
 sudo cp -r public/img/. /var/www/infosistel/public/img/
+sudo cp -r public/favicon.ico /var/www/infosistel/favicon.ico 2>/dev/null || true
 
 # Asegurar permisos en zona pública
 sudo chown -R nginx:nginx /var/www/infosistel 2>/dev/null || sudo chown -R http:http /var/www/infosistel 2>/dev/null || sudo chown -R www-data:www-data /var/www/infosistel 2>/dev/null
