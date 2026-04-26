@@ -160,7 +160,7 @@ export default function Footer() {
                   <div className="w-8 h-8 rounded-lg bg-blue-infositel/5 flex items-center justify-center shrink-0">
                     <Mail className="text-blue-infositel" size={14} />
                   </div>
-                  <span className="text-sm text-gray-400">contacto@infositel.com</span>
+                  <span className="text-sm text-gray-400">ecaballero@hotmail.com</span>
                 </li>
               </ul>
             </div>

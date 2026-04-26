@@ -8,7 +8,7 @@ import OfferToast from "@/components/OfferToast";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Clock, Phone, Zap, Star, MapPin } from "lucide-react";
+import { ArrowRight, Clock, Phone, Zap, Star, MapPin, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getProducts } from "./admin/actions";
 
@@ -407,6 +407,13 @@ export default function Home() {
                   <div>
                     <h4 className="font-black text-xl mb-1">Teléfono / WhatsApp</h4>
                     <p className="text-gray-500 font-black text-xl">+51 964 648 202</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-8">
+                  <div className="p-5 bg-blue-50 rounded-[1.5rem] shrink-0"><Mail className="text-blue-infositel" size={28} /></div>
+                  <div>
+                    <h4 className="font-black text-xl mb-1">Correo Electrónico</h4>
+                    <p className="text-gray-500 font-bold text-lg">ecaballero@hotmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-8">
