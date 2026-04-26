@@ -33,6 +33,9 @@ function RevealText({ text, className }: { text: string; className?: string }) {
         </motion.span>
       ))}
     </h2>
+  );
+}
+
 // ── Galactic Orbital Showcase — 3 Rings of Pure Magic ──
 function MagicalOrbitalShowcase({ 
   allProducts, 
