@@ -58,6 +58,16 @@ export default function OfferToast({
     fetchRandomOffer();
   }, []);
 
+  // Auto-hide after 5 seconds of visibility
+  useEffect(() => {
+    if (visible && !dismissed) {
+      const timer = setTimeout(() => {
+        setVisible(false);
+      }, 5000); // 5 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [visible, dismissed]);
+
   if (!offer) return null;
 
   const discount = Math.round(

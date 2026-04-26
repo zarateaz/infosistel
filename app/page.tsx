@@ -36,7 +36,7 @@ function RevealText({ text, className }: { text: string; className?: string }) {
   );
 }
 
-// ── Galactic Orbital Showcase — 3 Rings of Pure Magic ──
+// ── Magical Orbital Showcase — Clean & High Impact ──
 function MagicalOrbitalShowcase({ 
   allProducts, 
   onSelect 
@@ -45,11 +45,7 @@ function MagicalOrbitalShowcase({
   onSelect: (p: Product) => void; 
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [rings, setRings] = useState<{
-    inner: Product[],
-    middle: Product[],
-    outer: Product[]
-  }>({ inner: [], middle: [], outer: [] });
+  const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
@@ -58,129 +54,94 @@ function MagicalOrbitalShowcase({
     const updateUniverse = () => {
       setIsTransitioning(true);
       setTimeout(() => {
-        const nextIdx = (currentIndex + 18) % allProducts.length;
-        const p = (start: number, count: number) => {
-          const res = [];
-          for (let i = 0; i < count; i++) {
-            res.push(allProducts[(start + i) % allProducts.length]);
-          }
-          return res;
-        };
-
-        setRings({
-          inner: p(nextIdx, 3),
-          middle: p(nextIdx + 3, 6),
-          outer: p(nextIdx + 9, 9)
-        });
+        const nextIdx = (currentIndex + 4) % allProducts.length;
+        const next = [];
+        for (let i = 0; i < 4; i++) {
+          next.push(allProducts[(nextIdx + i) % allProducts.length]);
+        }
+        setDisplayProducts(next);
         setCurrentIndex(nextIdx);
         setIsTransitioning(false);
-      }, 1000);
+      }, 600);
     };
 
-    if (rings.inner.length === 0) {
-      setRings({
-        inner: allProducts.slice(0, 3),
-        middle: allProducts.slice(3, 9),
-        outer: allProducts.slice(9, 18)
-      });
+    if (displayProducts.length === 0) {
+      setDisplayProducts(allProducts.slice(0, 4));
     }
 
-    const interval = setInterval(updateUniverse, 12000);
+    const interval = setInterval(updateUniverse, 3000); // 3 seconds cycle
     return () => clearInterval(interval);
-  }, [allProducts, currentIndex, rings.inner.length]);
+  }, [allProducts, currentIndex, displayProducts.length]);
 
-  const OrbitRing = ({ products, radius, speed, reverse = false }: { 
-    products: Product[], 
-    radius: number, 
-    speed: number,
-    reverse?: boolean 
-  }) => (
-    <div className="absolute inset-0 flex items-center justify-center">
-      {products.map((product, i) => {
-        const angleStep = 360 / products.length;
-        const baseAngle = i * angleStep;
-
-        return (
-          <motion.div
-            key={`${product.id}-${currentIndex}-${radius}`}
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ 
-              opacity: isTransitioning ? 0 : 1,
-              scale: isTransitioning ? 0 : 1,
-              rotate: reverse ? [baseAngle + 360, baseAngle] : [baseAngle, baseAngle + 360]
-            }}
-            transition={{
-              rotate: { duration: speed, repeat: Infinity, ease: "linear" },
-              opacity: { duration: 0.8 },
-              scale: { duration: 1, ease: [0.2, 0.65, 0.3, 0.9] }
-            }}
-          >
-            <div 
-              className="absolute" 
-              style={{ transform: `translateX(${radius}px)` }}
-            >
-              <motion.div
-                animate={{ rotate: reverse ? [-(baseAngle + 360), -baseAngle] : [-baseAngle, -(baseAngle + 360)] }}
-                transition={{ duration: speed, repeat: Infinity, ease: "linear" }}
-                whileHover={{ scale: 1.3, zIndex: 100 }}
-                onClick={(e) => { e.stopPropagation(); onSelect(product); }}
-                className="group relative cursor-pointer"
-              >
-                {/* Product Card with Advanced Glassmorphism */}
-                <div className="
-                  relative w-32 h-32 p-4
-                  bg-white/40 backdrop-blur-md rounded-[2rem]
-                  border border-white/40 shadow-[0_10px_30px_rgba(0,0,0,0.04)]
-                  group-hover:bg-white/90 group-hover:shadow-[0_20px_60px_rgba(20,51,201,0.2)]
-                  transition-all duration-500 flex flex-col items-center justify-center overflow-hidden
-                ">
-                  <div className="relative w-20 h-20 z-10 group-hover:scale-110 transition-transform duration-500">
-                    <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-xl" />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-infositel/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  {/* Category Badge on hover */}
-                  <div className="absolute bottom-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[7px] font-black tracking-widest text-blue-infositel uppercase">{product.category}</span>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-
-  if (!rings.inner.length) return null;
+  if (!displayProducts.length) return null;
 
   return (
-    <div className="relative w-[850px] h-[850px] flex items-center justify-center [perspective:2500px]">
+    <div className="relative w-[600px] h-[600px] flex items-center justify-center [perspective:1500px]">
       {/* ── THE CORE ── */}
-      <div className="relative z-50">
-        <motion.div
-          animate={{ 
-            scale: isTransitioning ? [1, 1.3, 1] : 1,
-            rotate: [0, 360]
-          }}
-          transition={{ 
-            scale: { duration: 1 },
-            rotate: { duration: 25, repeat: Infinity, ease: "linear" }
-          }}
-          className="w-24 h-24 bg-gradient-to-br from-blue-infositel to-indigo-900 rounded-[2rem] flex items-center justify-center shadow-[0_0_50px_rgba(20,51,201,0.4)] border border-white/20"
-        >
-          <Zap size={40} className="text-white fill-white" />
-        </motion.div>
+      <motion.div
+        animate={{ 
+          y: [0, -10, 0],
+          rotate: [0, 360]
+        }}
+        transition={{ 
+          y: { duration: 4, repeat: Infinity },
+          rotate: { duration: 30, repeat: Infinity, ease: "linear" }
+        }}
+        className="relative z-50 w-28 h-28 bg-gradient-to-br from-blue-infositel to-blue-800 rounded-[2.5rem] flex items-center justify-center shadow-[0_20px_50px_rgba(20,51,201,0.4)] border border-white/20"
+      >
+        <Zap size={48} className="text-white fill-white" />
+      </motion.div>
+
+      {/* ── 4 ORBITING PRODUCTS ── */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {displayProducts.map((product, i) => {
+          const angleStep = 360 / 4;
+          const baseAngle = i * angleStep;
+
+          return (
+            <motion.div
+              key={`${product.id}-${currentIndex}`}
+              className="absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ 
+                opacity: isTransitioning ? 0 : 1,
+                scale: isTransitioning ? 0 : 1,
+                rotate: [baseAngle, baseAngle + 360]
+              }}
+              transition={{
+                rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+                opacity: { duration: 0.4 },
+                scale: { duration: 0.6, ease: "backOut" }
+              }}
+            >
+              <div 
+                className="absolute" 
+                style={{ transform: `translateX(250px)` }}
+              >
+                <motion.div
+                  animate={{ rotate: [-baseAngle, -(baseAngle + 360)] }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  whileHover={{ scale: 1.2, zIndex: 100 }}
+                  onClick={() => onSelect(product)}
+                  className="group relative cursor-pointer"
+                >
+                  <div className="
+                    relative w-40 h-40 p-6
+                    bg-white/90 backdrop-blur-xl rounded-[2.8rem]
+                    border border-white/50 shadow-[0_15px_35px_rgba(0,0,0,0.05)]
+                    group-hover:shadow-[0_25px_60px_rgba(20,51,201,0.15)]
+                    transition-all duration-500 flex items-center justify-center
+                  ">
+                    <div className="relative w-28 h-28 z-10 transition-transform duration-500 group-hover:scale-110">
+                      <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-xl" />
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
-
-      {/* ── 3 CONCENTRIC GALAXY RINGS ── */}
-      <OrbitRing products={rings.inner} radius={180} speed={45} />
-      <OrbitRing products={rings.middle} radius={320} speed={60} reverse />
-      <OrbitRing products={rings.outer} radius={440} speed={75} />
-
-      {/* Background Ambience */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(20,51,201,0.03)_0%,_transparent_70%)] pointer-events-none" />
     </div>
   );
 }
