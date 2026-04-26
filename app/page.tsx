@@ -33,10 +33,7 @@ function RevealText({ text, className }: { text: string; className?: string }) {
         </motion.span>
       ))}
     </h2>
-  );
-}
-
-// ── Magical Orbital Showcase — Clean & High Impact ──
+// ── Magical Orbital Showcase — God Level Pro Edition ──
 function MagicalOrbitalShowcase({ 
   allProducts, 
   onSelect 
@@ -54,6 +51,7 @@ function MagicalOrbitalShowcase({
     const updateUniverse = () => {
       setIsTransitioning(true);
       setTimeout(() => {
+        // Cycle by 4, wrapping around the entire catalog
         const nextIdx = (currentIndex + 4) % allProducts.length;
         const next = [];
         for (let i = 0; i < 4; i++) {
@@ -62,37 +60,49 @@ function MagicalOrbitalShowcase({
         setDisplayProducts(next);
         setCurrentIndex(nextIdx);
         setIsTransitioning(false);
-      }, 600);
+      }, 700);
     };
 
     if (displayProducts.length === 0) {
-      setDisplayProducts(allProducts.slice(0, 4));
+      const initial = [];
+      for (let i = 0; i < 4; i++) {
+         initial.push(allProducts[i % allProducts.length]);
+      }
+      setDisplayProducts(initial);
     }
 
-    const interval = setInterval(updateUniverse, 3000); // 3 seconds cycle
+    const interval = setInterval(updateUniverse, 4500); // 4.5s for "Pro" pacing
     return () => clearInterval(interval);
   }, [allProducts, currentIndex, displayProducts.length]);
 
   if (!displayProducts.length) return null;
 
   return (
-    <div className="relative w-[600px] h-[600px] flex items-center justify-center [perspective:1500px]">
-      {/* ── THE CORE ── */}
+    <div className="relative w-[650px] h-[650px] flex items-center justify-center [perspective:2000px]">
+      {/* ── THE RESONANCE CORE ── */}
       <motion.div
         animate={{ 
-          y: [0, -10, 0],
-          rotate: [0, 360]
+          y: [0, -15, 0],
+          rotate: [0, 360],
+          boxShadow: [
+            "0 0 40px rgba(20,51,201,0.2)",
+            "0 0 80px rgba(20,51,201,0.4)",
+            "0 0 40px rgba(20,51,201,0.2)"
+          ]
         }}
         transition={{ 
-          y: { duration: 4, repeat: Infinity },
-          rotate: { duration: 30, repeat: Infinity, ease: "linear" }
+          y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+          rotate: { duration: 40, repeat: Infinity, ease: "linear" },
+          boxShadow: { duration: 3, repeat: Infinity }
         }}
-        className="relative z-50 w-28 h-28 bg-gradient-to-br from-blue-infositel to-blue-800 rounded-[2.5rem] flex items-center justify-center shadow-[0_20px_50px_rgba(20,51,201,0.4)] border border-white/20"
+        className="relative z-50 w-32 h-32 bg-gradient-to-br from-blue-infositel via-blue-600 to-indigo-900 rounded-[2.8rem] flex items-center justify-center border border-white/20"
       >
-        <Zap size={48} className="text-white fill-white" />
+        <Zap size={56} className="text-white fill-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+        {/* Orbit Path Decoration */}
+        <div className="absolute -inset-24 border border-blue-infositel/10 rounded-full animate-pulse pointer-events-none" />
       </motion.div>
 
-      {/* ── 4 ORBITING PRODUCTS ── */}
+      {/* ── 4 PRO ORBITING CARDS ── */}
       <div className="absolute inset-0 flex items-center justify-center">
         {displayProducts.map((product, i) => {
           const angleStep = 360 / 4;
@@ -102,39 +112,66 @@ function MagicalOrbitalShowcase({
             <motion.div
               key={`${product.id}-${currentIndex}`}
               className="absolute inset-0 flex items-center justify-center"
-              initial={{ opacity: 0, scale: 0 }}
+              initial={{ opacity: 0, scale: 0, scaleZ: 0 }}
               animate={{ 
                 opacity: isTransitioning ? 0 : 1,
                 scale: isTransitioning ? 0 : 1,
                 rotate: [baseAngle, baseAngle + 360]
               }}
               transition={{
-                rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-                opacity: { duration: 0.4 },
-                scale: { duration: 0.6, ease: "backOut" }
+                rotate: { duration: 35, repeat: Infinity, ease: "linear" },
+                opacity: { duration: 0.6 },
+                scale: { duration: 1, ease: [0.2, 0.65, 0.3, 0.9] }
               }}
             >
               <div 
                 className="absolute" 
-                style={{ transform: `translateX(250px)` }}
+                style={{ transform: `translateX(280px)` }}
               >
                 <motion.div
                   animate={{ rotate: [-baseAngle, -(baseAngle + 360)] }}
-                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                  whileHover={{ scale: 1.2, zIndex: 100 }}
+                  transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+                  whileHover={{ scale: 1.25, zIndex: 100 }}
                   onClick={() => onSelect(product)}
                   className="group relative cursor-pointer"
                 >
+                  {/* Glowing Energy Aura */}
+                  <div className="absolute -inset-6 bg-blue-infositel/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  
+                  {/* THE CARD FRONT */}
                   <div className="
-                    relative w-40 h-40 p-6
-                    bg-white/90 backdrop-blur-xl rounded-[2.8rem]
-                    border border-white/50 shadow-[0_15px_35px_rgba(0,0,0,0.05)]
-                    group-hover:shadow-[0_25px_60px_rgba(20,51,201,0.15)]
-                    transition-all duration-500 flex items-center justify-center
+                    relative w-48 h-48
+                    bg-white/90 backdrop-blur-2xl rounded-[3rem]
+                    border border-white shadow-[0_20px_50px_rgba(0,0,0,0.06)]
+                    group-hover:shadow-[0_40px_80px_rgba(20,51,201,0.25)]
+                    group-hover:border-blue-infositel/40 transition-all duration-700
+                    flex flex-col items-center justify-center overflow-hidden
                   ">
-                    <div className="relative w-28 h-28 z-10 transition-transform duration-500 group-hover:scale-110">
-                      <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-xl" />
+                    {/* Floating Price Tag (THE 'PRO' ETIQUETA) */}
+                    <div className="absolute top-4 right-4 z-20">
+                      <div className="bg-blue-infositel text-white px-3 py-1 rounded-full text-[10px] font-black shadow-lg translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                        S/. {product.salePrice || product.price}
+                      </div>
                     </div>
+
+                    {/* Product Image */}
+                    <div className="relative w-32 h-32 z-10 transition-transform duration-700 group-hover:scale-110 group-hover:-translate-y-3">
+                      <Image 
+                        src={product.image} 
+                        alt={product.name} 
+                        fill 
+                        className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.2)]" 
+                      />
+                    </div>
+                    
+                    {/* Info Overlay */}
+                    <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-white via-white/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col items-center">
+                      <span className="text-[9px] font-black text-blue-infositel uppercase tracking-[0.3em] mb-1">{product.category}</span>
+                      <h4 className="text-[11px] font-bold text-gray-900 truncate w-full text-center">{product.name}</h4>
+                    </div>
+
+                    {/* Cyber-Glass Shine */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent pointer-events-none" />
                   </div>
                 </motion.div>
               </div>
