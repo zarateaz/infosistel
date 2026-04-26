@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-PROJECT_ROOT=$(pwd)
+PROJECT_ROOT="/home/zarate/infosistel"
 BACKUP_DIR="$HOME/backups/data"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 CURRENT_BACKUP="$BACKUP_DIR/backup_$TIMESTAMP"

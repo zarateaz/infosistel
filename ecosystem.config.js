@@ -18,7 +18,7 @@ module.exports = {
         JWT_SECRET: "infosistel-jwt-super-secret-key-2026!!",
         // 64 hex chars = 32 bytes para AES-256-GCM
         ENCRYPTION_KEY: "696e666f73697374656c2d656e63727970742d6b65792d333262797465733200",
-        COOKIE_SECURE: "false",  // Cambiar a true SOLO después de instalar SSL
+        COOKIE_SECURE: "true",  // Cambiar a true SOLO después de instalar SSL
       }
     }
   ]
