@@ -36,110 +36,180 @@ function RevealText({ text, className }: { text: string; className?: string }) {
   );
 }
 
-// ── Orbital ring — each card orbits around the center ──
-function OrbitalShowcase({
-  products,
-  onSelect,
-}: {
-  products: Product[];
-  onSelect: (p: Product) => void;
+// ── Magical Orbital Showcase — God Level 3D Experience ──
+function MagicalOrbitalShowcase({ 
+  allProducts, 
+  onSelect 
+}: { 
+  allProducts: Product[]; 
+  onSelect: (p: Product) => void; 
 }) {
-  const ORBIT_DURATION = 35;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  if (products.length === 0) return null;
+  // Take 6 products at a time
+  useEffect(() => {
+    if (allProducts.length === 0) return;
+    
+    const updateProducts = () => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        const nextIdx = (currentIndex + 6) % allProducts.length;
+        const nextProducts = [];
+        for (let i = 0; i < 6; i++) {
+          nextProducts.push(allProducts[(nextIdx + i) % allProducts.length]);
+        }
+        setDisplayProducts(nextProducts);
+        setCurrentIndex(nextIdx);
+        setIsTransitioning(false);
+      }, 800); // Vortex duration
+    };
+
+    if (displayProducts.length === 0) {
+      const initial = [];
+      for (let i = 0; i < 6; i++) {
+        initial.push(allProducts[i % allProducts.length]);
+      }
+      setDisplayProducts(initial);
+    }
+
+    const interval = setInterval(updateProducts, 10000);
+    return () => clearInterval(interval);
+  }, [allProducts, currentIndex, displayProducts.length]);
+
+  if (displayProducts.length === 0) return null;
 
   return (
-    <div className="relative w-[600px] h-[600px] flex items-center justify-center flex-shrink-0 perspective-[1000px]">
-      {/* Decorative static rings */}
-      {[580, 440, 300].map((size, i) => (
-        <motion.div
-          key={size}
-          className="absolute rounded-full border border-blue-infositel/10 pointer-events-none"
-          style={{ width: size, height: size }}
-          animate={{
-            rotate: i % 2 === 0 ? 360 : -360,
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            rotate: { duration: 80 + i * 20, repeat: Infinity, ease: "linear" },
-            scale: { duration: 10, repeat: Infinity, ease: "easeInOut" }
-          }}
-        />
-      ))}
-
-      {/* CENTER: INFOSISTEL logo badge */}
-      <motion.div
-        className="absolute z-20 flex flex-col items-center gap-3"
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+    <div className="relative w-[700px] h-[700px] flex items-center justify-center flex-shrink-0 [perspective:2000px]">
+      {/* ── THE CORE: INFOSISTEL QUANTUM BADGE ── */}
+      <motion.div 
+        className="relative z-30 flex flex-col items-center"
+        animate={{ 
+          y: [0, -15, 0],
+          scale: isTransitioning ? [1, 1.2, 1] : 1
+        }}
+        transition={{ 
+          y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+          scale: { duration: 0.8, ease: "backOut" }
+        }}
       >
-        <div className="relative">
-          <motion.div
-            className="absolute -inset-6 rounded-[2.5rem] bg-blue-infositel/10 blur-2xl"
-            animate={{ opacity: [0.3, 0.6, 0.3], scale: [0.8, 1.2, 0.8] }}
-            transition={{ duration: 4, repeat: Infinity }}
-          />
-          <div className="relative w-24 h-24 bg-gradient-to-br from-blue-infositel to-blue-700 rounded-[2rem] flex items-center justify-center shadow-[0_20px_50px_rgba(20,51,201,0.4)]">
-            <Zap size={42} className="text-white fill-white animate-pulse" />
+        <div className="relative group cursor-pointer">
+          {/* Energy Rings */}
+          {[0, 1, 2].map(i => (
+            <motion.div
+              key={i}
+              className="absolute -inset-8 rounded-[3rem] border border-blue-infositel/20"
+              animate={{ 
+                rotate: i % 2 === 0 ? 360 : -360,
+                scale: [1, 1.1 + (i * 0.1), 1],
+                opacity: [0.3, 0.1, 0.3]
+              }}
+              transition={{ 
+                rotate: { duration: 15 + i * 5, repeat: Infinity, ease: "linear" },
+                scale: { duration: 4 + i, repeat: Infinity, ease: "easeInOut" }
+              }}
+            />
+          ))}
+          
+          <div className="relative w-32 h-32 bg-gradient-to-br from-blue-infositel via-blue-600 to-indigo-900 rounded-[2.5rem] flex items-center justify-center shadow-[0_30px_60px_rgba(20,51,201,0.5)] overflow-hidden border border-white/20">
+             <motion.div 
+               className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] opacity-30"
+               animate={{ opacity: [0.2, 0.5, 0.2] }}
+               transition={{ duration: 2, repeat: Infinity }}
+             />
+             <Zap size={56} className="text-white fill-white relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
           </div>
         </div>
-        <div className="text-center">
-          <span className="block text-[10px] font-black text-blue-infositel tracking-[0.6em] uppercase">INFOSISTEL</span>
-          <span className="block text-[8px] font-bold text-gray-400 tracking-[0.4em] uppercase mt-1"></span>
+        <div className="mt-6 text-center">
+          <motion.h3 
+            className="text-xl font-black tracking-[0.8em] text-blue-infositel uppercase"
+            animate={{ letterSpacing: ["0.6em", "0.9em", "0.6em"] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          >
+            INFO<span className="text-gray-900">SISTEL</span>
+          </h3 >
+          <div className="h-0.5 w-12 bg-blue-infositel mx-auto mt-2 rounded-full" />
         </div>
       </motion.div>
 
-      {/* DYNAMIC ORBITING PRODUCT CARDS */}
-      {products.map((product, i) => {
-        const step = 360 / products.length;
-        const baseAngle = i * step;
+      {/* ── THE ORBITAL FIELD ── */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {displayProducts.map((product, i) => {
+          const angleStep = 360 / 6;
+          const baseAngle = i * angleStep;
 
-        return (
-          <motion.div
-            key={product.id}
-            className="absolute inset-0 flex items-center justify-end origin-center"
-            style={{ transformStyle: "preserve-3d" }}
-            animate={{ rotate: [baseAngle, baseAngle + 360] }}
-            transition={{
-              duration: ORBIT_DURATION,
-              ease: "linear",
-              repeat: Infinity,
-            }}
-          >
+          return (
             <motion.div
-              animate={{ rotate: [-baseAngle, -(baseAngle + 360)] }}
+              key={`${product.id}-${currentIndex}`}
+              className="absolute inset-0 flex items-center justify-center origin-center"
+              initial={{ opacity: 0, scale: 0, rotate: baseAngle - 180 }}
+              animate={{ 
+                opacity: isTransitioning ? 0 : 1, 
+                scale: isTransitioning ? 0 : 1,
+                rotate: [baseAngle, baseAngle + 360] 
+              }}
+              exit={{ opacity: 0, scale: 0, rotate: baseAngle + 180 }}
               transition={{
-                duration: ORBIT_DURATION,
-                ease: "linear",
-                repeat: Infinity,
+                rotate: { duration: 40, repeat: Infinity, ease: "linear" },
+                opacity: { duration: 0.5 },
+                scale: { duration: 0.8, ease: "backOut" }
               }}
-              whileHover={{
-                scale: 1.15,
-                zIndex: 50,
-              }}
-              onClick={() => onSelect(product)}
-              className="group relative w-36 h-36 mr-4 cursor-pointer"
             >
-              <div className="
-                relative w-full h-full p-4
-                bg-white/90 backdrop-blur-md rounded-[2.2rem]
-                border border-white/50 shadow-[0_15px_35px_rgba(0,0,0,0.05)]
-                group-hover:shadow-[0_25px_50px_rgba(20,51,201,0.15)]
-                group-hover:border-blue-infositel/30 transition-all duration-500
-                flex flex-col items-center justify-center overflow-hidden
-              ">
-                <div className="relative w-20 h-20 z-10 transition-transform duration-500 group-hover:scale-110">
-                  <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.1)]" />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 bg-gradient-to-t from-white via-white/80 to-transparent">
-                  <span className="block text-[8px] font-black text-blue-infositel tracking-widest uppercase truncate">{product.category}</span>
-                  <p className="text-[9px] font-bold text-gray-800 truncate px-1">{product.name}</p>
-                </div>
+              <div 
+                className="absolute" 
+                style={{ transform: `rotate(-${baseAngle}deg) translateX(280px)` }}
+              >
+                <motion.div
+                  animate={{ 
+                    rotate: [-baseAngle, -(baseAngle + 360)],
+                  }}
+                  transition={{
+                    duration: 40,
+                    ease: "linear",
+                    repeat: Infinity,
+                  }}
+                  whileHover={{ 
+                    scale: 1.25, 
+                    zIndex: 100,
+                    rotate: 0 // Keep upright on hover
+                  }}
+                  onClick={() => onSelect(product)}
+                  className="group relative cursor-pointer"
+                >
+                  {/* Floating Aura */}
+                  <motion.div 
+                    className="absolute -inset-4 bg-blue-infositel/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+
+                  <div className="
+                    relative w-44 h-44 p-6
+                    bg-white/80 backdrop-blur-xl rounded-[2.5rem]
+                    border border-white shadow-[0_20px_50px_rgba(0,0,0,0.06)]
+                    group-hover:shadow-[0_30px_70px_rgba(20,51,201,0.2)]
+                    group-hover:border-blue-infositel/40 transition-all duration-500
+                    flex flex-col items-center justify-center overflow-hidden
+                  ">
+                    <div className="relative w-28 h-28 z-10 transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2">
+                      <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.15)]" />
+                    </div>
+                    
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-infositel/5 to-transparent flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <span className="text-[10px] font-black text-blue-infositel uppercase tracking-widest">{product.category}</span>
+                      <p className="text-[11px] font-bold text-gray-900 truncate w-full">{product.name}</p>
+                    </div>
+
+                    {/* Glossy Reflection */}
+                    <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/40 to-transparent rotate-45 pointer-events-none" />
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
-          </motion.div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -331,7 +401,7 @@ export default function Home() {
               transition={{ duration: 1, ease: [0.2, 0.65, 0.3, 0.9] }}
               className="hidden lg:flex items-center justify-center"
             >
-              <OrbitalShowcase products={products} onSelect={handleSelectProduct} />
+              <MagicalOrbitalShowcase allProducts={products} onSelect={handleSelectProduct} />
             </motion.div>
           </div>
 
