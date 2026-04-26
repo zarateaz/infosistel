@@ -128,7 +128,7 @@ function MagicalOrbitalShowcase({
             transition={{ duration: 4, repeat: Infinity }}
           >
             INFO<span className="text-gray-900">SISTEL</span>
-          </h3 >
+          </motion.h3>
           <div className="h-0.5 w-12 bg-blue-infositel mx-auto mt-2 rounded-full" />
         </div>
       </motion.div>
