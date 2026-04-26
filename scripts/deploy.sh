@@ -85,18 +85,22 @@ mkdir -p .next/standalone/data
 ln -snf ../../../data/dev.db .next/standalone/data/dev.db || true
 echo "✅ Base de datos vinculada al standalone"
 
-# PERSISTENCIA TOTAL DE IMÁGENES
-echo "🔄 Sincronizando imágenes y vinculando base de datos..."
-# Sincronizar por si acaso
-if [ -d "public/uploads" ]; then
-    cp -rn public/uploads/* data/uploads/ 2>/dev/null || true
-fi
+# PERSISTENCIA TOTAL DE IMÁGENES Y ASSETS PÚBLICOS
+echo "🔄 Sincronizando assets públicos en /var/www/infosistel..."
+sudo mkdir -p /var/www/infosistel/static
+sudo mkdir -p /var/www/infosistel/uploads
+sudo mkdir -p /var/www/infosistel/public/img
 
-# Vinculamos la base de datos dentro del standalone
-mkdir -p .next/standalone/data
-ln -snf "$APP_DIR/data/dev.db" .next/standalone/data/dev.db || true
+# Copiar archivos a zona pública
+sudo cp -r .next/static/. /var/www/infosistel/static/
+sudo cp -r data/uploads/. /var/www/infosistel/uploads/
+sudo cp -r public/img/. /var/www/infosistel/public/img/
 
-echo "✅ Sistema de persistencia vinculado"
+# Asegurar permisos en zona pública
+sudo chown -R nginx:nginx /var/www/infosistel 2>/dev/null || sudo chown -R http:http /var/www/infosistel 2>/dev/null || sudo chown -R www-data:www-data /var/www/infosistel 2>/dev/null
+sudo chmod -R 755 /var/www/infosistel
+
+echo "✅ Sistema de persistencia y assets públicos vinculados"
 
 # ── 6. Reiniciar PM2 (Prioridad: levantamos la app primero) ──
 echo "🚀 [6/7] Reiniciando la app en PM2 (puerto 3001)..."
