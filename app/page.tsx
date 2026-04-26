@@ -33,6 +33,9 @@ function RevealText({ text, className }: { text: string; className?: string }) {
         </motion.span>
       ))}
     </h2>
+  );
+}
+
 // ── Magical Orbital Showcase — God Level Pro Edition ──
 function MagicalOrbitalShowcase({ 
   allProducts, 
