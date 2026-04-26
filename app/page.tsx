@@ -184,11 +184,6 @@ function MagicalOrbitalShowcase({
     </div>
   );
 }
-)}
-      </div>
-    </div>
-  );
-}
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
