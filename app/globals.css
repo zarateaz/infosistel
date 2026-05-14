@@ -156,3 +156,47 @@ body {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+/* ── No scrollbar ── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Height utilities ── */
+.h-13 { height: 3.25rem; }
+
+/* ── Scan line animation ── */
+@keyframes scan-x {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100vw); }
+}
+.animate-scan-x { animation: scan-x 4s linear infinite; }
+
+/* ── Glitch text effect ── */
+@keyframes glitch {
+  0%   { clip-path: inset(60% 0 30% 0); transform: translate(-2px, 1px); }
+  20%  { clip-path: inset(10% 0 80% 0); transform: translate(2px, -1px); }
+  40%  { clip-path: inset(80% 0 5%  0); transform: translate(-1px, 2px); }
+  60%  { clip-path: inset(30% 0 55% 0); transform: translate(1px, -2px); }
+  80%  { clip-path: inset(5%  0 90% 0); transform: translate(-2px, 1px); }
+  100% { clip-path: inset(50% 0 40% 0); transform: translate(2px, -1px); }
+}
+
+/* ── Border beam ── */
+@keyframes border-beam {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ── Hero swiper pagination dots — mobile friendly ── */
+.hero-swiper .swiper-pagination {
+  bottom: 5.5rem !important;
+}
+@media (min-width: 1024px) {
+  .hero-swiper .swiper-pagination {
+    bottom: 3.5rem !important;
+  }
+}
+
+/* ── Catalog blue bg opacity utility ── */
+.bg-blue-infositel\/8 { background-color: rgba(20, 51, 201, 0.08); }
+.bg-blue-infositel\/12 { background-color: rgba(20, 51, 201, 0.12); }

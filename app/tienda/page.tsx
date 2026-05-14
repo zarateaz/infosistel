@@ -1,59 +1,183 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { ShoppingCart, Search, Filter, MessageCircle, X, ChevronRight } from "lucide-react";
+import { ShoppingCart, Search, X, ChevronDown, MessageCircle, Package, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import PageBg from "@/components/PageBg";
-import ImageFrame from "@/components/ImageFrame";
 
 import { Product } from "@/types";
-
-
-const DEFAULT_PRODUCTS: Product[] = [
-  {
-    id: "1",
-    name: "Mouse Gamer AETHEREAL G7",
-    category: "Mouse",
-    description: "Tecnología de neón RGB, sensor óptico de alta precisión y diseño ergonómico para largas sesiones.",
-    price: 490,
-    stock: 10,
-    image: "/img/producto3mouse.webp",
-    isFeatured: true,
-    onSale: false,
-    salePrice: null
-  },
-  {
-    id: "2",
-    name: "Teclado Mecánico G7 RGB",
-    category: "Teclado",
-    description: "Iluminación RGB Pro Series, switches mecánicos de respuesta instantánea y cable reforzado.",
-    price: 380,
-    stock: 8,
-    image: "/img/producto5teclado.webp",
-    isFeatured: true,
-    onSale: false,
-    salePrice: null
-  },
-  {
-    id: "3",
-    name: "Laptop ASUS ROG Strix G16",
-    category: "Laptops",
-    description: "Potencia sin límites: RTX 4080, i9-13980HX, 32GB RAM. La cima del rendimiento móvil.",
-    price: 8900,
-    stock: 3,
-    image: "/img/fondo4laptop.webp",
-    isFeatured: true,
-    onSale: false,
-    salePrice: null
-  },
-];
-
-
-const DEFAULT_CATEGORIES = ["Todos", "Mouse", "Teclado", "Monitores", "Laptops", "SSD", "Cables"];
-
 import { getProducts, getCategories, addOrder } from "../admin/actions";
 
+// ─── Product Detail Modal ───────────────────────────────────────────────────
+function ProductModal({ product, onClose, onAddToCart }: { product: any; onClose: () => void; onAddToCart: (p: any) => void }) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
+      >
+        <motion.div
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: "100%", opacity: 0 }}
+          transition={{ type: "spring", damping: 30, stiffness: 300 }}
+          onClick={(e) => e.stopPropagation()}
+          className="bg-white w-full sm:max-w-lg rounded-t-[2rem] sm:rounded-[2rem] p-6 sm:p-8 max-h-[90svh] overflow-y-auto"
+        >
+          {/* Handle bar — mobile only */}
+          <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden" />
+
+          <div className="flex items-start justify-between mb-4">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-blue-infositel uppercase tracking-[0.2em]">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-infositel" />
+              {product.category}
+            </span>
+            <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+              <X size={18} className="text-gray-400" />
+            </button>
+          </div>
+
+          {/* Image */}
+          <div className="relative h-56 w-full mb-6 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-white">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute w-40 h-40 rounded-full bg-blue-infositel/10 blur-[50px]" />
+            </div>
+            <Image src={product.image} alt={product.name} fill className="object-contain p-6 drop-shadow-[0_10px_30px_rgba(20,51,201,0.2)]" />
+            {product.isFeatured && (
+              <div className="absolute top-3 left-3 flex items-center gap-1 bg-blue-infositel text-white text-[9px] font-black px-2.5 py-1 rounded-full">
+                <Star size={9} fill="white" /> RECOMENDADO
+              </div>
+            )}
+          </div>
+
+          <h2 className="text-2xl font-black text-gray-900 mb-3 leading-tight">{product.name}</h2>
+
+          {/* Description */}
+          {product.description && (
+            <div className="mb-5">
+              {product.description.includes("*") || product.description.includes("\n") ? (
+                <ul className="space-y-2">
+                  {product.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 1).map((text: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-500">
+                      <span className="mt-1.5 w-1 h-1 rounded-full bg-blue-infositel shrink-0" />
+                      {text.trim()}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500 leading-relaxed">{product.description}</p>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between pt-5 border-t border-gray-100">
+            <div>
+              {product.isFeatured && (
+                <span className="block text-xs text-gray-300 line-through font-bold">S/. {Math.round(product.price * 1.3)}.00</span>
+              )}
+              <div className="flex items-baseline gap-1">
+                <span className="text-blue-infositel/50 font-bold text-sm">S/.</span>
+                <span className="text-4xl font-black text-gray-900 tracking-tighter">{product.price.toFixed(2)}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => { onAddToCart(product); onClose(); }}
+              className="flex items-center gap-2 bg-blue-infositel text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-xl shadow-blue-500/30 hover:scale-[1.03] active:scale-95 transition-all"
+            >
+              <ShoppingCart size={18} />
+              Añadir
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// ─── Product Card ───────────────────────────────────────────────────────────
+function ProductCard({ product, onSelect, onAddToCart }: { product: any; onSelect: () => void; onAddToCart: (p: any) => void }) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      onClick={onSelect}
+      className="group relative bg-white rounded-[1.6rem] border border-blue-infositel/10 hover:border-blue-infositel/30 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col"
+    >
+      {/* Featured glow */}
+      {product.isFeatured && (
+        <div className="absolute inset-0 rounded-[1.6rem] ring-2 ring-blue-infositel/20 pointer-events-none" />
+      )}
+
+      {/* Image zone */}
+      <div className="relative bg-gradient-to-br from-blue-50/60 to-white overflow-hidden" style={{ paddingBottom: "80%" }}>
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-blue-infositel/0 group-hover:bg-blue-infositel/4 transition-colors duration-500 z-10" />
+
+        {/* Core glow */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-20 h-20 rounded-full bg-blue-infositel/10 blur-[40px]" />
+        </div>
+
+        <motion.div
+          whileHover={{ scale: 1.08 }}
+          transition={{ type: "spring", stiffness: 280, damping: 22 }}
+          className="absolute inset-0 p-4"
+        >
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-contain p-4"
+            style={{ filter: "drop-shadow(0 8px 24px rgba(20,51,201,0.15))" }}
+          />
+        </motion.div>
+
+        {/* Badges */}
+        {product.isFeatured && (
+          <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1 bg-blue-infositel text-white text-[8px] font-black px-2 py-0.5 rounded-full">
+            <Star size={7} fill="white" /> TOP
+          </div>
+        )}
+
+        {/* Quick-add button on hover */}
+        <motion.button
+          initial={{ opacity: 0, y: 8 }}
+          whileHover={{ opacity: 1, y: 0 }}
+          className="absolute bottom-2.5 right-2.5 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 w-9 h-9 rounded-full bg-blue-infositel text-white flex items-center justify-center shadow-lg shadow-blue-500/40"
+          onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
+        >
+          <ShoppingCart size={14} />
+        </motion.button>
+      </div>
+
+      {/* Info */}
+      <div className="p-3.5 flex flex-col gap-1.5 flex-1">
+        <span className="text-[9px] font-black text-blue-infositel/60 uppercase tracking-[0.2em] leading-none truncate">{product.category}</span>
+        <h3 className="text-sm font-black text-gray-900 group-hover:text-blue-infositel transition-colors leading-snug line-clamp-2">{product.name}</h3>
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-[10px] text-blue-infositel/50 font-bold">S/.</span>
+            <span className="text-base font-black text-gray-900 tracking-tight">{product.price.toFixed(2)}</span>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
+            className="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-infositel text-white shadow-md shadow-blue-500/30 hover:scale-110 active:scale-90 transition-all"
+          >
+            <ShoppingCart size={13} />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Main Store Page ────────────────────────────────────────────────────────
 export default function StorePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -61,8 +185,10 @@ export default function StorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<{ product: any; quantity: number }[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [checkoutData, setCheckoutData] = useState({ name: "", phone: "" });
-  const [expandedProducts, setExpandedProducts] = useState<string[]>([]);
+  const [isSticky, setIsSticky] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function load() {
@@ -74,358 +200,263 @@ export default function StorePage() {
     load();
   }, []);
 
-  const filteredProducts = products.filter((p) => {
-    const matchesCategory = activeCategory === "Todos" || p.category === activeCategory;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  }).sort((a, b) => {
-    if (a.isFeatured && !b.isFeatured) return -1;
-    if (!a.isFeatured && b.isFeatured) return 1;
-    return 0;
-  });
-
-  const addToCart = (product: Product) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
+  useEffect(() => {
+    const handleScroll = () => {
+      if (filterRef.current) {
+        setIsSticky(window.scrollY > filterRef.current.offsetTop - 64);
       }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const filteredProducts = products.filter((p) => {
+    const matchCat = activeCategory === "Todos" || p.category === activeCategory;
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  }).sort((a, b) => (a.isFeatured === b.isFeatured ? 0 : a.isFeatured ? -1 : 1));
+
+  const addToCart = (product: any) => {
+    setCart((prev) => {
+      const existing = prev.find((i) => i.product.id === product.id);
+      if (existing) return prev.map((i) => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
       return [...prev, { product, quantity: 1 }];
     });
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (id: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== id));
-  };
-
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const removeFromCart = (id: string) => setCart((prev) => prev.filter((i) => i.product.id !== id));
+  const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0);
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   const handleCheckout = () => {
-    if (!checkoutData.name || !checkoutData.phone) {
-      alert("Por favor completa tu nombre y número.");
-      return;
-    }
-
-    const message = `Hola INFOSISTEL! Quisiera realizar un pedido:\n\n*Cliente:* ${checkoutData.name}\n*Celular:* ${checkoutData.phone}\n\n*Productos:*\n${cart
-      .map((item) => `- ${item.product.name} (x${item.quantity}) - S/. ${item.product.price * item.quantity}`)
-      .join("\n")}\n\n*Total:* S/. ${total}\n\n¿Tienen disponibilidad?`;
-
-    // Save order via Server Action
-    addOrder({
-      customerName: checkoutData.name,
-      customerPhone: checkoutData.phone,
-      total: total,
-      items: cart.map(item => ({
-        name: item.product.name,
-        category: item.product.category,
-        quantity: item.quantity
-      }))
-    });
-
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/51964648202?text=${encodedMessage}`, "_blank");
+    if (!checkoutData.name || !checkoutData.phone) { alert("Por favor completa tu nombre y número."); return; }
+    const msg = `Hola INFOSISTEL! Quisiera realizar un pedido:\n\n*Cliente:* ${checkoutData.name}\n*Celular:* ${checkoutData.phone}\n\n*Productos:*\n${cart.map((i) => `- ${i.product.name} (x${i.quantity}) - S/. ${i.product.price * i.quantity}`).join("\n")}\n\n*Total:* S/. ${total}\n\n¿Tienen disponibilidad?`;
+    addOrder({ customerName: checkoutData.name, customerPhone: checkoutData.phone, total, items: cart.map((i) => ({ name: i.product.name, category: i.product.category, quantity: i.quantity })) });
+    window.open(`https://wa.me/51964648202?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   return (
-    <div className="bg-white min-h-screen relative overflow-hidden">
-      <PageBg intensity={0.6} />
-      {/* Header Store */}
-      <div className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-gray-100 py-10">
-        <div className="w-full px-4 md:px-12">
-          <h1 className="text-3xl md:text-5xl font-black mb-3">Catálogo Pro</h1>
-          <p className="text-gray-400 max-w-2xl text-sm md:text-base font-medium">
-            Repuestos y accesorios premium con garantía total de INFOSISTEL.
-          </p>
+    <div className="bg-white min-h-screen relative">
+
+      {/* ── PAGE HEADER ── */}
+      <div className="relative overflow-hidden bg-blue-infositel pt-24 pb-10 px-4 sm:px-8">
+        {/* BG grid */}
+        <div className="absolute inset-0 opacity-10"
+          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)", backgroundSize: "32px 32px" }}
+        />
+        {/* Scan line */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-white/30 to-transparent"
+            animate={{ x: ["-10vw", "110vw"] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 6 }}
+          />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2 mb-3">
+            <Package size={14} className="text-white/60" />
+            <span className="text-white/60 text-[10px] font-black tracking-[0.3em] uppercase">Catálogo Digital</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-none mb-2">
+            CATÁLOGO <span className="text-white/50">PRO</span>
+          </h1>
+          <p className="text-white/60 text-sm font-medium">Repuestos y accesorios premium · Garantía INFOSISTEL</p>
         </div>
       </div>
 
-      <div className="relative z-10 w-full px-4 md:px-12 py-8 flex flex-col gap-10">
-        {/* Horizontal Filters & Search */}
-        <div className="space-y-8">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="relative flex-1 max-w-2xl">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  placeholder="Buscar en el catálogo..."
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-gray-100 border rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-infositel focus:outline-none transition-all shadow-sm"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="flex items-center gap-2 text-gray-400 font-bold text-xs uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
-                 <Filter size={14} /> {filteredProducts.length} Productos
-              </div>
-           </div>
+      {/* ── STICKY FILTERS ── */}
+      <div ref={filterRef} className={`sticky top-16 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100 transition-shadow duration-300 ${isSticky ? "shadow-lg shadow-blue-500/5" : ""}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex flex-col gap-3">
 
-           {/* Horizontal Pill Categories */}
-           <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 no-scrollbar mask-fade-right">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all ${
-                    activeCategory === cat
-                      ? "bg-blue-infositel text-white shadow-xl shadow-blue-500/30 scale-105"
-                      : "bg-white text-gray-500 border border-gray-100 hover:border-blue-infositel/20"
-                  }`}
-                >
-                  {cat}
+          {/* Search + count row */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+              <input
+                type="text"
+                placeholder="Buscar producto..."
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:bg-white transition-all placeholder:text-gray-300 font-medium"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <X size={14} className="text-gray-300 hover:text-gray-500" />
                 </button>
-              ))}
-           </div>
-        </div>
-
-        {/* Product Grid - Full Screen Optimized */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
-            <AnimatePresence mode="popLayout">
-              {filteredProducts.map((p) => (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  key={p.id}
-                  className={`group bg-white rounded-[2.5rem] p-6 flex flex-col transition-all duration-700 border-2 ${
-                    p.isFeatured
-                      ? 'border-blue-infositel/40 shadow-[0_40px_100px_rgba(20,51,201,0.18)] ring-4 ring-blue-infositel/5'
-                      : 'border-blue-infositel/10 hover:border-blue-infositel/30 shadow-[0_10px_40px_rgba(20,51,201,0.05)] hover:shadow-[0_30px_80px_rgba(20,51,201,0.12)]'
-                  }`}
-                >
-                    {/* Image zone — with magnetic energy */}
-                   <div className="relative h-64 w-full rounded-[2rem] mb-6 overflow-hidden">
-                     {/* Dynamic backdrop */}
-                     <div className={`absolute inset-0 transition-colors duration-700 ${p.isFeatured ? 'bg-gradient-to-br from-blue-100/30 via-white to-blue-50/20' : 'bg-gradient-to-br from-blue-50/20 to-white'}`} />
-                     
-                     {/* Floating energy core */}
-                     <motion.div 
-                       className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
-                       animate={{ 
-                         scale: [1, 1.2, 1],
-                         opacity: [0.4, 0.8, 0.4],
-                         rotate: [0, 90, 0]
-                       }}
-                       transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                     >
-                       <div className={`w-40 h-40 rounded-full blur-[60px] ${p.isFeatured ? 'bg-blue-infositel/20' : 'bg-blue-infositel/10'}`} />
-                     </motion.div>
-                     
-                     <motion.div 
-                        whileHover={{ scale: 1.15, rotate: -2, y: -5 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                        className="relative z-10 w-full h-full p-4"
-                     >
-                        <Image
-                          src={p.image}
-                          alt={p.name}
-                          fill
-                          priority={p.isFeatured}
-                          className="object-contain drop-shadow-[0_20px_40px_rgba(20,51,201,0.2)]"
-                        />
-                     </motion.div>
-
-                     {/* Premium Ribbon */}
-                     {p.isFeatured && (
-                       <div className="absolute top-4 left-4 z-20 bg-blue-infositel text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-blue-500/30 tracking-tighter">
-                          RECOMENDADO ⭐
-                       </div>
-                     )}
-
-                     {/* Glass Overlay on Hover */}
-                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-white/10 via-transparent to-blue-infositel/5 pointer-events-none" />
-                   </div>
-
-                   <div className="space-y-2">
-                     <div className="flex items-center gap-2">
-                        <span className="w-1 h-1 rounded-full bg-blue-infositel" />
-                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${p.isFeatured ? 'text-blue-infositel' : 'text-blue-infositel/60'}`}>
-                          {p.category}
-                        </span>
-                     </div>
-                     <h3 className={`text-2xl font-black leading-tight transition-colors ${p.isFeatured ? 'text-gray-900 group-hover:text-blue-infositel' : 'text-gray-800 group-hover:text-blue-infositel'}`}>
-                       {p.name}
-                     </h3>
-                   </div>
-                  {/* 💎 Refined Interactive Description Section */}
-                  <div className="my-5 min-h-[110px] flex flex-col justify-start relative group/desc transition-all duration-700 ease-in-out">
-                    <AnimatePresence initial={false}>
-                      <motion.div
-                        key={expandedProducts.includes(p.id) ? 'expanded' : 'collapsed'}
-                        initial={{ opacity: 0, height: 80 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        {p.description.includes("*") || p.description.includes("\n") ? (
-                          <ul className="space-y-2">
-                             {(expandedProducts.includes(p.id) 
-                               ? p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 1)
-                               : p.description.split(/[\*\n]/).filter((t: string) => t.trim().length > 1).slice(0, 3)
-                             ).map((text: string, i: number) => (
-                               <motion.li 
-                                 key={i}
-                                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                 className="flex items-start gap-2.5 text-[11px] leading-relaxed font-bold text-slate-500"
-                               >
-                                 <span className="mt-2 w-1 h-1 rounded-full bg-blue-infositel shrink-0 shadow-[0_0_5px_rgba(20,51,201,0.3)]" />
-                                 <span className="flex-1">{text.trim()}</span>
-                               </motion.li>
-                             ))}
-                          </ul>
-                        ) : (
-                          <p className={`text-slate-500 text-[12px] leading-relaxed font-semibold ${expandedProducts.includes(p.id) ? '' : 'line-clamp-3'}`}>
-                             {p.description}
-                          </p>
-                        )}
-                      </motion.div>
-                    </AnimatePresence>
-
-                    {(p.description.split(/[\*\n]/).length > 3 || p.description.length > 90) && (
-                       <button 
-                         onClick={() => setExpandedProducts(prev => 
-                           prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
-                         )}
-                         className="mt-3 flex items-center gap-2 group/more"
-                       >
-                         <span className="text-[10px] font-black text-blue-infositel uppercase tracking-widest border-b-2 border-blue-infositel/10 group-hover/more:border-blue-infositel transition-all">
-                           {expandedProducts.includes(p.id) ? "Mostrar menos ▲" : "Ver detalles completos ▼"}
-                         </span>
-                         <motion.div
-                            animate={{ y: expandedProducts.includes(p.id) ? 0 : [0, 3, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                         >
-                            <ChevronRight size={10} className={`text-blue-infositel transition-transform duration-300 ${expandedProducts.includes(p.id) ? '-rotate-90' : 'rotate-90'}`} />
-                         </motion.div>
-                       </button>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-blue-infositel/5">
-                     <div className="flex flex-col">
-                       {p.isFeatured && <span className="text-[11px] text-blue-infositel font-black line-through opacity-40 italic">S/. {Math.round(p.price * 1.3)}.00</span>}
-                       <div className="flex items-baseline gap-1">
-                          <span className="text-blue-infositel/40 font-bold text-sm">S/.</span>
-                          <span className="text-gray-900 text-3xl font-black tracking-tighter">
-                             {p.price.toFixed(2)}
-                          </span>
-                       </div>
-                     </div>
-                     <motion.button
-                       whileHover={{ scale: 1.12, rotate: 5 }}
-                       whileTap={{ scale: 0.9 }}
-                       onClick={() => addToCart(p)}
-                       className="h-16 w-16 rounded-[1.5rem] flex items-center justify-center transition-all relative group/btn overflow-hidden bg-blue-infositel text-white shadow-[0_12px_35px_rgba(20,51,201,0.35)] hover:shadow-[0_20px_50px_rgba(20,51,201,0.45)]"
-                     >
-                       <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
-                       <ShoppingCart size={24} className="relative z-10" />
-                     </motion.button>
-                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+              )}
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 text-blue-infositel text-xs font-black bg-blue-infositel/8 px-3 py-2.5 rounded-xl whitespace-nowrap border border-blue-infositel/15">
+              {filteredProducts.length} items
+            </div>
+            {/* Cart button */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative flex items-center gap-2 bg-blue-infositel text-white px-4 py-2.5 rounded-xl font-black text-sm shadow-md shadow-blue-500/25 hover:scale-[1.03] active:scale-95 transition-all"
+            >
+              <ShoppingCart size={16} />
+              <span className="hidden sm:inline">Carrito</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </div>
 
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-20 bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100">
-              <p className="text-gray-400 font-black text-xl italic">No hay productos en esta categoría...</p>
-            </div>
-          )}
+          {/* Category pills — horizontal scroll */}
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 ${activeCategory === cat
+                  ? "bg-blue-infositel text-white shadow-md shadow-blue-500/25"
+                  : "bg-gray-50 text-gray-500 border border-gray-100 hover:border-blue-infositel/20 hover:text-blue-infositel"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
+      </div>
 
-      {/* Cart Drawer */}
+      {/* ── PRODUCT GRID ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-8">
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-gray-100">
+            <Package size={40} className="text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-300 font-black text-lg">Sin resultados</p>
+          </div>
+        ) : (
+          <motion.div
+            layout
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  onSelect={() => setSelectedProduct(p)}
+                  onAddToCart={addToCart}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </div>
+
+      {/* ── FLOATING CART FAB — mobile only ── */}
+      {cartCount > 0 && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          onClick={() => setIsCartOpen(true)}
+          className="fixed bottom-6 right-5 z-50 flex items-center gap-2.5 bg-blue-infositel text-white px-5 py-3.5 rounded-2xl font-black text-sm shadow-2xl shadow-blue-500/40 sm:hidden"
+        >
+          <ShoppingCart size={18} />
+          <span>S/. {total.toFixed(0)}</span>
+          <span className="w-5 h-5 bg-white text-blue-infositel text-[10px] font-black rounded-full flex items-center justify-center">{cartCount}</span>
+        </motion.button>
+      )}
+
+      {/* ── PRODUCT DETAIL MODAL ── */}
+      <AnimatePresence>
+        {selectedProduct && (
+          <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={addToCart} />
+        )}
+      </AnimatePresence>
+
+      {/* ── CART DRAWER ── */}
       <AnimatePresence>
         {isCartOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsCartOpen(false)}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
             />
             <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-sm sm:max-w-md bg-white z-[70] shadow-2xl flex flex-col p-4 sm:p-6 overflow-y-auto"
+              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-sm sm:max-w-md bg-white z-[70] shadow-2xl flex flex-col"
             >
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-black">Tu Carrito</h2>
-                <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                  <X />
+              {/* Drawer header */}
+              <div className="flex items-center justify-between p-5 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-infositel/10 flex items-center justify-center">
+                    <ShoppingCart size={16} className="text-blue-infositel" />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-lg leading-none">Tu Carrito</h2>
+                    <p className="text-xs text-gray-400 font-medium">{cartCount} producto{cartCount !== 1 ? "s" : ""}</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <X size={20} className="text-gray-400" />
                 </button>
               </div>
 
-              {cart.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center space-y-4 text-center">
-                  <div className="p-6 bg-gray-50 rounded-full">
-                    <ShoppingCart size={48} className="text-gray-300" />
-                  </div>
-                  <p className="text-gray-400 font-bold">Tu carrito está vacío</p>
-                  <button onClick={() => setIsCartOpen(false)} className="text-blue-infositel font-bold hover:underline">
-                    Ver productos
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="flex-1 space-y-6">
-                    {cart.map((item) => (
-                      <div key={item.product.id} className="flex items-center gap-4">
-                        <div className="relative h-20 w-20 bg-gray-50 rounded-2xl shrink-0">
-                          <Image src={item.product.image} alt={item.product.name} fill className="object-contain p-2" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-sm">{item.product.name}</h4>
-                          <p className="text-xs text-gray-500">Cantidad: {item.quantity}</p>
-                          <p className="font-black text-blue-infositel text-sm mt-1">S/. {item.product.price * item.quantity}</p>
-                        </div>
-                        <button
-                          onClick={() => removeFromCart(item.product.id)}
-                          className="p-2 text-gray-300 hover:text-red-500 transition-colors"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-8 pt-8 border-t border-gray-100 space-y-6">
-                    <div className="flex items-center justify-between text-xl font-black">
-                      <span>Total:</span>
-                      <span className="text-blue-infositel">S/. {total}</span>
+              {/* Items */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                {cart.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center">
+                      <ShoppingCart size={28} className="text-gray-200" />
                     </div>
-
-                    <div className="space-y-4">
-                      <h4 className="font-bold text-sm">Datos para el envío</h4>
-                      <input
-                        type="text"
-                        placeholder="Tu Nombre Completo"
-                        className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-infositel focus:outline-none"
-                        value={checkoutData.name}
-                        onChange={(e) => setCheckoutData({ ...checkoutData, name: e.target.value })}
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Número de Celular"
-                        className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-infositel focus:outline-none"
-                        value={checkoutData.phone}
-                        onChange={(e) => setCheckoutData({ ...checkoutData, phone: e.target.value })}
-                      />
-                    </div>
-
-                    <button
-                      onClick={handleCheckout}
-                      className="w-full bg-green-500 text-white py-5 rounded-2xl font-black flex items-center justify-center space-x-3 hover:bg-green-600 transition-all shadow-xl shadow-green-500/20"
-                    >
-                      <MessageCircle />
-                      <span>Pedir por WhatsApp</span>
+                    <p className="text-gray-400 font-bold text-sm">Tu carrito está vacío</p>
+                    <button onClick={() => setIsCartOpen(false)} className="text-blue-infositel font-black text-sm hover:underline">
+                      Ver productos →
                     </button>
                   </div>
-                </>
+                ) : (
+                  cart.map((item) => (
+                    <div key={item.product.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+                      <div className="relative w-16 h-16 bg-white rounded-xl shrink-0">
+                        <Image src={item.product.image} alt={item.product.name} fill className="object-contain p-2" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm leading-snug line-clamp-2">{item.product.name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Cant: {item.quantity}</p>
+                        <p className="font-black text-blue-infositel text-sm">S/. {(item.product.price * item.quantity).toFixed(2)}</p>
+                      </div>
+                      <button onClick={() => removeFromCart(item.product.id)} className="p-1.5 hover:bg-red-50 rounded-xl transition-colors shrink-0">
+                        <X size={14} className="text-gray-300 hover:text-red-400" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Footer */}
+              {cart.length > 0 && (
+                <div className="p-5 border-t border-gray-100 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-base">Total</span>
+                    <span className="font-black text-2xl text-blue-infositel tracking-tighter">S/. {total.toFixed(2)}</span>
+                  </div>
+                  <div className="space-y-2.5">
+                    <input
+                      type="text" placeholder="Tu Nombre Completo"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:bg-white transition-all"
+                      value={checkoutData.name} onChange={(e) => setCheckoutData({ ...checkoutData, name: e.target.value })}
+                    />
+                    <input
+                      type="tel" placeholder="Número de Celular"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:bg-white transition-all"
+                      value={checkoutData.phone} onChange={(e) => setCheckoutData({ ...checkoutData, phone: e.target.value })}
+                    />
+                  </div>
+                  <button
+                    onClick={handleCheckout}
+                    className="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2.5 hover:bg-[#20b856] transition-all shadow-xl shadow-green-500/20 active:scale-95"
+                  >
+                    <MessageCircle size={20} />
+                    Pedir por WhatsApp
+                  </button>
+                </div>
               )}
             </motion.div>
           </>
