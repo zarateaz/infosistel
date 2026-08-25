@@ -1,34 +1,18 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+/**
+ * server.js — OBSOLETO / DEPRECATED
+ *
+ * Este archivo era el servidor Express del proyecto anterior (versión HTML/JS puro).
+ * La aplicación ahora usa Next.js (app/) como servidor principal, iniciado por PM2
+ * a través de ecosystem.config.js → .next/standalone/server.js
+ *
+ * SECURITY: Este archivo NO debe iniciarse en producción.
+ * El servidor real es PM2 + Next.js standalone, NO este Express.
+ *
+ * Si accidentalmente se inicia este archivo, lanzará un error fatal inmediatamente.
+ */
 
-const app = express();
-
-// Middlewares
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
-// Routes
-const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/products');
-const repairRoutes = require('./routes/repairs');
-const orderRoutes = require('./routes/orders');
-
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/repairs', repairRoutes);
-app.use('/api/orders', orderRoutes);
-
-// Main Entry Points for Frontend
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor de Infosistel corriendo en el puerto ${PORT}`);
-});
+throw new Error(
+  "[INFOSISTEL] server.js está OBSOLETO. " +
+  "Usa PM2 con ecosystem.config.js para iniciar la aplicación Next.js. " +
+  "Comando: pm2 start ecosystem.config.js"
+);

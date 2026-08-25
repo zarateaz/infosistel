@@ -1,31 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Package, Clock, ShieldCheck, ArrowRight, UserCheck } from "lucide-react";
+import { Search, Package, Clock, ShieldCheck, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * SECURITY FIX (C-04): Removed `dni` field from TrackingStatus interface.
+ * The DNI is PII (Personally Identifiable Information) and must never be
+ * returned to the public tracking page — only the repair code, equipment
+ * description, progress, and status are shown. The API already excludes the
+ * DNI field in its SELECT query; this removes it from the client type too.
+ */
 interface TrackingStatus {
   id: string;
-  dni: string;
+  code: string;
   equipment: string;
   problem: string;
   progress: number;
   lastUpdate: string;
   statusText: string;
 }
-
-// Mock data - in a real app this would come from an API
-const MOCK_TRACKING: TrackingStatus[] = [
-  {
-    id: "INF001",
-    dni: "12345678",
-    equipment: "Laptop Asus ROG",
-    problem: "Limpieza y cambio de pasta térmica",
-    progress: 85,
-    lastUpdate: "12/04/2026 10:30 AM",
-    statusText: "En fase final de pruebas",
-  },
-];
 
 export default function TrackingPage() {
   const [query, setQuery] = useState("");
@@ -117,7 +111,9 @@ export default function TrackingPage() {
                       <Package size={42} className="text-blue-infositel" />
                     </div>
                     <div>
-                      <span className="text-blue-infositel font-black text-sm uppercase tracking-widest">Código: {result.id}</span>
+                      <span className="text-blue-infositel font-black text-sm uppercase tracking-widest">
+                        Código: {result.code ?? result.id}
+                      </span>
                       <h2 className="text-3xl font-black">{result.equipment}</h2>
                     </div>
                   </div>
@@ -125,7 +121,9 @@ export default function TrackingPage() {
                     <span className="inline-block px-6 py-2 bg-green-100 text-green-600 rounded-full font-black text-sm">
                       EN PROCESO
                     </span>
-                    <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-tighter">Última actualización: {result.lastUpdate}</p>
+                    <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-tighter">
+                      Última actualización: {result.lastUpdate}
+                    </p>
                   </div>
                 </div>
 
@@ -147,18 +145,14 @@ export default function TrackingPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  <div className="p-6 bg-gray-50 rounded-3xl space-y-2">
-                    <UserCheck className="text-blue-infositel" size={24} />
-                    <h4 className="font-bold text-sm uppercase tracking-wider text-gray-400">Cliente (DNI)</h4>
-                    <p className="text-lg font-black">{result.dni}</p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* C-04: DNI card removed — PII must not be shown publicly */}
                   <div className="p-6 bg-gray-50 rounded-3xl space-y-2">
                     <ShieldCheck className="text-blue-infositel" size={24} />
                     <h4 className="font-bold text-sm uppercase tracking-wider text-gray-400">Problema Reportado</h4>
                     <p className="text-lg font-black">{result.problem}</p>
                   </div>
-                  <div className="p-6 bg-blue-infositel text-white rounded-3xl space-y-2 lg:col-span-1 shadow-xl shadow-blue-500/20">
+                  <div className="p-6 bg-blue-infositel text-white rounded-3xl space-y-2 shadow-xl shadow-blue-500/20">
                     <Clock size={24} />
                     <h4 className="font-bold text-sm uppercase tracking-wider text-blue-100">Estado Actual</h4>
                     <p className="text-lg font-black">{result.statusText}</p>
@@ -180,8 +174,6 @@ export default function TrackingPage() {
           )}
         </AnimatePresence>
       </div>
-
-
     </div>
   );
 }

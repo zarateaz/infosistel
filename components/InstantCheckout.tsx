@@ -31,8 +31,8 @@ export default function InstantCheckout({
     const orderData = {
       customerName: formData.name,
       customerPhone: formData.phone,
-      items: [{ name: product.name, quantity: 1, category: product.category }],
-      total: product.salePrice ?? product.price,
+      items: [{ productId: product.id, name: product.name, quantity: 1, category: product.category }],
+      // Note: `total` is intentionally omitted — the server recalculates from real DB prices
       date: new Date().toISOString(),
     };
 

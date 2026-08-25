@@ -96,10 +96,21 @@ export function sanitizeInt(
 
 /**
  * Validate that a string looks like a plausible DNI or repair code.
- * Returns true if the input is 5–12 alphanumeric chars (or all digits for DNI).
+ * Accepts:
+ *  - New repair codes: INF-XXXX-XXXX (alphanumeric with hyphens, high entropy)
+ *  - Legacy repair codes: INF#### (digits only)
+ *  - DNIs: 8 digits
+ *  - UUIDs: for internal use
  */
 export function isValidQuery(input: string): boolean {
-  // Repair codes start with INF + digits: INFXXXX
-  // DNIs are 8 digits
-  return /^[a-zA-Z0-9]{4,20}$/.test(input.trim());
+  const trimmed = input.trim();
+  // New high-entropy format: INF-XXXX-XXXX
+  if (/^INF-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(trimmed)) return true;
+  // Legacy numeric format: INF#### or INFXXXX
+  if (/^INF[0-9A-Z]{3,8}$/i.test(trimmed)) return true;
+  // DNI: 7-12 digits
+  if (/^[0-9]{7,12}$/.test(trimmed)) return true;
+  // UUID format (for direct ID lookup)
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) return true;
+  return false;
 }

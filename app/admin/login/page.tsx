@@ -47,16 +47,16 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-3xl p-10 rounded-[3rem] shadow-[0_40px_100px_rgba(20,51,201,0.15)] border border-white"
+        className="relative z-10 w-full max-w-md bg-slate-900/80 backdrop-blur-3xl p-10 rounded-[3rem] shadow-[0_40px_100px_rgba(14,165,233,0.15)] border border-slate-800"
       >
-        <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-infositel/20 rounded-full blur-[40px] pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-cyan-500/20 rounded-full blur-[40px] pointer-events-none" />
         
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-blue-infositel rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-xl shadow-blue-500/25 rotate-12">
+          <div className="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-xl shadow-blue-500/25 rotate-12">
             <Lock className="text-white -rotate-12" size={28} />
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-2">INFOSISTEL</h1>
-          <p className="text-sm font-bold text-blue-infositel uppercase tracking-[0.2em]">Secure Admin</p>
+          <h1 className="text-3xl font-black tracking-tight text-white mb-2">INFOSISTEL</h1>
+          <p className="text-sm font-bold text-cyan-400 uppercase tracking-[0.2em]">Secure Admin</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 type="text"
                 value={user}
                 onChange={(e) => setUser(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-gray-50/50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/20 transition-all font-medium text-gray-800"
+                className="w-full pl-12 pr-4 py-4 bg-slate-800/50 rounded-2xl outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all font-medium text-white"
                 placeholder="developer"
                 required
               />
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 type="password"
                 value={pass}
                 onChange={(e) => setPass(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-gray-50/50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/20 transition-all font-medium text-gray-800"
+                className="w-full pl-12 pr-4 py-4 bg-slate-800/50 rounded-2xl outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all font-medium text-white"
                 placeholder="••••••••"
                 required
               />
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoggingIn}
-            className="w-full flex items-center justify-center gap-2 bg-black hover:bg-blue-infositel text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 shadow-xl"
+            className="w-full flex items-center justify-center gap-2 bg-black hover:bg-blue-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 shadow-xl"
           >
             {isLoggingIn ? <Loader2 className="animate-spin" size={18} /> : <span>Autenticar</span>}
           </button>

@@ -1,16 +1,51 @@
-import { NextResponse } from "next/server";
+/**
+ * app/api/products/route.ts
+ * SECURITY FIX (VULN-06): Uses requireAdminRole helper to validate both token
+ * AND user role (admin/superadmin) on all write operations.
+ *
+ * SECURITY FIX (D-04): Added rate limiting on GET to prevent DB overload via
+ * mass polling. SQLite is single-writer and can be saturated easily without
+ * a request throttle at the application layer (nginx also limits at L7).
+ */
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminRole } from "@/lib/requireAdminRole";
+import { checkRateLimit, getClientIP, rateLimitKey } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // [D-04] Rate limit: max 60 requests per IP per minute for product catalog
+  const ip = getClientIP(req);
+  const rateCheck = checkRateLimit(rateLimitKey("products-get", ip), 60, 60 * 1000);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { error: "Demasiadas solicitudes. Intenta en un momento." },
+      { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds ?? 60) } }
+    );
+  }
+
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(products);
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // SECURITY FIX (VULN-06): Validates token AND role (admin/superadmin)
+  const authError = await requireAdminRole(req);
+  if (authError) return authError;
+
+  // [H-04] Rate limit for admin writes: max 30 creates per hour per IP
+  const ip = getClientIP(req);
+  const rateCheck = checkRateLimit(rateLimitKey("products-post", ip), 30, 60 * 60 * 1000);
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { error: "Demasiadas operaciones. Intenta en un momento." },
+      { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds ?? 3600) } }
+    );
+  }
+
   const data = await req.json();
   const newProduct = await prisma.product.create({
     data: {

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const username = "zarate";
-  const password = "2208";
+  const password = "8090";
 
   console.log(`[SEED] Creando usuario: ${username}...`);
 

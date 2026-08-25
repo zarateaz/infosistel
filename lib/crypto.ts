@@ -111,3 +111,49 @@ export function decrypt(encryptedData: string): string {
     return "[ERROR_DECRYPTING]";
   }
 }
+
+/**
+ * SECURITY FIX (A-01): Generate a keyed HMAC-SHA256 of a DNI for use as a
+ * blind search index.
+ *
+ * WHY HMAC INSTEAD OF PLAIN SHA-256:
+ * DNIs peruanos son solo 8 dígitos (00000000–99999999) — solo 100 millones
+ * de valores posibles. Un atacante puede pre-computar SHA256(00000000) hasta
+ * SHA256(99999999) en segundos y obtener todos los DNIs de la base de datos.
+ *
+ * HMAC-SHA256 con un secreto del servidor convierte esto en imposible:
+ * HMAC(dni, DNI_HMAC_SECRET) solo puede ser verificado con el secreto,
+ * que nunca sale del servidor.
+ *
+ * SETUP REQUERIDO EN PRODUCCIÓN:
+ *   export DNI_HMAC_SECRET="$(openssl rand -hex 32)"
+ *
+ * IMPORTANTE: Cambiar este secreto invalida todos los dniSearchHash existentes
+ * en la base de datos — los registros no podrán encontrarse por DNI hasta
+ * que se re-hasheen. No cambiarlo una vez en producción.
+ */
+export function hashDNI(dni: string): string {
+  if (!dni) return "";
+
+  const secret = process.env.DNI_HMAC_SECRET;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "FATAL: DNI_HMAC_SECRET is not set. " +
+        "All DNI search lookups will fail without it. " +
+        "Set it with: export DNI_HMAC_SECRET=\"$(openssl rand -hex 32)\""
+      );
+    }
+    // Development fallback — NOT secure, only for local dev
+    console.warn(
+      "[DEV] DNI_HMAC_SECRET not set — using insecure dev fallback. " +
+      "Set DNI_HMAC_SECRET in production."
+    );
+    return crypto.createHmac("sha256", "dev-dni-secret-NOT-for-production")
+      .update(dni.trim())
+      .digest("hex");
+  }
+
+  return crypto.createHmac("sha256", secret).update(dni.trim()).digest("hex");
+}

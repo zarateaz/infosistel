@@ -1,0 +1,19 @@
+# robots.txt — INFOSISTEL
+# Controla qué partes del sitio pueden indexar los motores de búsqueda.
+
+User-agent: *
+# Bloquear panel de administración
+Disallow: /admin
+Disallow: /admin/
+# Bloquear todas las rutas de API (no son páginas para usuarios)
+Disallow: /api/
+Disallow: /api
+# Bloquear archivos internos de Next.js
+Disallow: /_next/
+
+# Permitir el resto del sitio (tienda, rastreo, página principal)
+Allow: /
+Allow: /tienda
+Allow: /rastreo
+
+Sitemap: https://infosistel.com.pe/sitemap.xml

@@ -40,16 +40,17 @@ model Category {
 }
 
 model Repair {
-  id          String   @id @default(cuid())
-  code        String   @unique // e.g., INF102
-  dni         String
-  equipment   String
-  problem     String
-  progress    Int      @default(0)
-  statusText  String
-  lastUpdate  DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  code          String   @unique // e.g., INF102
+  dni           String
+  dniSearchHash String?  // Blind index for secure search
+  equipment     String
+  problem       String
+  progress      Int      @default(0)
+  statusText    String
+  lastUpdate    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Order {
@@ -63,12 +64,14 @@ model Order {
 }
 
 model OrderItem {
-  id       String @id @default(cuid())
-  orderId  String
-  name     String
-  category String
-  quantity Int    @default(1)
-  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String? // Reference to Product for server-side price verification
+  name      String
+  category  String
+  quantity  Int     @default(1)
+  unitPrice Float?  // Price verified from DB at order time
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Sale {
@@ -81,4 +84,16 @@ model Sale {
   profit    Float
   date      DateTime @default(now())
   createdAt DateTime @default(now())
+}
+
+model CashboxTransaction {
+  id            String   @id @default(cuid())
+  date          DateTime @default(now())
+  description   String
+  type          String   // "INCOME" or "EXPENSE"
+  amount        Float
+  paymentMethod String   // "YAPE 1", "YAPE 2", "EFECTIVO"
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/crypto";
 import { signAuth } from "@/lib/auth";
-import { checkRateLimit, resetRateLimit, getClientIP } from "@/lib/rateLimit";
+import { checkRateLimit, resetRateLimit, getClientIP, rateLimitKey } from "@/lib/rateLimit";
 import { sanitizeName } from "@/lib/sanitize";
 
 export async function POST(request: Request) {
   // ── 1. Rate Limiting: max 5 attempts per IP per 15 minutes ──
   const ip = getClientIP(request);
-  const rateCheck = checkRateLimit(ip, 5, 15 * 60 * 1000);
+  // S-04: Use namespaced key to prevent cross-endpoint rate limit collisions
+  const rateKey = rateLimitKey("login", ip);
+  const rateCheck = checkRateLimit(rateKey, 5, 15 * 60 * 1000);
 
   if (!rateCheck.allowed) {
     console.warn(`[LOGIN] Rate limit exceeded for IP: ${ip}`);
@@ -48,6 +50,10 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
+      // SECURITY FIX (VULN-04): Perform a dummy scrypt hash to equalize response time.
+      // Without this, an attacker can enumerate valid usernames by measuring response time
+      // (non-existent users respond instantly; existing ones take 50-200ms for scrypt).
+      await verifyPassword(password, "a".repeat(128), "dummy-salt-for-timing-equalization");
       // Return same generic message to prevent username enumeration
       return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
     }
@@ -60,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     // ── 5. Success: reset rate limit, issue JWT ──
-    resetRateLimit(ip);
+    resetRateLimit(rateKey); // Reset with same namespaced key used for checking
 
     const token = await signAuth({
       id: user.id,

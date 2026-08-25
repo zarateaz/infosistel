@@ -1,13 +1,20 @@
+/**
+ * app/api/orders/route.ts
+ *
+ * SECURITY FIX (VULN-01): Server-side price recalculation.
+ * The total is NEVER trusted from the client. The server fetches real prices
+ * from the database and computes the total itself. Client-supplied prices are ignored.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
-import { sanitizeName, sanitizePhone, sanitizeNumber, sanitizeInt } from "@/lib/sanitize";
-import { checkRateLimit, getClientIP } from "@/lib/rateLimit";
+import { sanitizeName, sanitizePhone, sanitizeInt } from "@/lib/sanitize";
+import { checkRateLimit, getClientIP, rateLimitKey } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest) {
   // ── Rate Limiting: max 20 orders per IP per 10 minutes (anti-spam) ──
   const ip = getClientIP(request);
-  const rateCheck = checkRateLimit(ip, 20, 10 * 60 * 1000);
+  const rateCheck = checkRateLimit(rateLimitKey("order", ip), 20, 10 * 60 * 1000);
 
   if (!rateCheck.allowed) {
     return NextResponse.json(
@@ -17,13 +24,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // ── Request body size guard ──
-    const contentLength = request.headers.get("content-length");
-    if (contentLength && parseInt(contentLength) > 102_400) {
-      // 100KB max
-      return NextResponse.json({ error: "Payload demasiado grande" }, { status: 413 });
-    }
-
+    // ── Input validation & sanitization ──
+    // Note: Request body size limit is enforced by Nginx (client_max_body_size 5M)
+    // We removed manual Content-Length check as it could be bypassed via chunked encoding.
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== "object") {
       return NextResponse.json({ error: "Petición inválida" }, { status: 400 });
@@ -40,11 +43,6 @@ export async function POST(request: NextRequest) {
 
     const customerName = sanitizeName(body.customerName, 80) || "Cliente Web";
 
-    const total = sanitizeNumber(body.total, 0, 500_000);
-    if (total === null) {
-      return NextResponse.json({ error: "Total inválido" }, { status: 400 });
-    }
-
     // ── Validate items array ──
     if (!Array.isArray(body.items) || body.items.length === 0) {
       return NextResponse.json({ error: "Se requiere al menos un producto" }, { status: 400 });
@@ -53,22 +51,66 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Demasiados productos por pedido" }, { status: 400 });
     }
 
-    const sanitizedItems = body.items.map((item: any) => ({
-      name: sanitizeName(item.name, 100) || "Producto",
-      quantity: sanitizeInt(item.quantity, 1, 999) ?? 1,
-      category: sanitizeName(item.category, 50) || "General",
-    }));
+    // ── SECURITY FIX (VULN-01): Server-side price recalculation ──
+    // For items with a productId, fetch the real price from the database.
+    // The client-supplied `total` is completely IGNORED.
+    let serverTotal = 0;
+    const sanitizedItems: {
+      productId?: string;
+      name: string;
+      quantity: number;
+      category: string;
+      unitPrice?: number;
+    }[] = [];
+
+    for (const item of body.items) {
+      const quantity = sanitizeInt(item.quantity, 1, 999) ?? 1;
+      const itemName = sanitizeName(item.name, 100) || "Producto";
+      const itemCategory = sanitizeName(item.category, 50) || "General";
+      const rawProductId = typeof item.productId === "string" ? item.productId.trim() : null;
+
+      if (rawProductId) {
+        // Fetch real price from DB — never trust the client
+        const product = await prisma.product.findUnique({
+          where: { id: rawProductId },
+          select: { id: true, name: true, category: true, price: true, salePrice: true, onSale: true },
+        });
+
+        if (!product) {
+          return NextResponse.json(
+            { error: `Producto no encontrado: ${itemName}` },
+            { status: 404 }
+          );
+        }
+
+        // Use salePrice if the product is currently on sale, otherwise use regular price
+        const unitPrice = product.onSale && product.salePrice ? product.salePrice : product.price;
+        serverTotal += unitPrice * quantity;
+
+        sanitizedItems.push({
+          productId: product.id,
+          name: product.name,
+          quantity,
+          category: product.category,
+          unitPrice,
+        });
+      } else {
+        // Items without productId (e.g. custom items) — use sanitized name only, price = 0 contribution
+        // These are "consultation" style items without a DB-verified price
+        sanitizedItems.push({ name: itemName, quantity, category: itemCategory });
+      }
+    }
 
     // ── Validate date ──
     const orderDate =
       body.date && !isNaN(Date.parse(body.date)) ? new Date(body.date) : new Date();
 
-    // ── Create order (Prisma parameterized → SQL injection safe) ──
+    // ── Create order with SERVER-CALCULATED total ──
     const newOrder = await prisma.order.create({
       data: {
         customerName,
         customerPhone: encrypt(customerPhone), // AES-256-GCM encryption
-        total,
+        total: serverTotal, // ✅ Server-calculated, NOT from client
         date: orderDate,
         items: {
           create: sanitizedItems,
@@ -77,7 +119,7 @@ export async function POST(request: NextRequest) {
       include: { items: true },
     });
 
-    console.info(`[ORDER] Created order ${newOrder.id} from IP ${ip}`);
+    console.info(`[ORDER] Created order ${newOrder.id} | Total: ${serverTotal} | IP: ${ip}`);
     return NextResponse.json({ success: true, order: { id: newOrder.id } });
   } catch (error: any) {
     console.error("[ORDER_ERROR]:", error);

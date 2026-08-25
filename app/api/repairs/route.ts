@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { decrypt } from "@/lib/crypto";
+import { hashDNI } from "@/lib/crypto";
 import { isValidQuery, sanitizeDNI } from "@/lib/sanitize";
-import { checkRateLimit, getClientIP } from "@/lib/rateLimit";
+import { checkRateLimit, getClientIP, rateLimitKey } from "@/lib/rateLimit";
 
 export async function GET(request: NextRequest) {
   // ── Rate Limiting: max 30 lookups per IP per 5 minutes ──
   const ip = getClientIP(request);
-  const rateCheck = checkRateLimit(ip, 30, 5 * 60 * 1000);
+  const rateKey = rateLimitKey("repair", ip);
+  const rateCheck = checkRateLimit(rateKey, 30, 5 * 60 * 1000);
 
   if (!rateCheck.allowed) {
     return NextResponse.json(
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   const q = rawQuery.trim().toUpperCase();
 
   try {
-    // ── 1. Search by repair code (INF + digits pattern) ──
+    // ── 1. Search by repair code (INF + new format: INF-XXXX-XXXX or legacy INF####) ──
     if (q.startsWith("INF")) {
       const foundByCode = await prisma.repair.findFirst({
         where: { code: q },
@@ -81,8 +82,9 @@ export async function GET(request: NextRequest) {
     // ── 3. Search by DNI (only digits, 8 characters) ──
     const dniQuery = sanitizeDNI(rawQuery);
     if (dniQuery.length >= 7 && dniQuery.length <= 12) {
-      // Must decrypt in-memory since DNI is AES-encrypted with random IV
-      const repairs = await prisma.repair.findMany({
+      const searchHash = hashDNI(dniQuery);
+      const foundByDni = await prisma.repair.findFirst({
+        where: { dniSearchHash: searchHash },
         select: {
           id: true,
           code: true,
@@ -92,22 +94,11 @@ export async function GET(request: NextRequest) {
           statusText: true,
           createdAt: true,
           lastUpdate: true,
-          dni: true, // needed for decrypt comparison
         },
       });
 
-      const foundByDni = repairs.find((r) => {
-        try {
-          return decrypt(r.dni) === dniQuery;
-        } catch {
-          return false;
-        }
-      });
-
       if (foundByDni) {
-        // Return WITHOUT DNI in the response
-        const { dni: _removed, ...safeRepair } = foundByDni;
-        return NextResponse.json(safeRepair);
+        return NextResponse.json(foundByDni);
       }
     }
 

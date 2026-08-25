@@ -1,38 +1,65 @@
+/**
+ * app/uploads/[...path]/route.ts
+ *
+ * SECURITY FIX (VULN-07): Path Traversal prevention.
+ * Validates that the resolved file path starts with the expected upload directory,
+ * blocking any attempt to escape and read arbitrary files (e.g. ../../etc/passwd).
+ */
 import { NextRequest, NextResponse } from "next/server";
-import { join } from "path";
+import { join, resolve } from "path";
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
+
+// The canonical base upload directory — all served files MUST be under this path
+const UPLOAD_DIR = resolve(process.cwd(), "data", "uploads");
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
-  // 1. Obtener la ruta del archivo solicitado (Awaiting params para Next.js 15+)
   const { path: pathSegments } = await params;
-  const fileName = pathSegments.join("/");
-  
-  // 2. Definir la ruta absoluta en la carpeta persistente 'data/uploads'
-  const filePath = join(process.cwd(), "data", "uploads", fileName);
+
+  // Join path segments with forward slash — safe concatenation
+  const rawFileName = pathSegments.join("/");
+
+  // Resolve the absolute path to the requested file
+  const resolvedPath = resolve(UPLOAD_DIR, rawFileName);
+
+  // SECURITY FIX (VULN-07): Strict path prefix check.
+  // If the resolved path escapes UPLOAD_DIR (e.g. via ../../../etc/passwd),
+  // reject the request immediately with 403 Forbidden.
+  if (!resolvedPath.startsWith(UPLOAD_DIR + "/") && resolvedPath !== UPLOAD_DIR) {
+    console.warn(`[UPLOADS] Path traversal attempt blocked: ${rawFileName}`);
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
+  // Whitelist of allowed file extensions — block any non-image file type
+  const ext = resolvedPath.split(".").pop()?.toLowerCase();
+  const allowedExtensions = new Set(["jpg", "jpeg", "png", "webp", "gif"]);
+  if (!ext || !allowedExtensions.has(ext)) {
+    return new NextResponse("Forbidden: file type not allowed", { status: 403 });
+  }
 
   try {
-    // 3. Verificar si el archivo existe en 'data/uploads'
-    if (existsSync(filePath)) {
-      const fileBuffer = await readFile(filePath);
-      
-      // Determinar el Content-Type básico según la extensión
-      const ext = fileName.split(".").pop()?.toLowerCase();
-      let contentType = "application/octet-stream";
-      
-      if (ext === "jpg" || ext === "jpeg") contentType = "image/jpeg";
-      else if (ext === "png") contentType = "image/png";
-      else if (ext === "webp") contentType = "image/webp";
-      else if (ext === "gif") contentType = "image/gif";
-      else if (ext === "svg") contentType = "image/svg+xml";
+    if (existsSync(resolvedPath)) {
+      const fileBuffer = await readFile(resolvedPath);
+
+      // Determine Content-Type from the whitelisted extension
+      const contentTypeMap: Record<string, string> = {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        webp: "image/webp",
+        gif: "image/gif",
+      };
+      const contentType = contentTypeMap[ext] ?? "application/octet-stream";
 
       return new NextResponse(fileBuffer, {
         headers: {
           "Content-Type": contentType,
           "Cache-Control": "public, max-age=31536000, immutable",
+          // Prevent the browser from sniffing the content type
+          "X-Content-Type-Options": "nosniff",
         },
       });
     }
@@ -40,7 +67,5 @@ export async function GET(
     console.error("[UPLOADS_PROXY_ERROR]", error);
   }
 
-  // 4. Si no existe en data/uploads, dejar que Next.js intente servirlo desde 'public/uploads' (comportamiento normal)
-  // O retornar 404 si es un fallo definitivo
   return new NextResponse("Not Found", { status: 404 });
 }

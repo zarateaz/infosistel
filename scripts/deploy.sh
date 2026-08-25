@@ -5,6 +5,23 @@
 # ═══════════════════════════════════════════════════════
 set -e
 
+# ── SECURITY FIX (VULN-02): Validate required environment secrets ──
+if [ -z "$JWT_SECRET" ]; then
+  echo "❌ ERROR: JWT_SECRET no está definido. Abortando deploy."
+  echo "   Ejecuta: export JWT_SECRET=\"\$(openssl rand -base64 64)\""
+  exit 1
+fi
+if [ -z "$ENCRYPTION_KEY" ]; then
+  echo "❌ ERROR: ENCRYPTION_KEY no está definido. Abortando deploy."
+  echo "   Ejecuta: export ENCRYPTION_KEY=\"\$(openssl rand -hex 32)\""
+  exit 1
+fi
+if [ -z "$DNI_HMAC_SECRET" ]; then
+  echo "❌ ERROR: DNI_HMAC_SECRET no está definido. Abortando deploy."
+  echo "   Ejecuta: export DNI_HMAC_SECRET=\"\$(openssl rand -hex 32)\""
+  exit 1
+fi
+
 # ── Identificar el directorio de la app dinámicamente ──
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="$(dirname "$SCRIPT_DIR")"
@@ -32,7 +49,8 @@ echo "✅ Código actualizado: $(git log --oneline -1)"
 
 # Asegurar que el directorio de datos existe
 mkdir -p data/uploads
-sudo chmod -R 777 data || true
+# SECURITY FIX (VULN-03): Use restrictive permissions — NOT 777
+chmod 700 data || true
 
 # ── 3. Preparar Base de Datos y Dependencias ──
 echo "📦 [3/7] Instalando dependencias y sincronizando Base de Datos..."
@@ -51,15 +69,21 @@ if [ ! -f "data/dev.db" ]; then
         touch data/dev.db
     fi
 fi
-sudo chmod 666 data/dev.db || true
+# SECURITY FIX (VULN-03): Secure file permissions for database
+chmod 700 data || true
+chmod 600 data/dev.db || true
 
 # Generar Prisma Client usando la ruta persistente
 DATABASE_URL="file:$APP_DIR/data/dev.db" npx prisma generate
 
-# Asegurar permisos de carpetas críticas
-sudo chmod 777 data || true
-sudo chmod 777 data/uploads || true
-sudo chmod 666 data/dev.db || true
+# Sincronizar el esquema con la base de datos existente (agrega columnas/tablas
+# nuevas sin tocar datos: dniSearchHash, CashboxTransaction, etc.)
+DATABASE_URL="file:$APP_DIR/data/dev.db" npx prisma db push --skip-generate
+
+# SECURITY FIX (VULN-03): Secure permissions — NOT 777
+chmod 700 data || true
+chmod 700 data/uploads || true
+chmod 600 data/dev.db || true
 
 # ── 4. Build de producción ──
 echo "🔨 [4/7] Construyendo en producción..."
@@ -85,10 +109,11 @@ mkdir -p .next/standalone/data
 ln -snf ../../../data/dev.db .next/standalone/data/dev.db || true
 echo "✅ Base de datos vinculada al standalone"
 
-# PERSISTENCIA Y ASSETS
-echo "🔄 Asegurando permisos de datos..."
-sudo mkdir -p data/uploads
-sudo chmod -R 777 data || true
+# SECURITY FIX (VULN-03): Restrictive permissions after standalone copy
+echo "🔒 Asegurando permisos seguros de datos..."
+chmod 700 data || true
+chmod 700 data/uploads || true
+chmod 600 data/dev.db || true
 
 # Vinculamos la base de datos dentro del standalone
 mkdir -p .next/standalone/data

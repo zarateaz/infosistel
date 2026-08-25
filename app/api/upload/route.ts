@@ -1,28 +1,62 @@
+/**
+ * app/api/upload/route.ts
+ *
+ * SECURITY FIX (VULN-06): Admin role validation via requireAdminRole helper.
+ * SECURITY FIX (S-03): Magic bytes validation to prevent polyglot file uploads.
+ */
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir, access, chmod } from "fs/promises";
+import { writeFile, mkdir, chmod } from "fs/promises";
 import { join } from "path";
-import { verifyAuth } from "@/lib/auth";
+import { requireAdminRole } from "@/lib/requireAdminRole";
+
+/**
+ * S-03: Validate that the file buffer starts with the magic bytes of a known image format.
+ * This is the ONLY reliable way to verify file type — Content-Type and extension are spoofable.
+ *
+ * Magic byte signatures:
+ *  - JPEG:  FF D8 FF
+ *  - PNG:   89 50 4E 47 0D 0A 1A 0A
+ *  - WebP:  52 49 46 46 ?? ?? ?? ?? 57 45 42 50  (RIFF....WEBP)
+ *  - GIF:   47 49 46 38 39 61 (GIF89a) or 47 49 46 38 37 61 (GIF87a)
+ */
+function checkImageMagicBytes(buffer: Buffer): boolean {
+  if (buffer.length < 12) return false;
+
+  // JPEG: starts with FF D8 FF
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return true;
+
+  // PNG: starts with 89 50 4E 47 0D 0A 1A 0A
+  if (
+    buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47 &&
+    buffer[4] === 0x0D && buffer[5] === 0x0A && buffer[6] === 0x1A && buffer[7] === 0x0A
+  ) return true;
+
+  // WebP: RIFF at bytes 0-3 and WEBP at bytes 8-11
+  if (
+    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
+  ) return true;
+
+  // GIF87a or GIF89a: starts with GIF8
+  if (
+    buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38 &&
+    (buffer[4] === 0x37 || buffer[4] === 0x39) && buffer[5] === 0x61
+  ) return true;
+
+  return false;
+}
 
 export async function POST(request: NextRequest) {
   try {
     console.log("[UPLOAD_API] Inicio de petición POST");
-    
-    // 1. Security check: Must be authenticated to upload
-    const token = request.cookies.get("infositel_token")?.value;
-    console.log("[UPLOAD_API] Token encontrado:", !!token);
-    
-    if (!token) {
-      console.error("[UPLOAD_API] Error: Token ausente");
-      return NextResponse.json({ error: "No autorizado (token ausente)" }, { status: 401 });
-    }
 
-    const payload = await verifyAuth(token);
-    if (!payload) {
-      console.error("[UPLOAD_API] Error: Token inválido");
-      return NextResponse.json({ error: "No autorizado (token inválido)" }, { status: 401 });
+    // SECURITY FIX (VULN-06): Use requireAdminRole to validate token AND role
+    const authError = await requireAdminRole(request);
+    if (authError) {
+      console.error("[UPLOAD_API] Error: Acceso no autorizado");
+      return authError;
     }
-    
-    console.log("[UPLOAD_API] Usuario autenticado:", payload.username);
+    console.log("[UPLOAD_API] Acceso de administrador verificado");
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -49,13 +83,27 @@ export async function POST(request: NextRequest) {
        return NextResponse.json({ error: "Extensión de archivo no permitida" }, { status: 400 });
     }
 
-    // 3. Security check: Validate file size (max 100MB for product images)
-    if (file.size > 100 * 1024 * 1024) {
-      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 100MB" }, { status: 400 });
+    // 3. Security check: Validate file size (max 5MB for product images)
+    // 100MB was dangerously large and could be used for DoS attacks.
+    if (file.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: "Archivo demasiado grande. Máximo 5MB" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // S-03 SECURITY FIX: Validate magic bytes (file signature) — the REAL identity of the file.
+    // Content-Type and file extension are 100% client-controlled and trivially spoofed.
+    // Magic bytes are read from the actual binary content and cannot be faked without
+    // corrupting the file in a way that browsers won't render as an image.
+    const isValidImageMagicBytes = checkImageMagicBytes(buffer);
+    if (!isValidImageMagicBytes) {
+      console.error("[UPLOAD_API] Error: Magic bytes no corresponden a ninguna imagen válida");
+      return NextResponse.json(
+        { error: "El archivo no es una imagen válida (firma binaria incorrecta)" },
+        { status: 400 }
+      );
+    }
 
     // 4. Nombre único y sanitizado
     const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");

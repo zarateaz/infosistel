@@ -17,8 +17,13 @@ async function main() {
   }
 
   console.log("Seeding Usuario Admin Default...");
-  // username: zarate | password: 2208
-  const { hash, salt } = await hashPassword("2208");
+  // SECURITY FIX (VULN-02): Password is never hardcoded. Read from CLI arg or generate a random one.
+  const seedPassword = process.argv[2] || require("crypto").randomBytes(16).toString("hex");
+  if (!process.argv[2]) {
+    console.log(`\n⚠️  Auto-generated seed password: ${seedPassword}`);
+    console.log("   Save this and change it immediately after seeding!\n");
+  }
+  const { hash, salt } = await hashPassword(seedPassword);
   await prisma.user.create({
     data: {
       username: "zarate",
