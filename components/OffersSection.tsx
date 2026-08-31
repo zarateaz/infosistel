@@ -22,7 +22,7 @@ const FALLBACK_OFFERS: Product[] = [
     stock: 5,
     onSale: true,
     isFeatured: false,
-    image: "/img/cooler.png",
+    image: "/img/cooler.webp",
   },
   {
     id: "f2",
@@ -34,7 +34,7 @@ const FALLBACK_OFFERS: Product[] = [
     stock: 8,
     onSale: true,
     isFeatured: false,
-    image: "/img/mouse.png",
+    image: "/img/mouse.webp",
   },
   {
     id: "f3",
@@ -46,7 +46,7 @@ const FALLBACK_OFFERS: Product[] = [
     stock: 6,
     onSale: true,
     isFeatured: false,
-    image: "/img/teclado.png",
+    image: "/img/teclado.webp",
   },
 ];
 
@@ -101,7 +101,7 @@ export default function OffersSection({
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-3 py-2.5 px-7 rounded-full bg-blue-infositel text-white font-black text-xs tracking-[0.22em] uppercase shadow-xl shadow-blue-500/30"
+            className="inline-flex items-center gap-3 py-2.5 px-7 rounded-full bg-gradient-brand text-white font-black text-xs tracking-[0.22em] uppercase shadow-glow-brand"
           >
             <span className="w-2 h-2 rounded-full bg-white animate-ping" />
             🔥 Ofertas Exclusivas · Tiempo Limitado
@@ -114,7 +114,7 @@ export default function OffersSection({
               whileInView={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.7, ease: [0.2, 0.65, 0.3, 0.9] }}
               viewport={{ once: true }}
-              className="text-[clamp(2.6rem,7vw,5.5rem)] font-black leading-none tracking-tighter text-black"
+              className="font-display text-[clamp(2.6rem,7vw,5.5rem)] font-black leading-none tracking-tighter text-black"
             >
               ¡Aprovecha
             </motion.div>
@@ -129,12 +129,12 @@ export default function OffersSection({
               viewport={{ once: true }}
               className="relative inline-block"
             >
-              <span className="text-[clamp(2.6rem,7vw,5.5rem)] font-black leading-none tracking-tighter text-blue-infositel">
+              <span className="font-display text-gradient-brand text-[clamp(2.6rem,7vw,5.5rem)] font-black leading-none tracking-tighter">
                 Nuestras Ofertas!
               </span>
               {/* Draw-in underline */}
               <motion.span
-                className="absolute -bottom-2 left-0 right-0 h-[5px] bg-gradient-to-r from-blue-infositel via-blue-400 to-blue-600 rounded-full"
+                className="absolute -bottom-2 left-0 right-0 h-[5px] bg-gradient-brand rounded-full"
                 initial={{ scaleX: 0, originX: 0 }}
                 whileInView={{ scaleX: 1 }}
                 transition={{ delay: 0.65, duration: 0.8, ease: "easeOut" }}
@@ -171,7 +171,7 @@ export default function OffersSection({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1, duration: 0.6 }}
-                className="group relative bg-white rounded-[3rem] overflow-hidden border border-gray-100 hover:border-blue-infositel/30 transition-all duration-500 flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.02)]"
+                className="group relative bg-white rounded-[1.5rem] overflow-hidden border border-gray-100 hover:border-blue-infositel/30 transition-all duration-500 flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.02)]"
               >
                 {/* ── IMAGE ZONE ── */}
                 <div className="relative h-72 bg-white flex items-center justify-center p-8 overflow-hidden">
@@ -202,7 +202,7 @@ export default function OffersSection({
 
                   {/* Badge */}
                   <div className="absolute top-6 left-6 z-20">
-                    <div className="bg-blue-infositel text-white px-5 py-2 rounded-2xl font-black text-xs tracking-widest shadow-xl shadow-blue-500/20">
+                    <div className="bg-gradient-brand text-white px-5 py-2 rounded-2xl font-black text-xs tracking-widest shadow-glow-brand">
                       -{discount}% PROMO
                     </div>
                   </div>
@@ -236,7 +236,7 @@ export default function OffersSection({
                     </div>
                     <div className="h-1 bg-gray-50 rounded-full overflow-hidden">
                       <motion.div
-                        className="h-full bg-blue-infositel"
+                        className="h-full bg-gradient-brand"
                         initial={{ width: 0 }}
                         whileInView={{ width: "70%" }}
                         transition={{ duration: 1.5, delay: 0.5 }}
@@ -246,11 +246,11 @@ export default function OffersSection({
 
                   <button
                     onClick={() => onSelect(product)}
-                    className="mt-6 w-full group/btn relative bg-blue-infositel text-white h-16 rounded-[1.5rem] font-black flex items-center justify-center gap-4 overflow-hidden transition-all hover:scale-[1.02] shadow-2xl shadow-blue-500/20"
+                    className="mt-6 w-full group/btn relative bg-gradient-brand text-white h-16 rounded-[1.5rem] font-black flex items-center justify-center gap-4 overflow-hidden transition-all hover:scale-[1.02] shadow-glow-brand"
                   >
                     <span className="relative z-10 text-xs tracking-[0.2em] uppercase">Obtener Ahora</span>
                     <ArrowRight size={18} className="relative z-10 group-hover:translate-x-2 transition-transform" />
-                    <div className="absolute inset-0 bg-blue-700 -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-white/15 -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
                   </button>
                 </div>
               </motion.div>

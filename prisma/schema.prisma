@@ -29,6 +29,9 @@ model Product {
   isFeatured  Boolean  @default(false)
   onSale      Boolean  @default(false)
   salePrice   Float?
+  barcode     String?  @unique // EAN/UPC from the inventory scanner
+  model       String?  // Exact model name from the barcode lookup (e.g. "Kingston FURY Beast DDR4 16GB")
+  specs       String?  // JSON-encoded technical specs from the barcode lookup
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

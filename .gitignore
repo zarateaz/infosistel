@@ -32,6 +32,10 @@ ecosystem.config.js
 scripts/add-user-*.ts
 scripts/test-*.ts
 
+# datos reales de caja (montos, cliente, códigos de servicio) — no al repo público
+/ocr.txt
+/seed_caja.ts
+
 # security: Excluir README
 README.md
 

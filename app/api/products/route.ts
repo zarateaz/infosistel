@@ -25,8 +25,31 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // SECURITY FIX (2026-08-30, hallazgo del diagnóstico ASVS V4.1.3 — ver
+  // docs de tesis / capítulo III): sin `select` explícito, Prisma devolvía
+  // TODAS las columnas de Product a cualquier visitante no autenticado,
+  // incluyendo `costPrice` (precio de costo / margen de ganancia interno).
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      category: true,
+      description: true,
+      price: true,
+      stock: true,
+      image: true,
+      isFeatured: true,
+      onSale: true,
+      salePrice: true,
+      barcode: true,
+      model: true,
+      specs: true,
+      createdAt: true,
+      updatedAt: true,
+      // costPrice deliberadamente excluido — solo debe ser visible en el
+      // panel de administración, nunca en el catálogo público.
+    },
   });
   return NextResponse.json(products);
 }

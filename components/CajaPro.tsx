@@ -677,7 +677,7 @@ export default function CajaPro({ dbTransactions = [] }: { dbTransactions?: any[
             <div style={styles.receiptRow}><span style={{color: '#64748b'}}>Total Efectivo</span><span style={{color: '#64748b'}}>{fmt(efectivo.neto)}</span></div>
             <div style={styles.receiptRow}><span style={{color: '#64748b'}}>Total Yape</span><span style={{color: '#64748b'}}>{fmt(yape1.neto + yape2.neto)}</span></div>
             <div style={styles.receiptDivider} />
-            <div style={styles.receiptRow}><span style={{color: '#1433C9', fontWeight: 800}}>SALDO FINAL</span><span style={{color: '#1433C9', fontWeight: 800}}>{fmt(totals.saldo)}</span></div>
+            <div style={styles.receiptRow}><span style={{color: '#1433C9', fontWeight: 800}}>SALDO FINAL</span><span style={{background: 'linear-gradient(115deg, #60a5fa 0%, #1433c9 40%, #7c3aed 75%, #06b6d4 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', fontWeight: 800}}>{fmt(totals.saldo)}</span></div>
           </div>
         </div>
 
@@ -880,7 +880,7 @@ export default function CajaPro({ dbTransactions = [] }: { dbTransactions?: any[
               {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} 
               Agregar movimiento
             </button>
-            <button style={{...styles.addBtn, background: '#1433C9', color: '#fff', border: 'none', fontWeight: 700}} onClick={handlePrint}>
+            <button style={{...styles.addBtn, background: 'linear-gradient(115deg, #1433c9 0%, #5b21e0 55%, #7c3aed 100%)', color: '#fff', border: 'none', fontWeight: 700, boxShadow: '0 20px 60px -15px rgba(124,58,237,0.35), 0 8px 30px -10px rgba(20,51,201,0.35)'}} onClick={handlePrint}>
               Imprimir Reporte Mensual
             </button>
           </div>
@@ -902,7 +902,11 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap', gap: 16, marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid #e2e8f0',
   },
   eyebrow: { fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: 1.5, color: '#64748b', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase' },
-  title: { fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 900, margin: 0, letterSpacing: 1, color: '#1433C9' },
+  title: {
+    fontFamily: "var(--font-outfit), 'Inter', sans-serif", fontSize: 26, fontWeight: 900, margin: 0, letterSpacing: 1,
+    background: 'linear-gradient(115deg, #60a5fa 0%, #1433c9 40%, #7c3aed 75%, #06b6d4 100%)',
+    WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+  },
   grid: {
     display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 30,
   },

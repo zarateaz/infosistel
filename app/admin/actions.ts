@@ -102,6 +102,50 @@ export async function editProduct(id: string, data: unknown) {
   });
 }
 
+/**
+ * Insert or update a product scanned in the barcode inventory tool
+ * (app/admin/inventory/scan). Upserts by barcode so re-scanning the same
+ * item (e.g. to add stock) updates the existing row instead of duplicating it.
+ */
+export async function saveScannedProduct(data: unknown) {
+  await ensureAuth();
+
+  const d = data as Record<string, unknown>;
+  const barcode = sanitizeString(d.barcode, 32).replace(/[^0-9]/g, "");
+  if (!/^[0-9]{6,14}$/.test(barcode)) throw new Error("Código de barras inválido");
+
+  const name        = sanitizeName(d.model, 120);
+  const category    = sanitizeName(d.category, 80) || "GENERAL";
+  const description = sanitizeString(d.description, 2000);
+  const image        = sanitizeString(d.image, 500) || "/img/producto3mouse.webp";
+  const price        = sanitizeNumber(d.price, 0, 999_999) ?? 0;
+  const stockInput    = sanitizeInt(d.stock, 0, 100_000) ?? 0;
+  const model         = sanitizeString(d.model, 200);
+  // "add" (default): stockInput units are ADDED to whatever this barcode already
+  // has in stock — the safe default for re-scanning a product to log new arrivals.
+  // "set": stockInput REPLACES the stock count outright — only for an explicit
+  // manual correction (e.g. after a physical inventory count), never the default,
+  // since silently overwriting real stock on a re-scan would be a real loss of data.
+  const stockMode = d.stockMode === "set" ? "set" : "add";
+  // Not run through sanitizeString: it HTML-escapes quotes, which would corrupt
+  // the JSON. Safe as-is — Prisma parameterizes the query, and this value is
+  // only ever JSON.parse()'d back, never rendered as raw HTML.
+  const specsRaw = d.specs;
+  const specs = specsRaw ? JSON.stringify(specsRaw).slice(0, 2000) : null;
+
+  if (!name) throw new Error("El modelo del producto es requerido");
+  if (price <= 0) throw new Error("El precio de venta es requerido");
+
+  return prisma.product.upsert({
+    where: { barcode },
+    update: {
+      name, category, description, image, price, model, specs,
+      stock: stockMode === "add" ? { increment: stockInput } : stockInput,
+    },
+    create: { barcode, name, category, description, image, price, stock: stockInput, model, specs, costPrice: 0 },
+  });
+}
+
 export async function inlineUpdateProduct(id: string, data: unknown) {
   await ensureAuth();
   assertValidId(id, "Product ID");

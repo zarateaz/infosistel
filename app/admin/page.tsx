@@ -6,11 +6,13 @@ import {
   User, Lock, LogOut, Plus, Trash2, Package, Tag, 
   Wrench, X, RefreshCw, Upload, Loader2, Users as UsersIcon, 
   ShoppingCart as CartIcon, CreditCard, Mail, Tag as OfferTag,
-  CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3, 
-  Calculator, CalculatorIcon, Percent, TrendingUp, DollarSign, PieChart, ShoppingCart, ChevronRight
+  CheckCircle, AlertCircle, ToggleLeft, ToggleRight, ClipboardList, Edit3,
+  Calculator, CalculatorIcon, Percent, TrendingUp, DollarSign, PieChart, ShoppingCart, ChevronRight,
+  ScanBarcode
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import PageBg from "@/components/PageBg";
 import { useRouter } from "next/navigation";
 import {
@@ -35,7 +37,7 @@ export default function AdminPage() {
   const [newCategory, setNewCategory] = useState("");
   const [newProduct, setNewProduct] = useState({
     name: "", category: "", description: "", price: "", costPrice: "", stock: "",
-    image: "/img/cooler.png", onSale: false, salePrice: ""
+    image: "/img/cooler.webp", onSale: false, salePrice: ""
   });
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [inventorySearch, setInventorySearch] = useState("");
@@ -247,7 +249,7 @@ export default function AdminPage() {
     try {
       setIsBatchLoading(true);
       await addProductAction(newProduct);
-      setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.png", onSale: false, salePrice: "" });
+      setNewProduct({ name: "", category: "", description: "", price: "", costPrice: "", stock: "", image: "/img/cooler.webp", onSale: false, salePrice: "" });
       setImagePreview(null);
       await loadData();
       setShowProductSuccess(true);
@@ -520,7 +522,7 @@ export default function AdminPage() {
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-gray-100"
+              className="bg-white rounded-[1.5rem] p-8 max-w-sm w-full shadow-2xl border border-gray-100"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-4 mb-6">
@@ -528,7 +530,7 @@ export default function AdminPage() {
                   <AlertCircle className="text-red-500" size={28} />
                 </div>
                 <div>
-                  <h3 className="font-black text-xl text-gray-900">¿Eliminar?</h3>
+                  <h3 className="font-display font-black text-xl text-gray-900">¿Eliminar?</h3>
                   <p className="text-gray-400 text-sm">Esta acción no se puede deshacer.</p>
                 </div>
               </div>
@@ -565,7 +567,7 @@ export default function AdminPage() {
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-gray-100"
+              className="bg-white rounded-[1.5rem] p-8 max-w-sm w-full shadow-2xl border border-gray-100"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-4 mb-6">
@@ -573,14 +575,14 @@ export default function AdminPage() {
                   <OfferTag className="text-blue-infositel" size={28} />
                 </div>
                 <div>
-                  <h3 className="font-black text-xl text-gray-900">Activar Oferta</h3>
+                  <h3 className="font-display font-black text-xl text-gray-900">Activar Oferta</h3>
                   <p className="text-gray-400 text-sm">Ingresa el precio de oferta</p>
                 </div>
               </div>
               <input
                 type="number"
                 placeholder="Precio de oferta S/."
-                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel mb-4 text-lg font-black text-gray-900"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent mb-4 text-lg font-black text-gray-900"
                 value={offerEdit.price}
                 onChange={e => setOfferEdit({ ...offerEdit, price: e.target.value })}
                 autoFocus
@@ -592,7 +594,7 @@ export default function AdminPage() {
                 <button
                   onClick={confirmOfferActivation}
                   disabled={!offerEdit.price}
-                  className="flex-1 py-3 rounded-2xl bg-blue-infositel text-white font-black hover:opacity-90 transition-all disabled:bg-gray-200"
+                  className="flex-1 py-3 rounded-2xl bg-gradient-brand text-white font-black hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Activar 🔥
                 </button>
@@ -612,7 +614,7 @@ export default function AdminPage() {
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[2rem] p-6 max-w-lg w-full shadow-2xl my-8 relative border border-gray-100"
+              className="bg-white rounded-[1.5rem] p-6 max-w-lg w-full shadow-2xl my-8 relative border border-gray-100"
               onClick={e => e.stopPropagation()}
             >
               <button 
@@ -621,21 +623,21 @@ export default function AdminPage() {
                >
                 <X size={20} />
               </button>
-              <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-gray-900">
+              <h3 className="font-display text-xl font-black mb-6 flex items-center gap-2 text-gray-900">
                 <Edit3 className="text-blue-infositel" size={20} /> Editar Producto
               </h3>
               
               <div className="space-y-3">
                   <input type="text" placeholder="Nombre del producto"
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                     value={editingProduct.name} onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })} />
-                  <select className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  <select className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                     value={editingProduct.category} onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })}>
                     <option value="">Seleccionar Categoría</option>
                     {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                   </select>
                   <textarea placeholder="Descripción"
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm resize-none text-gray-900"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm resize-none text-gray-900"
                     rows={2}
                     value={editingProduct.description} onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })} />
                   
@@ -643,19 +645,19 @@ export default function AdminPage() {
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-gray-400 px-1">Costo (S/.)</label>
                       <input type="number" placeholder="Costo"
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                         value={editingProduct.costPrice || ""} onChange={e => setEditingProduct({ ...editingProduct, costPrice: e.target.value })} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black tracking-wider text-gray-400 px-1">Venta (S/.)</label>
                       <input type="number" placeholder="Venta"
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                         value={editingProduct.price} onChange={e => setEditingProduct({ ...editingProduct, price: e.target.value })} />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black tracking-wider text-gray-400 px-1">Stock</label>
                       <input type="number" placeholder="Stock"
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                         value={editingProduct.stock} onChange={e => setEditingProduct({ ...editingProduct, stock: e.target.value })} />
                     </div>
                   </div>
@@ -695,7 +697,7 @@ export default function AdminPage() {
                   </div>
 
                   <button onClick={saveEditedProduct}
-                    className="w-full bg-blue-infositel text-white py-4 mt-2 rounded-2xl font-black hover:opacity-90 transition-all text-sm">
+                    className="w-full bg-gradient-brand text-white py-4 mt-2 rounded-2xl font-black hover:opacity-90 transition-all text-sm shadow-glow-brand">
                     Guardar Cambios
                   </button>
               </div>
@@ -708,7 +710,7 @@ export default function AdminPage() {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900">Dashboard</h1>
+            <h1 className="font-display text-3xl md:text-4xl font-black text-gray-900">Dashboard</h1>
             <p className="text-gray-400 font-medium text-sm">Gestiona tu tienda desde cualquier dispositivo.</p>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -736,7 +738,7 @@ export default function AdminPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-2xl font-black text-sm transition-all whitespace-nowrap ${
-                  activeTab === tab.id ? "bg-blue-infositel text-white shadow-lg" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                  activeTab === tab.id ? "bg-gradient-brand text-white shadow-glow-brand" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <tab.icon size={16} />
@@ -754,20 +756,28 @@ export default function AdminPage() {
         {/* ══════════════════ INVENTARIO TAB ══════════════════ */}
         {activeTab === "inventario" && (
           <div className="space-y-6">
+            <div className="flex justify-end">
+              <Link
+                href="/admin/inventory/scan"
+                className="inline-flex items-center gap-2 bg-gradient-brand text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-glow-brand hover:scale-[1.02] active:scale-95 transition-transform"
+              >
+                <ScanBarcode size={16} /> Agregar producto con código de barras
+              </Link>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-200">
+              <div className="bg-white p-5 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
                 <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Inversión (Suma Compras)</p>
-                <h3 className="text-2xl md:text-3xl font-black text-blue-infositel">
+                <h3 className="text-2xl md:text-3xl font-black text-gradient-brand">
                   S/. {products.reduce((acc, p) => acc + (p.costPrice || 0) * p.stock, 0).toFixed(2)}
                 </h3>
               </div>
-              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-200">
+              <div className="bg-white p-5 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
                 <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Capital (Suma Ventas)</p>
                 <h3 className="text-2xl md:text-3xl font-black text-green-500">
                   S/. {products.reduce((acc, p) => acc + p.price * p.stock, 0).toFixed(2)}
                 </h3>
               </div>
-              <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-gray-200">
+              <div className="bg-white p-5 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
                 <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">Ganancia Estimada Total</p>
                 <h3 className="text-2xl md:text-3xl font-black text-purple-500">
                   S/. {products.reduce((acc, p) => acc + (p.price - (p.costPrice || 0)) * p.stock, 0).toFixed(2)}
@@ -776,11 +786,11 @@ export default function AdminPage() {
             </div>
 
             {/* CALCULATOR PANEL */}
-            <div className="bg-gradient-to-br from-pink-500 to-rose-900 rounded-[2.5rem] p-6 md:p-8 shadow-xl text-white relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('/img/pattern.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+            <div className="bg-gradient-brand rounded-[1.5rem] p-6 md:p-8 shadow-glow-brand text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-[url('/img/pattern.webp')] opacity-10 mix-blend-overlay pointer-events-none"></div>
               <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-center justify-between">
                 <div className="flex-1 w-full space-y-6">
-                  <h3 className="text-2xl font-black flex items-center gap-2">
+                  <h3 className="font-display text-2xl font-black flex items-center gap-2">
                     <CalculatorIcon size={28} className="text-blue-300" /> Calculadora de Precios
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -827,10 +837,10 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-[1.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-xl font-black text-gray-900">Detalle de Inventario</h3>
+                  <h3 className="font-display text-xl font-black text-gray-900">Detalle de Inventario</h3>
                   <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200">
                     <button 
                       onClick={() => setInventoryView("table")}
@@ -848,7 +858,7 @@ export default function AdminPage() {
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
                   <select 
-                    className="p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-medium border border-gray-200 text-gray-700"
+                    className="p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm font-medium border border-gray-200 text-gray-700"
                     value={inventoryCategory} onChange={e => setInventoryCategory(e.target.value)}
                   >
                     <option value="">Todas las categorías</option>
@@ -857,7 +867,7 @@ export default function AdminPage() {
                   <input
                     type="text"
                     placeholder="🔍 Buscar producto..."
-                    className="w-full md:w-64 p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-medium border border-gray-200 text-gray-700"
+                    className="w-full md:w-64 p-3 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm font-medium border border-gray-200 text-gray-700"
                     value={inventorySearch}
                     onChange={e => setInventorySearch(e.target.value)}
                   />
@@ -884,7 +894,7 @@ export default function AdminPage() {
                         return (
                           <tr key={p.id} className="border-b border-gray-100 hover:bg-blue-50/30">
                             <td className="py-3 px-4 font-bold flex items-center gap-3">
-                              <div className="w-8 h-8 relative rounded-lg border border-slate-800/50 overflow-hidden bg-slate-900 shrink-0"><Image src={p.image} fill className="object-cover p-1" alt="img"/></div>
+                              <div className="w-8 h-8 relative rounded-lg border border-gray-200 overflow-hidden bg-gray-50 shrink-0"><Image src={p.image} fill className="object-cover p-1" alt="img"/></div>
                               <span className="truncate max-w-[200px] block">{p.name}</span>
                             </td>
                             <td className="py-3 px-4 text-center font-black">
@@ -906,9 +916,9 @@ export default function AdminPage() {
                             </td>
                             <td className="py-3 px-4 text-right">
                               <div className="flex items-center justify-end gap-1">
-                                <span className="text-slate-500 font-bold text-xs">S/.</span>
-                                <input type="number" 
-                                  className="w-20 bg-slate-800/50 border border-slate-800/50 rounded-lg px-2 py-1 outline-none text-right font-medium text-slate-300 focus:ring-2 focus:ring-pink-500"
+                                <span className="text-gray-400 font-bold text-xs">S/.</span>
+                                <input type="number"
+                                  className="w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 outline-none text-right font-medium text-gray-900 focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent"
                                   defaultValue={cost}
                                   onBlur={(e) => inlineUpdateProductAction(p.id, { costPrice: e.target.value }).then(loadData)}
                                 />
@@ -928,7 +938,7 @@ export default function AdminPage() {
                               >
                                 <CalculatorIcon size={16} />
                               </button>
-                              <button onClick={() => { setEditingProduct(p); setImagePreview(p.image); setActiveTab("productos"); }} className="p-2 text-slate-500 hover:bg-gray-100 hover:text-slate-300 rounded-xl transition-all">
+                              <button onClick={() => { setEditingProduct(p); setImagePreview(p.image); setActiveTab("productos"); }} className="p-2 text-gray-400 hover:bg-gray-100 hover:text-blue-infositel rounded-xl transition-all">
                                 <Edit3 size={16} />
                               </button>
                             </td>
@@ -949,7 +959,7 @@ export default function AdminPage() {
                         animate={{ opacity: 1, y: 0 }}
                         whileHover={{ y: -10, scale: 1.02 }}
                         key={p.id} 
-                        className={`bg-white rounded-[3rem] p-6 border-2 transition-all group relative ${p.stock < 5 ? 'border-red-100 shadow-[0_20px_50px_rgba(239,68,68,0.1)]' : 'border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_40px_80px_rgba(20,51,201,0.1)]'}`}
+                        className={`bg-white rounded-[1.5rem] p-6 border-2 transition-all group relative ${p.stock < 5 ? 'border-red-100 shadow-[0_20px_50px_rgba(239,68,68,0.1)]' : 'border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_40px_80px_rgba(20,51,201,0.1)]'}`}
                       >
                          {/* Low Stock Badge */}
                          {p.stock < 5 && (
@@ -977,7 +987,7 @@ export default function AdminPage() {
                              </button>
                          </div>
                          
-                         <div className="relative h-64 w-full bg-gray-50 rounded-[2.5rem] overflow-hidden mb-8 border border-gray-100 p-8 group-hover:bg-blue-50/30 transition-colors duration-500">
+                         <div className="relative h-64 w-full bg-gray-50 rounded-[1.5rem] overflow-hidden mb-8 border border-gray-100 p-8 group-hover:bg-blue-50/30 transition-colors duration-500">
                            <motion.div 
                               whileHover={{ scale: 1.1, rotate: 2 }}
                               className="relative h-full w-full"
@@ -1008,7 +1018,7 @@ export default function AdminPage() {
                            </div>
 
                            <div className="flex items-center justify-between gap-4">
-                              <div className="bg-gray-50 backdrop-blur-sm border border-gray-200 p-4 rounded-[1.8rem] flex-1 relative overflow-hidden">
+                              <div className="bg-gray-50 backdrop-blur-sm border border-gray-200 p-4 rounded-[1.5rem] flex-1 relative overflow-hidden">
                                 {p.onSale && (
                                   <div className="absolute top-0 right-0 bg-blue-600 text-white text-[8px] font-black px-2 py-1 rounded-bl-xl">
                                     PROMO 🔥
@@ -1030,7 +1040,7 @@ export default function AdminPage() {
                                 </div>
                               </div>
 
-                             <div className={`p-4 rounded-[1.8rem] min-w-[120px] text-center shadow-xl transition-all duration-500 ${p.stock < 5 ? 'bg-red-500 text-white shadow-red-500/30 ring-4 ring-red-50' : 'bg-blue-600 text-white shadow-blue-600/20'}`}>
+                             <div className={`p-4 rounded-[1.5rem] min-w-[120px] text-center shadow-xl transition-all duration-500 ${p.stock < 5 ? 'bg-red-500 text-white shadow-red-500/30 ring-4 ring-red-50' : 'bg-blue-600 text-white shadow-blue-600/20'}`}>
                                <p className="text-[9px] font-black opacity-60 uppercase mb-1 tracking-widest">Stock Disponible</p>
                                <div className="flex items-center justify-center gap-4">
                                  <button 
@@ -1078,32 +1088,32 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Form */}
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200 lg:sticky lg:top-28">
-                <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-gray-900">
+              <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200 lg:sticky lg:top-28">
+                <h3 className="font-display text-xl font-black mb-6 flex items-center gap-2 text-gray-900">
                   <Plus className="text-blue-infositel" size={20} /> Añadir Producto
                 </h3>
                 <div className="space-y-3">
                   <input type="text" placeholder="Nombre del producto"
-                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                     value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} />
-                  <select className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  <select className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                     value={newProduct.category} onChange={e => setNewProduct({ ...newProduct, category: e.target.value })}>
                     <option value="">Seleccionar Categoría</option>
                     {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                   </select>
                   <textarea placeholder="Descripción"
-                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm resize-none text-gray-900"
+                    className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm resize-none text-gray-900"
                     rows={3}
                     value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} />
                   <div className="grid grid-cols-3 gap-2">
                     <input type="number" placeholder="C. Compra"
-                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                       value={newProduct.costPrice} onChange={e => setNewProduct({ ...newProduct, costPrice: e.target.value })} />
                     <input type="number" placeholder="P. Venta"
-                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                       value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} />
                     <input type="number" placeholder="Stock"
-                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                       value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
                   </div>
 
@@ -1122,7 +1132,7 @@ export default function AdminPage() {
                       {newProduct.onSale && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
                           <input type="number" placeholder="Precio de Oferta S/."
-                            className="w-full p-3 bg-white rounded-xl outline-none border border-blue-200 focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                            className="w-full p-3 bg-white rounded-xl outline-none border border-blue-200 focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                             value={newProduct.salePrice}
                             onChange={e => setNewProduct({ ...newProduct, salePrice: e.target.value })} />
                         </motion.div>
@@ -1141,7 +1151,7 @@ export default function AdminPage() {
                   
                   <div 
                     onClick={() => !isUploading && fileInputRef.current?.click()}
-                    className={`relative h-44 w-full border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center overflow-hidden
+                    className={`relative h-44 w-full border-2 border-dashed rounded-[1.5rem] flex flex-col items-center justify-center overflow-hidden
                     transition-all cursor-pointer ${isUploading ? 'bg-blue-50/50 border-blue-200' : 'bg-gray-50 hover:bg-blue-50/50 border-gray-200'}`}
                   >
                     {isUploading ? (
@@ -1169,10 +1179,10 @@ export default function AdminPage() {
                   <button 
                     onClick={addProduct} 
                     disabled={isUploading || isBatchLoading}
-                    className={`w-full py-5 rounded-[2rem] font-black transition-all flex items-center justify-center gap-3 shadow-xl 
-                      ${isUploading || isBatchLoading 
-                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                        : showProductSuccess ? 'bg-blue-infositel text-white shadow-blue-infositel/20' : 'bg-blue-infositel text-white hover:opacity-90 active:scale-95 shadow-blue-infositel/10'}`}
+                    className={`w-full py-5 rounded-[1.5rem] font-black transition-all flex items-center justify-center gap-3 shadow-xl
+                      ${isUploading || isBatchLoading
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : showProductSuccess ? 'bg-gradient-brand text-white shadow-glow-brand' : 'bg-gradient-brand text-white hover:opacity-90 active:scale-95 shadow-glow-brand'}`}
                   >
                     {isBatchLoading ? (
                       <>
@@ -1198,8 +1208,8 @@ export default function AdminPage() {
             </div>
 
             {/* Product list */}
-            <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
-              <h3 className="text-xl font-black mb-6 text-gray-900">Lista de Productos <span className="text-gray-400 font-medium text-base">({products.length})</span></h3>
+            <div className="lg:col-span-2 bg-white rounded-[1.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
+              <h3 className="font-display text-xl font-black mb-6 text-gray-900">Lista de Productos <span className="text-gray-400 font-medium text-base">({products.length})</span></h3>
               <div className="space-y-3">
                 {products.map(p => (
                   <div key={p.id} className="flex items-center gap-3 md:gap-4 p-3 md:p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors">
@@ -1226,8 +1236,8 @@ export default function AdminPage() {
                       onClick={() => handleToggleOffer(p)}
                       className={`p-2.5 rounded-xl transition-all text-xs font-black shrink-0 hidden md:block ${
                         p.onSale
-                          ? "bg-blue-50 text-cyan-400 hover:bg-blue-100"
-                          : "bg-slate-800/50 text-slate-500 hover:bg-gray-100"
+                          ? "bg-blue-50 text-cyan-500 hover:bg-blue-100"
+                          : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                       }`}
                       title={p.onSale ? "Quitar oferta" : "Activar oferta"}
                     >
@@ -1260,20 +1270,20 @@ export default function AdminPage() {
         {/* ══════════════════ CATEGORIAS TAB ══════════════════ */}
         {activeTab === "categorias" && (
           <div className="max-w-2xl mx-auto space-y-8">
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200">
-              <h3 className="text-xl font-black mb-6 text-gray-900">Gestionar Categorías</h3>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
+              <h3 className="font-display text-xl font-black mb-6 text-gray-900">Gestionar Categorías</h3>
               <div className="flex gap-3">
                 <input type="text" placeholder="Nueva categoría..."
-                  className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  className="flex-1 p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                   value={newCategory} onChange={e => setNewCategory(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && addCategory()} />
                 <button onClick={addCategory}
-                  className={`px-6 rounded-2xl font-black transition-all text-sm whitespace-nowrap flex items-center gap-2 ${showCategorySuccess ? 'bg-blue-infositel text-white shadow-lg' : 'bg-blue-infositel text-white hover:opacity-90'}`}>
+                  className={`px-6 rounded-2xl font-black transition-all text-sm whitespace-nowrap flex items-center gap-2 bg-gradient-brand text-white ${showCategorySuccess ? 'shadow-glow-brand' : 'hover:opacity-90 shadow-glow-brand'}`}>
                   {showCategorySuccess ? <><CheckCircle size={16} /> Listo</> : "Añadir"}
                 </button>
               </div>
             </div>
-             <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200">
+             <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
               <div className="flex flex-wrap gap-3">
                 {categories.map(c => (
                   <div key={c.id} className="flex items-center gap-3 bg-gray-50 px-5 py-3 rounded-2xl border border-gray-200 group transition-all hover:border-blue-200">
@@ -1320,20 +1330,20 @@ export default function AdminPage() {
         {/* ══════════════════ REPARACIONES TAB ══════════════════ */}
         {activeTab === "reparaciones" && (
           <div className="space-y-8">
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200">
-              <h3 className="text-xl font-black mb-6 text-gray-900">Registrar Nueva Reparación</h3>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
+              <h3 className="font-display text-xl font-black mb-6 text-gray-900">Registrar Nueva Reparación</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input type="text" placeholder="DNI del Cliente"
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                   value={newRepair.dni} onChange={e => setNewRepair({ ...newRepair, dni: e.target.value })} />
                 <input type="text" placeholder="Equipo (ej. Laptop Dell)"
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                   value={newRepair.equipment} onChange={e => setNewRepair({ ...newRepair, equipment: e.target.value })} />
                 <input type="text" placeholder="Problema"
-                  className="sm:col-span-2 p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  className="sm:col-span-2 p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                   value={newRepair.problem} onChange={e => setNewRepair({ ...newRepair, problem: e.target.value })} />
                 <input type="text" placeholder="Estado (ej. Revisando placa)"
-                  className="p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  className="p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                   value={newRepair.statusText} onChange={e => setNewRepair({ ...newRepair, statusText: e.target.value })} />
                 <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
                   <RefreshCw size={20} className="text-gray-400 shrink-0" />
@@ -1342,15 +1352,15 @@ export default function AdminPage() {
                   <span className="font-black text-blue-infositel w-10 text-sm">{newRepair.progress}%</span>
                 </div>
                 <button onClick={addRepair}
-                  className="sm:col-span-2 bg-blue-infositel text-white py-4 rounded-2xl font-black hover:opacity-90 transition-all text-sm">
+                  className="sm:col-span-2 bg-gradient-brand text-white py-4 rounded-2xl font-black hover:opacity-90 transition-all text-sm shadow-glow-brand">
                   Registrar Equipo
                 </button>
               </div>
             </div>
 
             {/* Repairs list — card layout on mobile */}
-            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
-              <h3 className="text-xl font-black mb-6 text-gray-900">Equipos en Seguimiento <span className="text-gray-400 font-medium text-base">({repairs.length})</span></h3>
+            <div className="bg-white rounded-[1.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
+              <h3 className="font-display text-xl font-black mb-6 text-gray-900">Equipos en Seguimiento <span className="text-gray-400 font-medium text-base">({repairs.length})</span></h3>
               <div className="space-y-4">
                 {repairs.map(r => (
                   <div key={r.id} className="p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors">
@@ -1384,32 +1394,32 @@ export default function AdminPage() {
         {/* ══════════════════ USUARIOS TAB ══════════════════ */}
         {activeTab === "usuarios" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200 h-fit">
-              <h3 className="text-xl font-black mb-2 text-gray-900">Gestión de Acceso</h3>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200 h-fit">
+              <h3 className="font-display text-xl font-black mb-2 text-gray-900">Gestión de Acceso</h3>
               <p className="text-xs text-gray-400 font-bold mb-6 space-y-1">
                 <span className="flex items-center gap-2"><Lock size={11} className="text-green-500" />Hasheado Scrypt</span>
                 <span className="flex items-center gap-2"><CreditCard size={11} className="text-blue-infositel" />Datos AES-256-GCM</span>
               </p>
               <div className="space-y-3">
                 <input type="text" placeholder="Usuario"
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                   value={newAdmin.username} onChange={e => setNewAdmin({ ...newAdmin, username: e.target.value })} />
                 <input type="password" placeholder="Contraseña"
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                   value={newAdmin.password} onChange={e => setNewAdmin({ ...newAdmin, password: e.target.value })} />
-                <select className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel font-bold text-sm text-gray-900"
+                <select className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent font-bold text-sm text-gray-900"
                   value={newAdmin.role} onChange={e => setNewAdmin({ ...newAdmin, role: e.target.value as "admin" | "superadmin" })}>
                   <option value="admin">Administrador Estándar</option>
                   <option value="superadmin">Super Administrador</option>
                 </select>
                 <button onClick={addAdminUser}
-                  className="w-full bg-blue-infositel text-white py-4 rounded-2xl font-black hover:opacity-90 transition-all text-sm">
+                  className="w-full bg-gradient-brand text-white py-4 rounded-2xl font-black hover:opacity-90 transition-all text-sm shadow-glow-brand">
                   Crear Usuario
                 </button>
               </div>
             </div>
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200">
-              <h3 className="text-xl font-black mb-6 text-gray-900">Administradores</h3>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200">
+              <h3 className="font-display text-xl font-black mb-6 text-gray-900">Administradores</h3>
               <div className="space-y-3">
                 {adminUsers.map(u => (
                   <div key={u.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors">
@@ -1445,7 +1455,7 @@ export default function AdminPage() {
                ].map((s, i) => (
                  <motion.div 
                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                   key={i} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-200 relative overflow-hidden"
+                   key={i} className="bg-white p-8 rounded-[1.5rem] shadow-sm border border-gray-200 relative overflow-hidden"
                  >
                    <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} rounded-bl-[4rem] opacity-50`} />
                    <s.icon className={`relative z-10 ${s.color} mb-4`} size={24} />
@@ -1461,15 +1471,15 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Form to register manual sale */}
               <div className="lg:col-span-1">
-                <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-200 lg:sticky lg:top-24">
-                  <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-gray-900">
+                <div className="bg-white p-6 md:p-8 rounded-[1.5rem] shadow-sm border border-gray-200 lg:sticky lg:top-24">
+                  <h3 className="font-display text-xl font-black mb-6 flex items-center gap-2 text-gray-900">
                     <Plus className="text-blue-infositel" size={20} /> Registrar Venta Diaria
                   </h3>
                   <div className="space-y-4">
                     <div className="space-y-1">
                        <p className="text-[10px] font-black text-gray-400 uppercase ml-2">Seleccionar de Inventario</p>
                        <select 
-                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-bold text-gray-900"
+                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm font-bold text-gray-900"
                         onChange={e => handleSelectProductForSale(e.target.value)}
                         value={newSale.productId}
                        >
@@ -1481,27 +1491,27 @@ export default function AdminPage() {
                     </div>
 
                     <textarea placeholder="Nombre o detalles de la venta..." rows={2}
-                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm text-gray-900"
+                      className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm text-gray-900"
                       value={newSale.pName} onChange={e => setNewSale({ ...newSale, pName: e.target.value })} />
                     
                     <div className="grid grid-cols-2 gap-3">
                        <div className="space-y-1">
                          <p className="text-[10px] font-black text-gray-400 uppercase ml-2">P. Venta</p>
                          <input type="number" placeholder="0.00"
-                          className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-black text-gray-900"
+                          className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm font-black text-gray-900"
                           value={newSale.price} onChange={e => setNewSale({ ...newSale, price: e.target.value })} />
                        </div>
                        <div className="space-y-1">
                          <p className="text-[10px] font-black text-gray-400 uppercase ml-2">P. Costo</p>
                          <input type="number" placeholder="0.00"
-                          className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-black text-gray-900"
+                          className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm font-black text-gray-900"
                           value={newSale.costPrice} onChange={e => setNewSale({ ...newSale, costPrice: e.target.value })} />
                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 items-center">
                        <input type="number" placeholder="Cant."
-                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel text-sm font-black text-gray-900"
+                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-infositel/30 focus:border-transparent text-sm font-black text-gray-900"
                         value={newSale.quantity} onChange={e => setNewSale({ ...newSale, quantity: parseInt(e.target.value) || 1 })} />
                        
                        <label className="flex items-center gap-2 cursor-pointer p-4 bg-gray-50 border border-gray-200 rounded-2xl">
@@ -1510,7 +1520,7 @@ export default function AdminPage() {
                        </label>
                     </div>
 
-                    <button onClick={handleAddSale} className="w-full bg-blue-infositel text-white py-4 rounded-2xl font-black hover:opacity-90 transition-all shadow-xl shadow-blue-infositel/20 text-sm">
+                    <button onClick={handleAddSale} className="w-full bg-gradient-brand text-white py-4 rounded-2xl font-black hover:opacity-90 transition-all shadow-glow-brand text-sm">
                       Registrar Operación
                     </button>
                   </div>
@@ -1520,9 +1530,9 @@ export default function AdminPage() {
               {/* Transactions List */}
               <div className="lg:col-span-2 space-y-6">
                  {/* Historial */}
-                 <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
+                 <div className="bg-white rounded-[1.5rem] p-6 md:p-8 shadow-sm border border-gray-200">
                     <div className="flex items-center justify-between mb-8">
-                       <h3 className="text-xl font-black text-gray-900">Historial Consolidado</h3>
+                       <h3 className="font-display text-xl font-black text-gray-900">Historial Consolidado</h3>
                        <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                           <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-blue-infositel" /> Presencial</span>
                           <span className="flex items-center gap-1 ml-4"><div className="w-1.5 h-1.5 rounded-full bg-green-500" /> Web</span>
@@ -1532,7 +1542,7 @@ export default function AdminPage() {
                     <div className="space-y-4">
                        {/* Physical Sales */}
                        {sales.map(s => (
-                         <div key={s.id} className="p-5 border border-gray-100 rounded-[1.8rem] hover:bg-gray-50 transition-all flex items-center justify-between group">
+                         <div key={s.id} className="p-5 border border-gray-100 rounded-[1.5rem] hover:bg-gray-50 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                <div className="p-3 bg-blue-50 text-blue-infositel rounded-2xl shrink-0"><TrendingUp size={18} /></div>
                                <div>
@@ -1557,7 +1567,7 @@ export default function AdminPage() {
 
                        {/* Web Orders */}
                        {orders.map(o => (
-                         <div key={o.id} className="p-5 border border-green-100 bg-green-50/30 rounded-[1.8rem] hover:bg-green-50/50 transition-all flex items-center justify-between group">
+                         <div key={o.id} className="p-5 border border-green-100 bg-green-50/30 rounded-[1.5rem] hover:bg-green-50/50 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                <div className="p-3 bg-green-50 text-green-500 rounded-2xl shrink-0"><ShoppingCart size={18} /></div>
                                <div>

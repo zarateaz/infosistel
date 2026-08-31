@@ -4,13 +4,19 @@
   --background: #ffffff;
   --foreground: #000000;
   --infositel-blue: #1433C9;
+  --infositel-violet: #7C3AED;
+  --infositel-cyan: #06B6D4;
+  --infositel-ink: #05070f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-blue-infositel: var(--infositel-blue);
-  
+  --color-violet-infositel: var(--infositel-violet);
+  --color-cyan-infositel: var(--infositel-cyan);
+  --color-ink-infositel: var(--infositel-ink);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
@@ -107,46 +113,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* ── Swiper overrides (migrated from Hero.tsx <style jsx global>) ── */
-.swiper-button-next,
-.swiper-button-prev {
-  color: #1433c9 !important;
-  background: rgba(255, 255, 255, 0.92);
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(20, 51, 201, 0.2);
-  box-shadow: 0 4px 20px rgba(20, 51, 201, 0.1);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s;
-}
-
-.swiper-button-next:hover,
-.swiper-button-prev:hover {
-  background: #1433c9;
-  color: #fff !important;
-  box-shadow: 0 8px 28px rgba(20, 51, 201, 0.35);
-}
-
-.swiper-button-next::after,
-.swiper-button-prev::after {
-  font-size: 14px !important;
-  font-weight: 900;
-}
-
-.swiper-pagination-bullet {
-  background: #1433c9;
-  opacity: 0.2;
-  transition: all 0.3s;
-}
-
-.swiper-pagination-bullet-active {
-  background: #1433c9 !important;
-  opacity: 1;
-  width: 28px !important;
-  border-radius: 4px !important;
-}
-
 /* ── Shimmer animation (migrated from rastreo/page.tsx <style jsx>) ── */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
@@ -187,16 +153,91 @@ body {
   100% { background-position: 200% 50%; }
 }
 
-/* ── Hero swiper pagination dots — mobile friendly ── */
-.hero-swiper .swiper-pagination {
-  bottom: 5.5rem !important;
-}
-@media (min-width: 1024px) {
-  .hero-swiper .swiper-pagination {
-    bottom: 3.5rem !important;
-  }
-}
 
 /* ── Catalog blue bg opacity utility ── */
 .bg-blue-infositel\/8 { background-color: rgba(20, 51, 201, 0.08); }
 .bg-blue-infositel\/12 { background-color: rgba(20, 51, 201, 0.12); }
+
+/* ── Display font (Outfit) for headlines — Inter stays for body copy ── */
+.font-display {
+  font-family: var(--font-outfit), var(--font-sans), sans-serif;
+}
+
+/* ── Logo font (Baloo 2) — chunky/rounded, matches the real storefront sign ── */
+.font-logo {
+  font-family: var(--font-baloo), var(--font-display), sans-serif;
+}
+
+/* ── Brand gradient: blue → violet → cyan ── */
+.text-gradient-brand {
+  background: linear-gradient(115deg, #60a5fa 0%, #1433c9 40%, #7c3aed 75%, #06b6d4 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-x 8s ease infinite;
+}
+
+.bg-gradient-brand {
+  background: linear-gradient(115deg, #1433c9 0%, #5b21e0 55%, #7c3aed 100%);
+}
+
+.bg-gradient-brand-soft {
+  background: linear-gradient(115deg, rgba(20,51,201,0.12) 0%, rgba(124,58,237,0.12) 100%);
+}
+
+.shadow-glow-brand {
+  box-shadow: 0 20px 60px -15px rgba(124, 58, 237, 0.35), 0 8px 30px -10px rgba(20, 51, 201, 0.35);
+}
+
+/* ── Aurora backdrop for dark sections (hero / footer) ── */
+.bg-aurora {
+  background-color: var(--infositel-ink);
+  background-image:
+    radial-gradient(ellipse 55% 45% at 15% 15%, rgba(20, 51, 201, 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 85% 20%, rgba(124, 58, 237, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(6, 182, 212, 0.28) 0%, transparent 65%);
+}
+
+@keyframes aurora-drift {
+  0%, 100% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+  50% { background-position: 6% 4%, -6% -4%, 3% -5%; }
+}
+
+.animate-aurora {
+  background-size: 140% 140%, 140% 140%, 140% 140%;
+  animation: aurora-drift 18s ease-in-out infinite;
+}
+
+/* ── Category chip glow (per-category accent colors) ── */
+.chip-glow {
+  transition: transform 0.4s cubic-bezier(0.2, 0.65, 0.3, 0.9), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.chip-glow:hover {
+  transform: translateY(-6px);
+}
+
+/* ── Service cards — per-card accent via --c-from / --c-to custom props ── */
+.service-card {
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+}
+.service-card:hover {
+  border-color: color-mix(in srgb, var(--c-from) 35%, transparent);
+  box-shadow: 0 30px 70px -20px color-mix(in srgb, var(--c-from) 40%, transparent);
+}
+.service-icon-box {
+  background: color-mix(in srgb, var(--c-from) 8%, transparent);
+  transition: background 0.4s ease;
+}
+.service-card:hover .service-icon-box {
+  background: linear-gradient(115deg, var(--c-from), var(--c-to));
+}
+
+/* ── Category tiles (bento grid) — border/shadow tinted via --c custom prop ── */
+.category-tile {
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+}
+.category-tile:hover {
+  border-color: color-mix(in srgb, var(--c) 40%, transparent);
+  box-shadow: 0 20px 45px -18px color-mix(in srgb, var(--c) 45%, transparent);
+}

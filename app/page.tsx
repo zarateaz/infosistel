@@ -5,12 +5,12 @@ import Services from "@/components/Services";
 import InstantCheckout from "@/components/InstantCheckout";
 import OffersSection from "@/components/OffersSection";
 import OfferToast from "@/components/OfferToast";
+import StoreCTA from "@/components/StoreCTA";
+import HowItWorks from "@/components/HowItWorks";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Clock, Phone, Zap, Star, MapPin, Mail } from "lucide-react";
-import { useState, useEffect } from "react";
-import { getProducts } from "./admin/actions";
+import { Clock, Phone, MapPin, Mail } from "lucide-react";
+import { useState } from "react";
 
 import { Product } from "@/types";
 
@@ -36,230 +36,9 @@ function RevealText({ text, className }: { text: string; className?: string }) {
   );
 }
 
-// ── Magical Orbital Showcase — God Level Pro Edition ──
-function MagicalOrbitalShowcase({ 
-  allProducts, 
-  onSelect 
-}: { 
-  allProducts: Product[]; 
-  onSelect: (p: Product) => void; 
-}) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  useEffect(() => {
-    if (allProducts.length === 0) return;
-    
-    const updateUniverse = () => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        // Cycle by 4, wrapping around the entire catalog
-        const nextIdx = (currentIndex + 4) % allProducts.length;
-        const next = [];
-        for (let i = 0; i < 4; i++) {
-          next.push(allProducts[(nextIdx + i) % allProducts.length]);
-        }
-        setDisplayProducts(next);
-        setCurrentIndex(nextIdx);
-        setIsTransitioning(false);
-      }, 700);
-    };
-
-    if (displayProducts.length === 0) {
-      const initial = [];
-      for (let i = 0; i < 4; i++) {
-         initial.push(allProducts[i % allProducts.length]);
-      }
-      setDisplayProducts(initial);
-    }
-
-    const interval = setInterval(updateUniverse, 4500); // 4.5s for "Pro" pacing
-    return () => clearInterval(interval);
-  }, [allProducts, currentIndex, displayProducts.length]);
-
-  if (!displayProducts.length) return null;
-
-  return (
-    <div className="relative w-[650px] h-[650px] flex items-center justify-center [perspective:2000px]">
-      {/* ── THE RESONANCE CORE ── */}
-      <motion.div
-        animate={{ 
-          y: [0, -15, 0],
-          rotate: [0, 360],
-          boxShadow: [
-            "0 0 40px rgba(20,51,201,0.2)",
-            "0 0 80px rgba(20,51,201,0.4)",
-            "0 0 40px rgba(20,51,201,0.2)"
-          ]
-        }}
-        transition={{ 
-          y: { duration: 5, repeat: Infinity, ease: "easeInOut" },
-          rotate: { duration: 40, repeat: Infinity, ease: "linear" },
-          boxShadow: { duration: 3, repeat: Infinity }
-        }}
-        className="relative z-50 w-32 h-32 bg-gradient-to-br from-blue-infositel via-blue-600 to-indigo-900 rounded-[2.8rem] flex items-center justify-center border border-white/20"
-      >
-        <Zap size={56} className="text-white fill-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
-        {/* Orbit Path Decoration */}
-        <div className="absolute -inset-24 border border-blue-infositel/10 rounded-full animate-pulse pointer-events-none" />
-      </motion.div>
-
-      {/* ── 4 PRO ORBITING CARDS ── */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {displayProducts.map((product, i) => {
-          const angleStep = 360 / 4;
-          const baseAngle = i * angleStep;
-
-          return (
-            <motion.div
-              key={`${product.id}-${currentIndex}`}
-              className="absolute inset-0 flex items-center justify-center"
-              initial={{ opacity: 0, scale: 0, scaleZ: 0 }}
-              animate={{ 
-                opacity: isTransitioning ? 0 : 1,
-                scale: isTransitioning ? 0 : 1,
-                rotate: [baseAngle, baseAngle + 360]
-              }}
-              transition={{
-                rotate: { duration: 35, repeat: Infinity, ease: "linear" },
-                opacity: { duration: 0.6 },
-                scale: { duration: 1, ease: [0.2, 0.65, 0.3, 0.9] }
-              }}
-            >
-              <div 
-                className="absolute" 
-                style={{ transform: `translateX(280px)` }}
-              >
-                <motion.div
-                  animate={{ rotate: [-baseAngle, -(baseAngle + 360)] }}
-                  transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-                  whileHover={{ scale: 1.25, zIndex: 100 }}
-                  onClick={() => onSelect(product)}
-                  className="group relative cursor-pointer"
-                >
-                  {/* Glowing Energy Aura */}
-                  <div className="absolute -inset-6 bg-blue-infositel/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  
-                  {/* THE CARD FRONT */}
-                  <div className="
-                    relative w-48 h-48
-                    bg-white/90 backdrop-blur-2xl rounded-[3rem]
-                    border border-white shadow-[0_20px_50px_rgba(0,0,0,0.06)]
-                    group-hover:shadow-[0_40px_80px_rgba(20,51,201,0.25)]
-                    group-hover:border-blue-infositel/40 transition-all duration-700
-                    flex flex-col items-center justify-center overflow-hidden
-                  ">
-                    {/* Floating Price Tag (THE 'PRO' ETIQUETA) */}
-                    <div className="absolute top-2 right-2 z-20">
-                      <div className="bg-blue-infositel/10 backdrop-blur-md text-blue-infositel border border-blue-infositel/20 px-2 py-0.5 rounded-full text-[8px] font-black group-hover:bg-blue-infositel group-hover:text-white transition-colors duration-500">
-                        S/. {product.salePrice || product.price}
-                      </div>
-                    </div>
-
-                    {/* PERSISTENT PRODUCT LABEL (MAX 10 CHARS) */}
-                    <div className="absolute top-4 inset-x-0 text-center px-4 z-20">
-                      <p className="text-[10px] font-black text-gray-800 uppercase tracking-tighter truncate leading-none">
-                        {product.name.length > 10 ? product.name.substring(0, 10) + "..." : product.name}
-                      </p>
-                    </div>
-
-                    {/* Product Image */}
-                    <div className="relative w-28 h-28 z-10 transition-transform duration-700 group-hover:scale-110 group-hover:translate-y-2">
-                      <Image 
-                        src={product.image} 
-                        alt={product.name} 
-                        fill 
-                        className="object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.15)]" 
-                      />
-                    </div>
-                    
-                    {/* Info Overlay (Secondary info on hover) */}
-                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-blue-infositel/5 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 flex flex-col items-center">
-                      <span className="text-[7px] font-black text-blue-infositel uppercase tracking-[0.4em]">{product.category}</span>
-                    </div>
-
-                    {/* Cyber-Glass Shine */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent pointer-events-none" />
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    async function load() {
-      const all: Product[] = await getProducts();
-      if (!all || all.length === 0) return;
-
-      // ── LOGICA DE SELECCION INTELIGENTE Y ROTATIVA ──
-      // 1. Generar semilla basada en la hora actual del servidor
-      const hourSeed = Math.floor(Date.now() / (1000 * 60 * 60));
-
-      // Función determinista para barajar basada en seed
-      const seededShuffle = (arr: any[], seed: number) => {
-        let m = arr.length, t, i;
-        const random = () => {
-          const x = Math.sin(seed++) * 10000;
-          return x - Math.floor(x);
-        };
-        while (m) {
-          i = Math.floor(random() * m--);
-          t = arr[m];
-          arr[m] = arr[i];
-          arr[i] = t;
-        }
-        return arr;
-      };
-
-      // 2. Agrupar por categorías
-      const byCategory: Record<string, Product[]> = {};
-      all.forEach(p => {
-        if (!byCategory[p.category]) byCategory[p.category] = [];
-        byCategory[p.category].push(p);
-      });
-
-      const categories = Object.keys(byCategory).sort();
-      let selected: Product[] = [];
-      let usedIds = new Set<string>();
-
-      // 3. Seleccionar al menos uno de cada categoría (si hay espacio)
-      categories.forEach((cat, idx) => {
-        const catProducts = byCategory[cat];
-        // Elegir uno determinísticamente basado en la hora
-        const pickIndex = (hourSeed + idx) % catProducts.length;
-        const picked = catProducts[pickIndex];
-        if (picked && selected.length < 10) {
-          selected.push(picked);
-          usedIds.add(picked.id);
-        }
-      });
-
-      // 4. Rellenar hasta 10 con el resto de productos (barajados por la hora)
-      if (selected.length < 10) {
-        const remaining = all.filter(p => !usedIds.has(p.id));
-        const shuffledRemaining = seededShuffle([...remaining], hourSeed);
-        const fillers = shuffledRemaining.slice(0, 10 - selected.length);
-        selected = [...selected, ...fillers];
-      }
-
-      // 5. Barajar el resultado final para que el orden en el círculo también rote
-      const finalShowcase = seededShuffle([...selected], hourSeed);
-      setProducts(finalShowcase);
-    }
-    load();
-  }, []);
-
 
   const handleSelectProduct = (p: Product) => {
     setSelectedProduct(p);
@@ -270,6 +49,8 @@ export default function Home() {
     <div className="min-h-screen">
       <Hero />
 
+      <StoreCTA />
+
       <InstantCheckout
         product={selectedProduct}
         isOpen={isModalOpen}
@@ -278,139 +59,9 @@ export default function Home() {
 
       <OfferToast onSelect={handleSelectProduct} />
 
+      <HowItWorks />
+
       <Services />
-
-      {/* ── ORBITAL PRODUCT SHOWCASE ── */}
-      <section className="relative py-24 bg-white overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.025] pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(#1433C9 1px, transparent 1px), linear-gradient(90deg, #1433C9 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
-
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-            <div className="flex-1 space-y-10 text-center lg:text-left max-w-lg">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="inline-flex items-center gap-3 py-2.5 px-8 rounded-full border-2 border-blue-infositel/20 text-blue-infositel font-black text-xs tracking-[0.3em] uppercase"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-infositel" />
-                </span>
-                Innovation Store
-              </motion.div>
-
-              <div className="space-y-3">
-                <RevealText
-                  text="Explora Nuestra"
-                  className="text-[clamp(2.5rem,6vw,4.5rem)] font-black leading-[0.9] tracking-tighter text-black"
-                />
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  viewport={{ once: true }}
-                  className="text-[clamp(3rem,8vw,6.5rem)] font-black leading-[0.85] tracking-tighter text-blue-infositel drop-shadow-[0_10px_30px_rgba(20,51,201,0.15)]"
-                >
-                  Tecnología
-                </motion.div>
-              </div>
-
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                viewport={{ once: true }}
-                className="text-gray-400 text-lg font-medium leading-relaxed"
-              >
-                Hardware premium seleccionado para la excelencia. Cada producto, una experiencia única.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                viewport={{ once: true }}
-                className="flex items-center justify-center lg:justify-start gap-12 py-8 border-y border-gray-100"
-              >
-                {[
-                  { value: "500+", label: "Clientes", icon: Star },
-                  { value: "100%", label: "Garantía", icon: Zap },
-                  { value: "5 años", label: "Experiencia", icon: Clock },
-                ].map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <stat.icon className="text-blue-infositel mx-auto mb-1 opacity-50" size={16} />
-                    <div className="text-2xl font-black text-black">{stat.value}</div>
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">{stat.label}</div>
-                  </div>
-                ))}
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <Link
-                  href="/tienda"
-                  className="group relative inline-flex items-center justify-center bg-blue-infositel text-white h-18 px-12 py-5 rounded-[1.5rem] font-black text-sm uppercase tracking-[0.25em] overflow-hidden shadow-2xl shadow-blue-500/40 hover:scale-[1.04] active:scale-95 transition-all"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="relative z-10 flex items-center gap-3">
-                    Entrar al Universo
-                    <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
-                  </span>
-                </Link>
-              </motion.div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: [0.2, 0.65, 0.3, 0.9] }}
-              className="hidden lg:flex items-center justify-center"
-            >
-              <MagicalOrbitalShowcase allProducts={products} onSelect={handleSelectProduct} />
-            </motion.div>
-          </div>
-
-          <div className="lg:hidden grid grid-cols-2 gap-4 mt-16">
-            {products.map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                onClick={() => handleSelectProduct(product)}
-                className="group relative bg-white rounded-[2rem] border border-gray-100 hover:border-blue-infositel/30 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer overflow-hidden p-5 flex flex-col items-center text-center"
-              >
-                <span className="text-[9px] font-black text-blue-infositel tracking-[0.3em] uppercase mb-3 block">{product.category}</span>
-                <div className="relative w-28 h-28">
-                  <motion.div
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
-                    className="relative w-full h-full"
-                  >
-                    <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-[0_10px_25px_rgba(20,51,201,0.15)] group-hover:drop-shadow-[0_15px_35px_rgba(20,51,201,0.3)] transition-all duration-300" />
-                  </motion.div>
-                </div>
-                <h3 className="text-sm font-black text-black group-hover:text-blue-infositel transition-colors mt-3 leading-tight">{product.name}</h3>
-                <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-blue-infositel to-blue-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <OffersSection onSelect={handleSelectProduct} />
 
@@ -420,15 +71,15 @@ export default function Home() {
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
-            className="inline-block p-6 bg-blue-50 rounded-[2rem] mb-4"
+            className="inline-block p-6 bg-gradient-brand-soft rounded-[2rem] mb-4"
           >
-            <Clock className="text-blue-infositel" size={48} />
+            <Clock className="text-violet-infositel" size={48} />
           </motion.div>
-          <RevealText text="¿Dejaste tu equipo?" className="text-4xl md:text-5xl font-black text-black" />
+          <RevealText text="¿Dejaste tu equipo?" className="font-display text-4xl md:text-5xl font-black text-black" />
           <p className="text-gray-400 text-lg font-medium">Haz seguimiento al estado de tu reparación en tiempo real. Solo necesitas tu DNI o el código que te entregamos.</p>
-          <Link href="/rastreo" className="group relative inline-flex items-center justify-center border-2 border-blue-infositel/20 px-12 py-5 rounded-2xl font-black text-blue-infositel overflow-hidden transition-all hover:border-blue-infositel">
+          <Link href="/rastreo" className="group relative inline-flex items-center justify-center border-2 border-violet-infositel/20 px-12 py-5 rounded-2xl font-black text-blue-infositel overflow-hidden transition-all hover:border-transparent">
             <span className="relative z-10 transition-opacity duration-300 group-hover:opacity-0">Rastrear Mi Equipo</span>
-            <div className="absolute inset-0 bg-blue-infositel translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            <div className="absolute inset-0 bg-gradient-brand translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-black z-20">Rastrear Mi Equipo</span>
           </Link>
         </div>
@@ -438,7 +89,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-[4rem] p-8 md:p-16 shadow-sm border border-gray-100">
             <div className="space-y-12">
-              <RevealText text="Visítanos en Huancayo" className="text-5xl font-black" />
+              <RevealText text="Visítanos en Huancayo" className="font-display text-5xl font-black" />
               <div className="grid gap-10">
                 <div className="flex items-start space-x-8">
                   <div className="p-5 bg-blue-50 rounded-[1.5rem] shrink-0"><MapPin className="text-blue-infositel" size={28} /></div>
@@ -473,7 +124,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-8">
-                <a href="https://www.google.com/maps/search/?api=1&query=Av.+Giraldez+274+Huancayo" target="_blank" rel="noreferrer" className="bg-blue-infositel text-white px-10 py-5 rounded-[1.5rem] font-black inline-block hover:scale-110 active:scale-95 transition-transform shadow-xl shadow-blue-500/20">Cómo llegar en Google Maps</a>
+                <a href="https://www.google.com/maps/search/?api=1&query=Av.+Giraldez+274+Huancayo" target="_blank" rel="noreferrer" className="bg-gradient-brand text-white px-10 py-5 rounded-[1.5rem] font-black inline-block hover:scale-110 active:scale-95 transition-transform shadow-glow-brand">Cómo llegar en Google Maps</a>
               </div>
             </div>
             <div className="min-h-[500px] rounded-[3rem] overflow-hidden border-[12px] border-gray-50 shadow-inner bg-gray-100 relative">

@@ -30,7 +30,7 @@ export default function OfferToast({
         stock: 5,
         onSale: true,
         isFeatured: false,
-        image: "/img/cooler.png",
+        image: "/img/cooler.webp",
       };
 
 

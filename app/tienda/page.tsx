@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { ShoppingCart, Search, X, ChevronDown, MessageCircle, Package, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -101,9 +102,9 @@ function ProductModal({ product, onClose, onAddToCart }: { product: any; onClose
 function ProductCard({ product, onSelect, onAddToCart }: { product: any; onSelect: () => void; onAddToCart: (p: any) => void }) {
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       onClick={onSelect}
@@ -178,17 +179,32 @@ function ProductCard({ product, onSelect, onAddToCart }: { product: any; onSelec
 }
 
 // ─── Main Store Page ────────────────────────────────────────────────────────
-export default function StorePage() {
+function StorePage() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [searchQuery, setSearchQuery] = useState("");
+  // Mobile-perf fix: the grid below re-runs a filter + layout-animation pass
+  // on every render of `debouncedQuery`. Typing directly into `searchQuery`
+  // (input stays instantly responsive) but only pushing to `debouncedQuery`
+  // after a short pause means a phone doesn't re-animate the whole grid on
+  // every single keystroke.
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [cart, setCart] = useState<{ product: any; quantity: number }[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [checkoutData, setCheckoutData] = useState({ name: "", phone: "" });
   const [isSticky, setIsSticky] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+
+  // Honors links like `/tienda?cat=RAM` (Hero category rail, product-page
+  // "same category" links, etc.) — previously ignored, so those links looked
+  // like they filtered but silently always showed everything.
+  useEffect(() => {
+    const catParam = searchParams.get("cat");
+    if (catParam) setActiveCategory(catParam);
+  }, [searchParams]);
 
   useEffect(() => {
     async function load() {
@@ -199,6 +215,11 @@ export default function StorePage() {
     }
     load();
   }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(searchQuery), 200);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -212,7 +233,7 @@ export default function StorePage() {
 
   const filteredProducts = products.filter((p) => {
     const matchCat = activeCategory === "Todos" || p.category === activeCategory;
-    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = p.name.toLowerCase().includes(debouncedQuery.toLowerCase());
     return matchCat && matchSearch;
   }).sort((a, b) => (a.isFeatured === b.isFeatured ? 0 : a.isFeatured ? -1 : 1));
 
@@ -240,28 +261,12 @@ export default function StorePage() {
     <div className="bg-white min-h-screen relative">
 
       {/* ── PAGE HEADER ── */}
-      <div className="relative overflow-hidden bg-blue-infositel pt-24 pb-10 px-4 sm:px-8">
-        {/* BG grid */}
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)", backgroundSize: "32px 32px" }}
-        />
-        {/* Scan line */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            className="absolute top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-white/30 to-transparent"
-            animate={{ x: ["-10vw", "110vw"] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 6 }}
-          />
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 mb-3">
-            <Package size={14} className="text-white/60" />
-            <span className="text-white/60 text-[10px] font-black tracking-[0.3em] uppercase">Catálogo Digital</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-none mb-2">
-            CATÁLOGO <span className="text-white/50">PRO</span>
+      <div className="relative bg-white pt-28 pb-10 px-4 sm:px-8 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 tracking-tight leading-none mb-3">
+            Nuestra <span className="text-gradient-brand">tienda</span>
           </h1>
-          <p className="text-white/60 text-sm font-medium">Repuestos y accesorios premium · Garantía INFOSISTEL</p>
+          <p className="text-gray-500 text-sm sm:text-base font-medium">Repuestos y accesorios · Garantía Infosistel</p>
         </div>
       </div>
 
@@ -330,11 +335,12 @@ export default function StorePage() {
             <p className="text-gray-300 font-black text-lg">Sin resultados</p>
           </div>
         ) : (
-          <motion.div
-            layout
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"
-          >
-            <AnimatePresence mode="popLayout">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+            {/* Mobile-perf fix: dropped the outer `layout` + `mode="popLayout"`
+                FLIP animation — it recalculated every card's position on every
+                keystroke. Plain CSS grid reflow + a simple fade per card
+                (below) looks nearly identical and costs far less on a phone CPU. */}
+            <AnimatePresence>
               {filteredProducts.map((p) => (
                 <ProductCard
                   key={p.id}
@@ -344,7 +350,7 @@ export default function StorePage() {
                 />
               ))}
             </AnimatePresence>
-          </motion.div>
+          </div>
         )}
       </div>
 
@@ -463,5 +469,13 @@ export default function StorePage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function TiendaPage() {
+  return (
+    <Suspense fallback={null}>
+      <StorePage />
+    </Suspense>
   );
 }

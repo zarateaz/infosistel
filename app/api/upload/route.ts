@@ -7,7 +7,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir, chmod } from "fs/promises";
 import { join } from "path";
+import sharp from "sharp";
 import { requireAdminRole } from "@/lib/requireAdminRole";
+
+// Mobile-perf guardrail: every uploaded product photo is re-encoded to WebP
+// and capped at 1200px on its longest edge before it ever touches disk —
+// admins were uploading straight-from-phone photos of 5-8MB at 2000px+,
+// which is what made /tienda crawl on mobile (see the mobile perf audit).
+const MAX_DIMENSION = 1200;
+const WEBP_QUALITY = 80;
 
 /**
  * S-03: Validate that the file buffer starts with the magic bytes of a known image format.
@@ -105,34 +113,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Nombre único y sanitizado
-    const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "_");
-    const uniqueName = `${Date.now()}-${sanitizedName}`;
+    // 4. Nombre único y sanitizado — siempre .webp, sin importar el formato de origen
+    const baseName = file.name.toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9.]/g, "_");
+    const uniqueName = `${Date.now()}-${baseName}.webp`;
 
     // 5. Directorio de uploads — ruta absoluta persistente
     const uploadDir = join(process.cwd(), "data", "uploads");
-    
+
     try {
       await mkdir(uploadDir, { recursive: true });
     } catch (e) {}
 
     try {
+      // Re-encode + downscale before writing — this is the fix for the
+      // multi-MB photos that were choking the catalog on mobile.
+      const optimized = await sharp(buffer)
+        .resize({ width: MAX_DIMENSION, height: MAX_DIMENSION, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: WEBP_QUALITY })
+        .toBuffer();
+
       const path = join(uploadDir, uniqueName);
-      await writeFile(path, buffer);
-      
+      await writeFile(path, optimized);
+
       // COMANDO SENIOR: Asegurar que el archivo sea legible por el servidor web (chmod 644)
       await chmod(path, 0o644);
-      
-      console.log("[UPLOAD_API] Archivo guardado y permisos 644 aplicados en:", path);
-      
-      return NextResponse.json({ 
-        success: true, 
-        url: `/uploads/${uniqueName}` 
+
+      console.log(`[UPLOAD_API] Guardado ${uniqueName} (${(buffer.length / 1024).toFixed(0)}KB → ${(optimized.length / 1024).toFixed(0)}KB), permisos 644 aplicados en:`, path);
+
+      return NextResponse.json({
+        success: true,
+        url: `/uploads/${uniqueName}`
       });
     } catch (writeError: any) {
       console.error("[UPLOAD_API] ERROR DE ESCRITURA:", writeError.message);
-      return NextResponse.json({ 
-        error: "Falla de escritura en disco. Revisa permisos de carpeta." 
+      return NextResponse.json({
+        error: "Falla de escritura en disco. Revisa permisos de carpeta."
       }, { status: 500 });
     }
   } catch (error: any) {
